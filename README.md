@@ -1,5 +1,5 @@
-# esphome-webserver
-A Lit Element web component htm webserver for esphome devices. 
+# esphome-web_keypad
+A Lit Element web component htm webserver for esphome devices and adapted to dsc/vista alarm panel component 
 
 ###  Features
 
@@ -8,9 +8,9 @@ A Lit Element web component htm webserver for esphome devices.
 - completely standalone - no other external dependancies  9K compressed
 - Light and Dark themes
 - Primary theme - currently light blue - can be overridden
-- Embedded ESP home logo svg
 - Entities are discovered and display
 - No css fetch - index page fetches one js file
+- added dsc/vista web keypad component
 
 dark scheme desktop:
 ====================
@@ -32,19 +32,23 @@ Light scheme on mobile:
 
 ```yaml
 # Example config.yaml
-
-web_server:
-  port: 80
-  css_url: ""
-  js_url: https://esphome.io/_static/v2/www.js
-  version: 2
+## each included files will be downloaded automatically and compiled within the flash.  
+## there will be no need for internet access when running.
+web_keypad:
+  port: 80  
+  partitions: 1 # a keypad will be shown for each partition
+  config_url: https://dilbert66.github.io/config_files/config_dsc.yml  
+  js_url: https://dilbert66.github.io/js_files/www.js
+  ## If you prefer to use locally hosted compile time files comment two lines above and uncomment below
+  #js_include: ./www.js    
+  #config_local: ./config_dsc.yml    
 ```
 
 development
 ===========
 
 ```
-git clone https://github.com/esphome/esphome-webserver.git
+https://github.com/Dilbert66/esphome-webserver-custom.git
 pnpm install
 ```
 
@@ -67,9 +71,11 @@ The build files are copied to static/v2 usually for deployment to https://esphom
 If you customise, you can deploy to your local homeassistant /local/www/_static/v2 and use:
 
 ```yaml
-web_server:
+web_keypad:
   port: 80
   version: 2
+  partitions: 1  # a keypad will be shown for each partition
+  config_url: http://homeassistant.local:8123/local/_static/v2/config_dsc.yml   
   js_url: http://homeassistant.local:8123/local/_static/v2/www.js
 
 ```

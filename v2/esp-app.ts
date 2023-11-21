@@ -5,7 +5,6 @@ import { getBasePath } from "./esp-entity-table";
 import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
-import "./esp-logo";
 import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
@@ -137,9 +136,6 @@ export default class EspApp extends LitElement {
   render() {
     return html`
       <h1>
-        <a href="https://esphome.io/web-api" class="logo">
-          <esp-logo></esp-logo>
-        </a>
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
