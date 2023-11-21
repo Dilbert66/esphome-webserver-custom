@@ -6,8 +6,10 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-logo";
+import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+
 
 window.source = new EventSource(getBasePath() + "/events");
 
@@ -16,6 +18,7 @@ interface Config {
   log: boolean;
   title: string;
   comment: string;
+  partitions: Number;
 }
 
 @customElement("esp-app")
@@ -24,9 +27,11 @@ export default class EspApp extends LitElement {
   @state() ping: string = "";
   @query("#beat")
   beat!: HTMLSpanElement;
-
+  
+  _partitions: Number=0;
+  
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: true, title: "", comment: "" };
+  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -47,7 +52,7 @@ export default class EspApp extends LitElement {
       config.log = this.config.log;
     }
     this.config = config;
-
+    this._partitions=config.partitions;
     document.title = config.title;
     document.documentElement.lang = config.lang;
   }
@@ -106,6 +111,16 @@ export default class EspApp extends LitElement {
         </form>`;
     }
   }
+  renderKeypads() {
+          this.numbers=[];
+          for (let i=1; i<=this._partitions;i++) {
+                this.numbers.push(i);
+            }
+           return html`
+           ${this.numbers.map(num => html`<esp-keypad _current_partition=${num} ></esp-keypad>&nbsp;&nbsp;`)}`;
+  }                  
+     
+  
 
   renderComment() {
     return this.config.comment
@@ -129,7 +144,14 @@ export default class EspApp extends LitElement {
         <span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
+      
+      <div class="container">
+      ${this.renderKeypads()}
+</div>
       <main class="flex-grid-half">
+
+
+      
         <section class="col">
           <esp-entity-table></esp-entity-table>
           <h2>
@@ -149,6 +171,7 @@ export default class EspApp extends LitElement {
           </h2>
           ${this.ota()}
         </section>
+
         ${this.renderLog()}
       </main>
     `;
