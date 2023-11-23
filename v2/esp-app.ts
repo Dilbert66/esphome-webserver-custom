@@ -9,7 +9,6 @@ import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-
 window.source = new EventSource(getBasePath() + "/events");
 
 interface Config {
@@ -116,11 +115,10 @@ export default class EspApp extends LitElement {
                 this.numbers.push(i);
             }
            return html`
-           ${this.numbers.map(num => html`<esp-keypad _current_partition=${num} ></esp-keypad>&nbsp;&nbsp;`)}`;
+           ${this.numbers.map(num => html`<div class="keypad"><esp-keypad _current_partition=${num} ></esp-keypad></div>`)}`;
   }                  
      
   
-
   renderComment() {
     return this.config.comment
       ? html`<h3>${this.config.comment}</h3>`
@@ -141,7 +139,7 @@ export default class EspApp extends LitElement {
       </h1>
       ${this.renderComment()}
       
-      <div class="container">
+      <div class="keypad_row">
       ${this.renderKeypads()}
 </div>
       <main class="flex-grid-half">
@@ -191,7 +189,14 @@ export default class EspApp extends LitElement {
         .col {
           width: 48%;
         }
-
+        .keypad_row {
+          display: flex;
+          flex-wrap:wrap;
+          justify-content: center;
+         } 
+         .keypad {
+             padding: 5px;
+         }
         @media (max-width: 600px) {
           .flex-grid,
           .flex-grid-half {

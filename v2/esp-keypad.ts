@@ -144,8 +144,6 @@ export class keyPad extends LitElement  {
       this._iconF=this._sensor_F?this._labelOff:"";
       this._iconG=this._sensor_G?this._labelOff:"";
       this._iconH=this._sensor_H?this._labelOff:"";
-      
-      this._view_status2=true;
    
   }  
 
@@ -163,16 +161,22 @@ export class keyPad extends LitElement  {
         let parts = data.id.split("-");
         let changed=false;
         if (parts[2] != undefined && parts[2] !="") {
+
           if (parts[2]==("ln1_" + this._current_partition)) {
               this._line1=data.value;
-              changed=true;
-          } else
+              this.requestUpdate();
+              return;
+          } 
           if (parts[2]==("ln2_" + this._current_partition)) {
               this._line2=data.value;
-              changed=true;              
-          } else
+              this.requestUpdate();
+              return;         
+          } 
+          //   if (this._current_partition=2  )
+         //   console.log("parts="+parts[2]+",sensora="+this._sensor_A.replace("?",this._current_partition));         
           if (parts[2]==this._sensor_A.replace("?",this._current_partition)) {
             this._iconA=data.value?this._labelOn:this._labelOff;
+            console.log("icona="+this.iconA);
             changed=true ;           
           } else
           if (parts[2]==this._sensor_B.replace("?",this._current_partition)) {
