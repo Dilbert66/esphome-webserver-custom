@@ -6,6 +6,9 @@ let basePath=getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
+    
+  @property({ type: String }) _line1id = ""; //display lines
+  @property({ type: String }) _line2id = "";  
 
   @property({ type: String }) _cmd_A = ""; //cmds to send
   @property({ type: String }) _cmd_B = "";
@@ -80,11 +83,13 @@ export class keyPad extends LitElement  {
   _iconF="";
   _iconG="";
   _iconH="";
+  
 
  setConfig(data) {
       //console.log("data="+data);
       let keypad_config=JSON.parse(data);
-
+      this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"";
+      this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"";
       this._button_A=keypad_config["button_A"]!=null?keypad_config["button_A"]:"";
       this._button_B=keypad_config["button_B"]!=null?keypad_config["button_B"]:"";
       this._button_C=keypad_config["button_C"]!=null?keypad_config["button_C"]:"";
@@ -162,18 +167,14 @@ export class keyPad extends LitElement  {
         let changed=false;
         if (parts[2] != undefined && parts[2] !="") {
 
-          if (parts[2]==("ln1_" + this._current_partition)) {
+          if (parts[2]==this._line1id.replace("?",this._current_partition)) {
               this._line1=data.value;
-              this.requestUpdate();
-              return;
-          } 
-          if (parts[2]==("ln2_" + this._current_partition)) {
+              changed=true;
+          }  else
+          if (parts[2]==this._line2id.replace("?",this._current_partition)) {
               this._line2=data.value;
-              this.requestUpdate();
-              return;         
-          } 
-          //   if (this._current_partition=2  )
-         //   console.log("parts="+parts[2]+",sensora="+this._sensor_A.replace("?",this._current_partition));         
+               changed=true;
+          }   else
           if (parts[2]==this._sensor_A.replace("?",this._current_partition)) {
             this._iconA=data.value?this._labelOn:this._labelOff;
             console.log("icona="+this.iconA);
