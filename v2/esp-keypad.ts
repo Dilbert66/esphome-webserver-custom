@@ -161,13 +161,13 @@ export class keyPad extends LitElement  {
     super.connectedCallback();
     window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
-
       const data = JSON.parse(messageEvent.data);
 
-      if (data.id && data.id != "log") {
- 
+        if (data.id != undefined ) {
+
         let parts = data.id.split("-");
         let changed=false;
+    
         if (parts[2] != undefined && parts[2] !="") {
 
           if (parts[2]==this._line1id.replace("?",this._current_partition)) {
