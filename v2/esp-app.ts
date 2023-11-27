@@ -9,7 +9,8 @@ import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-window.source = new EventSource(getBasePath() + "/events");
+//window.source = new EventSource(getBasePath() + "/events");
+window.source = new WebSocket("ws://vistaalarmtest.local/ws");
 
 interface Config {
   ota: boolean;
@@ -66,14 +67,18 @@ export default class EspApp extends LitElement {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
-    window.source.addEventListener("ping", (e: Event) => {
+
+    window.source.addEventListener("messagex", (e: Event) => {
+
       const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
-      }
+//console.log(messageEvent.data);
+    //  const d: String = messageEvent.data;
+      //if (d.length) {
+     //   this.setConfig(JSON.parse(messageEvent.data));
+      //}
       this.ping = messageEvent.lastEventId;
     });
+
     window.source.onerror = function (e: Event) {
       console.dir(e);
       //alert("Lost event stream!")
@@ -110,6 +115,7 @@ export default class EspApp extends LitElement {
     }
   }
   renderKeypads() {
+this._partitions=3;
           this.numbers=[];
           for (let i=1; i<=this._partitions;i++) {
                 this.numbers.push(i);

@@ -159,10 +159,13 @@ export class keyPad extends LitElement  {
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("state", (e: Event) => {
+    window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
+
       const data = JSON.parse(messageEvent.data);
-      if (data.id) {
+
+      if (data.id && data.id != "log") {
+ 
         let parts = data.id.split("-");
         let changed=false;
         if (parts[2] != undefined && parts[2] !="") {
