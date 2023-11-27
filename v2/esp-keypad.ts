@@ -177,7 +177,6 @@ export class keyPad extends LitElement  {
           }   else
           if (parts[2]==this._sensor_A.replace("?",this._current_partition)) {
             this._iconA=data.value?this._labelOn:this._labelOff;
-            console.log("icona="+this.iconA);
             changed=true ;           
           } else
           if (parts[2]==this._sensor_B.replace("?",this._current_partition)) {
