@@ -84,7 +84,7 @@ export class keyPad extends LitElement  {
   _iconG="";
   _iconH="";
   
-
+ 
  setConfig(data) {
       //console.log("data="+data);
       let keypad_config=JSON.parse(data);
@@ -149,6 +149,7 @@ export class keyPad extends LitElement  {
       this._iconF=this._sensor_F?this._labelOff:"";
       this._iconG=this._sensor_G?this._labelOff:"";
       this._iconH=this._sensor_H?this._labelOff:"";
+      this.requestUpdate();
    
   }  
 
@@ -159,17 +160,18 @@ export class keyPad extends LitElement  {
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("message", (e: Event) => {
+   window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
+      //console.log(messageEvent.data);
+       const msg = JSON.parse(messageEvent.data);
 
-        if (data.id != undefined ) {
-
+        if (msg.type != undefined && msg.type =="state" ) {
+         const data=msg.data;
         let parts = data.id.split("-");
         let changed=false;
     
         if (parts[2] != undefined && parts[2] !="") {
-
+            
           if (parts[2]==this._line1id.replace("?",this._current_partition)) {
               this._line1=data.value;
               changed=true;

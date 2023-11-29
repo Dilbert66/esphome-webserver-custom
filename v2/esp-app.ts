@@ -12,6 +12,7 @@ import cssButton from "./css/button";
 //window.source = new EventSource(getBasePath() + "/events");
 window.source = new WebSocket("ws://vistaalarmtest.local/ws");
 
+
 interface Config {
   ota: boolean;
   log: boolean;
@@ -45,7 +46,7 @@ export default class EspApp extends LitElement {
     const conf = document.querySelector('script#config');
     if ( conf ) this.setConfig(JSON.parse(conf.innerText));
   }
-
+/*
   setConfig(config: any) {
     if (!("log" in config)) {
       config.log = this.config.log;
@@ -55,6 +56,15 @@ export default class EspApp extends LitElement {
     document.title = config.title;
     document.documentElement.lang = config.lang;
   }
+  */
+  
+  setConfig(data) {
+    this.config = data; 
+    this._partitions=data.partitions;
+    document.title = data.title;
+    document.documentElement.lang = data.lang;
+    this.requestUpdate();
+  }  
 
   firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -68,19 +78,22 @@ export default class EspApp extends LitElement {
     });
     this.scheme = this.isDark();
 
-    window.source.addEventListener("messagex", (e: Event) => {
+    window.source.addEventListener("message", (e: Event) => {
 
       const messageEvent = e as MessageEvent;
-//console.log(messageEvent.data);
-    //  const d: String = messageEvent.data;
-      //if (d.length) {
-     //   this.setConfig(JSON.parse(messageEvent.data));
-      //}
-      this.ping = messageEvent.lastEventId;
+      const msg = JSON.parse(messageEvent.data); 
+      if (msg.type != undefined && msg.type =="config" ) {
+        this.setConfig(msg.data);
+      } else if (msg.type != undefined && msg.type=="ping") {
+          console.log("ping");
+          this.ping = messageEvent.lastEventId;
+      }
     });
 
     window.source.onerror = function (e: Event) {
       console.dir(e);
+      //this.requestUpdate();     
+            
       //alert("Lost event stream!")
     };
   }
@@ -115,7 +128,7 @@ export default class EspApp extends LitElement {
     }
   }
   renderKeypads() {
-this._partitions=3;
+//this._partitions=3;
           this.numbers=[];
           for (let i=1; i<=this._partitions;i++) {
                 this.numbers.push(i);

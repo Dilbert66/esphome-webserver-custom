@@ -41,7 +41,8 @@ interface entityConfig {
 export function getBasePath() {
   let str = window.location.pathname;
   //console.log ("str= "+ str);
-  return "http://vistaalarmtest.local";
+ // return "http://dscalarmmoduleapi.local";
+   return "http://vistaalarmtest.local"
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
@@ -56,16 +57,16 @@ export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
 
+
   private _actionRenderer = new ActionRenderer();
 
   connectedCallback() {
     super.connectedCallback();
     window.source?.addEventListener("message", (e: Event) => { 
-
       const messageEvent = e as MessageEvent;
-
-      const data = JSON.parse(messageEvent.data);
-      if (data.id && data.id != "log")  {
+      const msg = JSON.parse(messageEvent.data);
+      if (msg.type != undefined && msg.type=="state" )  {
+      const data=msg.data;
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id ) {
         // Dynamically add discovered..
