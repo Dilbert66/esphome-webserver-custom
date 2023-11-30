@@ -46,17 +46,6 @@ export default class EspApp extends LitElement {
     const conf = document.querySelector('script#config');
     if ( conf ) this.setConfig(JSON.parse(conf.innerText));
   }
-/*
-  setConfig(config: any) {
-    if (!("log" in config)) {
-      config.log = this.config.log;
-    }
-    this.config = config;
-    this._partitions=config.partitions;
-    document.title = config.title;
-    document.documentElement.lang = config.lang;
-  }
-  */
   
   setConfig(data) {
     this.config = data; 
@@ -82,11 +71,11 @@ export default class EspApp extends LitElement {
 
       const messageEvent = e as MessageEvent;
       const msg = JSON.parse(messageEvent.data); 
-      if (msg.type != undefined && msg.type =="config" ) {
+      if (msg.type != undefined && msg.type =="app_config" ) {
         this.setConfig(msg.data);
       } else if (msg.type != undefined && msg.type=="ping") {
-          console.log("ping");
-          this.ping = messageEvent.lastEventId;
+          //console.log("ping" + messageEvent.lastEventId);
+          this.ping = msg.data;
       }
     });
 

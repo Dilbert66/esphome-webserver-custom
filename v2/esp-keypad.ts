@@ -85,9 +85,7 @@ export class keyPad extends LitElement  {
   _iconH="";
   
  
- setConfig(data) {
-      //console.log("data="+data);
-      let keypad_config=JSON.parse(data);
+ setConfig(keypad_config) {
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"";
       this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"";
       this._button_A=keypad_config["button_A"]!=null?keypad_config["button_A"]:"";
@@ -154,7 +152,7 @@ export class keyPad extends LitElement  {
   }  
 
   protected firstUpdated() {
-      this.getConfig();
+     // this.getConfig();
   }
 
 
@@ -182,7 +180,6 @@ export class keyPad extends LitElement  {
           }   else
           if (parts[2]==this._sensor_A.replace("?",this._current_partition)) {
             this._iconA=data.value?this._labelOn:this._labelOff;
-            console.log("icona="+this.iconA);
             changed=true ;           
           } else
           if (parts[2]==this._sensor_B.replace("?",this._current_partition)) {
@@ -215,7 +212,9 @@ export class keyPad extends LitElement  {
           }
           if (changed) this.requestUpdate(); 
         }        
-      } 
+      } else if (msg.type != undefined && msg.type =="key_config" ) {
+                  this.setConfig(msg.data);
+      }
     });
   }
 
@@ -225,7 +224,7 @@ getConfig() {
     fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`)
     .then(response => response.text())
     .then(data => {
-        this.setConfig(data);
+        this.setConfig(JSON.parse(data));
     })
     .catch(error => console.error(error));
 }
