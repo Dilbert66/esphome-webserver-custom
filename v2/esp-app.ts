@@ -10,7 +10,13 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
 //window.source = new EventSource(getBasePath() + "/events");
-window.source = new WebSocket("ws://vistaalarmtest.local/ws");
+//window.source = new WebSocket("ws://vistaalarmtest.local/ws");
+ window.source = new WebSocket("ws://" + getBasePath() + "/ws");
+//wsURL - the string URL of the websocket
+//waitTimer - the incrementing clock to use if no connection made
+//waitSeed - used to reset the waitTimer back to default on a successful connection
+//multiplier - how quickly you want the timer to grow on each unsuccessful connection attempt
+
 
 
 interface Config {
@@ -81,10 +87,12 @@ export default class EspApp extends LitElement {
 
     window.source.onerror = function (e: Event) {
       console.dir(e);
-      //this.requestUpdate();     
-            
-      //alert("Lost event stream!")
+      console.log(" error");
     };
+    window.source.onclose = function() {
+       console.log("web socket closed");
+       location.reload();   
+    }
   }
 
   isDark() {

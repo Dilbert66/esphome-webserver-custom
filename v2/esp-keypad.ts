@@ -2,7 +2,7 @@ import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
-let basePath=getBasePath();
+let basePath="http://" + getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {

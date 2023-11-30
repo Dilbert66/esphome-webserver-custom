@@ -39,14 +39,16 @@ interface entityConfig {
 }
 
 export function getBasePath() {
-  let str = window.location.pathname;
-  //console.log ("str= "+ str);
- // return "http://dscalarmmoduleapi.local";
-   return "http://vistaalarmtest.local"
-  return str.endsWith("/") ? str.slice(0, -1) : str;
+  //let str = window.location.pathname;
+  let cnn_string = document.location.host;  
+  console.log ("str= "+ cnn_string);
+  //return "vistaalarmtest.local";
+  return cnn_string;
+
+  //return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
-let basePath = getBasePath();
+let basePath = "http://" + getBasePath();
 
 interface RestAction {
   restAction(entity?: entityConfig, action?: string): void;
@@ -64,6 +66,7 @@ export class EntityTable extends LitElement implements RestAction {
     super.connectedCallback();
     window.source?.addEventListener("message", (e: Event) => { 
       const messageEvent = e as MessageEvent;
+
       const msg = JSON.parse(messageEvent.data);
       if (msg.type != undefined && msg.type=="state" )  {
       const data=msg.data;
