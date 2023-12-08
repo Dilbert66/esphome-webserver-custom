@@ -153,13 +153,15 @@ export class keyPad extends LitElement  {
   }  
 
   protected firstUpdated() {
-      this.getConfig();
+     this.getConfig();
   }
 
 
   connectedCallback() {
     super.connectedCallback();
+    
     window.source?.addEventListener("state", (e: Event) => {
+        
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
       if (data.id) {
@@ -210,6 +212,7 @@ export class keyPad extends LitElement  {
           if (changed) this.requestUpdate(); 
         }        
       } 
+      
     });
   }
 
@@ -246,6 +249,7 @@ setPartition(e) {
     this.sendKey('R');
    }
 setState(e) {
+  
      var key=e.currentTarget.getAttribute('state');
       
      switch (key) {

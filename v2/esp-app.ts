@@ -78,7 +78,7 @@ export default class EspApp extends LitElement {
       console.dir(e);
       //alert("Lost event stream!")
     };
-  }
+  } 
 
   isDark() {
     return this.darkQuery.matches ? "dark" : "light";
