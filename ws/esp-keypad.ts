@@ -2,7 +2,7 @@ import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
-let basePath=getBasePath();
+let basePath="http://" + getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
@@ -84,10 +84,8 @@ export class keyPad extends LitElement  {
   _iconG="";
   _iconH="";
   
-
- setConfig(data) {
-      //console.log("data="+data);
-      let keypad_config=JSON.parse(data);
+ 
+ setConfig(keypad_config) {
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"";
       this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"";
       this._button_A=keypad_config["button_A"]!=null?keypad_config["button_A"]:"";
@@ -149,31 +147,29 @@ export class keyPad extends LitElement  {
       this._iconF=this._sensor_F?this._labelOff:"";
       this._iconG=this._sensor_G?this._labelOff:"";
       this._iconH=this._sensor_H?this._labelOff:"";
+      this.requestUpdate();
    
   }  
 
   protected firstUpdated() {
-    // this.getConfig();
+     // this.getConfig();
   }
 
 
   connectedCallback() {
     super.connectedCallback();
-    
-    window.source?.addEventListener("key_config", (e: Event) => {
+   window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
-       this.setConfig(messageEvent.data);
-    });
-    
-    window.source?.addEventListener("state", (e: Event) => {
-        
-      const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
-      if (data.id) {
+     // console.log(messageEvent.data);
+       const msg = JSON.parse(messageEvent.data);
+
+        if (msg.type != undefined && msg.type =="state" ) {
+         const data=msg.data;
         let parts = data.id.split("-");
         let changed=false;
+    
         if (parts[2] != undefined && parts[2] !="") {
-
+            
           if (parts[2]==this._line1id.replace("?",this._current_partition)) {
               this._line1=data.value;
               changed=true;
@@ -216,8 +212,9 @@ export class keyPad extends LitElement  {
           }
           if (changed) this.requestUpdate(); 
         }        
-      } 
-      
+      } else if (msg.type != undefined && msg.type =="key_config" ) {
+                  this.setConfig(msg.data);
+      }
     });
   }
 
@@ -227,9 +224,18 @@ getConfig() {
     fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`)
     .then(response => response.text())
     .then(data => {
-        this.setConfig(data);
+        this.setConfig(JSON.parse(data));
     })
     .catch(error => console.error(error));
+}
+
+sendKeyWS (key) {
+     let action = {
+                'key': key,
+                'partition':this._current_partition
+            };
+    window.source.send(JSON.stringify(action));
+    
 }
 
 sendKey(key) {
@@ -251,10 +257,9 @@ sendKey(key) {
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');
     this._current_partition=p;
-    this.sendKey('R');
+    this.sendKeyWS('R');
    }
 setState(e) {
-  
      var key=e.currentTarget.getAttribute('state');
       
      switch (key) {
@@ -281,7 +286,7 @@ setState(e) {
          
      }
      
-     this.sendKey(key);
+     this.sendKeyWS(key);
   }
   
   render() {

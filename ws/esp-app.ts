@@ -9,7 +9,15 @@ import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-window.source = new EventSource(getBasePath() + "/events");
+//window.source = new EventSource(getBasePath() + "/events");
+//window.source = new WebSocket("ws://vistaalarmtest.local/ws");
+ window.source = new WebSocket("ws://" + getBasePath() + "/ws");
+//wsURL - the string URL of the websocket
+//waitTimer - the incrementing clock to use if no connection made
+//waitSeed - used to reset the waitTimer back to default on a successful connection
+//multiplier - how quickly you want the timer to grow on each unsuccessful connection attempt
+
+
 
 interface Config {
   ota: boolean;
@@ -44,16 +52,14 @@ export default class EspApp extends LitElement {
     const conf = document.querySelector('script#config');
     if ( conf ) this.setConfig(JSON.parse(conf.innerText));
   }
-
-  setConfig(config: any) {
-    if (!("log" in config)) {
-      config.log = this.config.log;
-    }
-    this.config = config;
-    this._partitions=config.partitions;
-    document.title = config.title;
-    document.documentElement.lang = config.lang;
-  }
+  
+  setConfig(data) {
+    this.config = data; 
+    this._partitions=data.partitions;
+    document.title = data.title;
+    document.documentElement.lang = data.lang;
+    this.requestUpdate();
+  }  
 
   firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
@@ -66,30 +72,44 @@ export default class EspApp extends LitElement {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
-    
-     window.source?.addEventListener("ota", (e: Event) => {
+
+    window.source.addEventListener("message", (e: Event) => {
+
       const messageEvent = e as MessageEvent;
-       this.uploadMessage=messageEvent.data;
-       this.requestUpdate;
-    });   
-    
-    window.source.addEventListener("ping", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
+      if (messageEvent.data == '__pong__') {
+        pong();
+        return;
+      }      
+      const msg = JSON.parse(messageEvent.data); 
+      if (msg.type != undefined && msg.type =="app_config" ) {
+        this.setConfig(msg.data);
+      } else if (msg.type != undefined && msg.type=="ping") {
+          //console.log("ping" + messageEvent.lastEventId);
+          this.ping = msg.data;
+      } else if (msg.type != undefined && msg.type=="ota") { 
+             //console.log("data=" + msg.data);
+             this.uploadMessage=msg.data;
+             this.requestUpdate();
       }
-      this.ping = messageEvent.lastEventId;
     });
+    
+    window.source.onopen = function () {
+    setInterval(this.pingServer, 30000);
+    }
     window.source.onerror = function (e: Event) {
       console.dir(e);
-      //alert("Lost event stream!")
+      console.log(" error");
     };
-  } 
+    window.source.onclose = function() {
+       console.log("web socket closed");
+       //location.reload();   
+    }
+  }
 
   isDark() {
     return this.darkQuery.matches ? "dark" : "light";
   }
+  
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
@@ -101,10 +121,9 @@ export default class EspApp extends LitElement {
       this.beat.animate(this.frames, 1000);
     }
   }
-  
-  
-  
- uploadFileName(e) { 
+ 
+uploadFileName(e) { 
+
   this.fileName=e.target.files[0];
 }
 
@@ -127,8 +146,6 @@ uploadFile(e) {
 
     });
 }
-  
-
   ota() {
 
       return html`<h2>OTA Update</h2>
@@ -145,8 +162,25 @@ uploadFile(e) {
          `;
    
   }
+  
+  
+pingServer() {
+        window.source.send('__ping__');
+        tm = setTimeout(function () {
+
+           /// ---connection closed ///
+
+
+    }, 5000);
+}
+
+pong() {
+    clearTimeout(tm);
+}  
  
+  
   renderKeypads() {
+//this._partitions=3;
           this.numbers=[];
           for (let i=1; i<=this._partitions;i++) {
                 this.numbers.push(i);
@@ -200,7 +234,7 @@ uploadFile(e) {
             </esp-switch>
             Scheme
           </h2>
-          ${this.ota()}
+            ${this.ota()}
         </section>
 
         ${this.renderLog()}

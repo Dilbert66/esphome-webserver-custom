@@ -20,14 +20,17 @@ export class DebugLog extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("log", (e: Event) => {
+    window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
+      const msg = JSON.parse(messageEvent.data);
+
+      if (msg.type != undefined && msg.type=="log") {
+
+      const d: String = msg.data;
       let parts = d.slice(10, d.length - 4).split(":");
       let tag = parts.slice(0, 2).join(":");
       let detail = d.slice(12 + tag.length, d.length - 4);
-      /*
-      const types: Record<string, string> = {
+     /* const types: Record<string, string> = {
         "[1;31m": "e",
         "[0;33m": "w",
         "[0;32m": "i",
@@ -43,7 +46,7 @@ export class DebugLog extends LitElement {
         "\x27[0;35m": "c",
         "\x27[0;36m": "d",
         "\x27[0;37m": "v",
-      };       
+      };      
       const record = {
         type: types[d.slice(0, 7)],
         level: d.slice(7, 10),
@@ -53,6 +56,7 @@ export class DebugLog extends LitElement {
       } as recordConfig;
       this.logs.push(record);
       this.logs = this.logs.slice(-this.rows);
+      }
     });
   }
 
