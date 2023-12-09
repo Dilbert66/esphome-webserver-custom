@@ -70,7 +70,7 @@ export default class EspApp extends LitElement {
      window.source?.addEventListener("ota", (e: Event) => {
       const messageEvent = e as MessageEvent;
        this.uploadMessage=messageEvent.data;
-       this.requestUpdate;
+       this.requestUpdate();
     });   
     
     window.source.addEventListener("ping", (e: Event) => {
@@ -137,7 +137,7 @@ uploadFile(e) {
           action="/update"
           enctype="multipart/form-data"
         >
-          <div name="message" >${this.uploadMessage}</div>
+          <div name="message" >&nbsp;${this.uploadMessage}&nbsp;</div>
           <input class="btn" type="file" @change="${this.uploadFileName}" name="update" />
           <input class="btn" type="submit" @click="${this.uploadFile}" value="Update" />
         </form>

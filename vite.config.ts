@@ -96,6 +96,7 @@ export default defineConfig({
       "/number": proxy_target,
       "/climate": proxy_target,
       "/events": proxy_target,
+      "/alarm_panel":proxy_target,
     },
   },
 });

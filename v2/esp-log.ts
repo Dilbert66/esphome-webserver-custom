@@ -58,7 +58,7 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div class="flow-x">
+      <div class="flow-x ">
         <table>
           <thead>
             <tr>

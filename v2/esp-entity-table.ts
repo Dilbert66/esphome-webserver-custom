@@ -42,7 +42,7 @@ export function getBasePath() {
   let str = window.location.pathname;
   //console.log ("str= "+ str);
   //return "http://dscalarmmoduleapi.local";
-  return "http://vistaalarmtest.local"
+  //return "http://vistaalarmtest.local"
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 

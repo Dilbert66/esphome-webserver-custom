@@ -529,7 +529,7 @@ setState(e) {
     </ha-card>
     `;
   }
-
+  
   static get styles() {
     return [
       css`
