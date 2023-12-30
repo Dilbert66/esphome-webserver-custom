@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig,loadEnv } from "vite";
 import gzipPlugin from "rollup-plugin-gzip";
 import minifyHTML from "rollup-plugin-minify-html-template-literals";
 import { brotliCompressSync } from "zlib";
@@ -9,12 +9,22 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
+import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 const proxy_target = "http://vistaalarmtest.local";
 
-export default defineConfig({
+export default({mode}) => {
+ const env = loadEnv(mode, process.cwd(), "");
+return  defineConfig({
   clearScreen: false,
+define: {
+  //  'env':env,
+  },  
   plugins: [
+ wasm(),
+    topLevelAwait(),
+  ,
     {
       ...nodeResolve({ exportConditions: ["development"] }),
       enforce: "pre",
@@ -38,6 +48,7 @@ export default defineConfig({
       delimiters: ["", ""],
       preventAssignment: true,
     }),
+    
     viteSingleFile(),
     {
       ...gzipPlugin({
@@ -67,7 +78,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "_static/v2",
+    outDir: "_static/v2login",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -86,6 +97,7 @@ export default defineConfig({
     port: 5001,
     strictPort: true,
     proxy: {
+      "/ws":proxy_target,
       "/light": proxy_target,
       "/select": proxy_target,
       "/cover": proxy_target,
@@ -100,3 +112,4 @@ export default defineConfig({
     },
   },
 });
+};

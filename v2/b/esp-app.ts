@@ -17,7 +17,6 @@ interface Config {
   title: string;
   comment: string;
   partitions: Number;
-  keypad: boolean;
 }
 
 @customElement("esp-app")
@@ -30,7 +29,7 @@ export default class EspApp extends LitElement {
   _partitions: Number=0;
   
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 ,keypad:false};
+  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -71,7 +70,7 @@ export default class EspApp extends LitElement {
      window.source?.addEventListener("ota", (e: Event) => {
       const messageEvent = e as MessageEvent;
        this.uploadMessage=messageEvent.data;
-       this.requestUpdate();
+       this.requestUpdate;
     });   
     
     window.source.addEventListener("ping", (e: Event) => {
@@ -138,7 +137,7 @@ uploadFile(e) {
           action="/update"
           enctype="multipart/form-data"
         >
-          <div name="message" >&nbsp;${this.uploadMessage}&nbsp;</div>
+          <div name="message" >${this.uploadMessage}</div>
           <input class="btn" type="file" @change="${this.uploadFileName}" name="update" />
           <input class="btn" type="submit" @click="${this.uploadFile}" value="Update" />
         </form>
@@ -148,13 +147,12 @@ uploadFile(e) {
   }
  
   renderKeypads() {
-         if (!this.config.keypad ) return nothing;
-         this.numbers=[];
+          this.numbers=[];
           for (let i=1; i<=this._partitions;i++) {
                 this.numbers.push(i);
             }
            return html`
-        ${this.numbers.map(num => html`<div class="keypad"><esp-keypad _current_partition=${num} ></esp-keypad></div>`)}`;
+           ${this.numbers.map(num => html`<div class="keypad"><esp-keypad _current_partition=${num} ></esp-keypad></div>`)}`;
   }                  
      
   
