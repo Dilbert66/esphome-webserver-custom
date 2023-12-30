@@ -1,0 +1,1 @@
+copy _static\v2\www.js \dev\dilbert66.github.io\js_files

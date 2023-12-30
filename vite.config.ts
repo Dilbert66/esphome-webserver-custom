@@ -9,8 +9,8 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
-import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
+//import wasm from "vite-plugin-wasm";
+//import topLevelAwait from "vite-plugin-top-level-await";
 
 const proxy_target = "http://vistaalarmtest.local";
 
@@ -22,10 +22,7 @@ define: {
   //  'env':env,
   },  
   plugins: [
- wasm(),
-    topLevelAwait(),
-  ,
-    {
+  {
       ...nodeResolve({ exportConditions: ["development"] }),
       enforce: "pre",
       apply: "start",

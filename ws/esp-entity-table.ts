@@ -42,7 +42,7 @@ export function getBasePath() {
   //let str = window.location.pathname;
   let cnn_string = document.location.host;  
   //console.log ("str= "+ cnn_string);
-  //return "vistaalarmtest.local";
+  return "vistaalarmtest.local";
   return cnn_string;
 
   //return str.endsWith("/") ? str.slice(0, -1) : str;
