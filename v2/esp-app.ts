@@ -1,6 +1,7 @@
 import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
+import sodium from 'libsodium-wrappers';
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -18,6 +19,76 @@ interface Config {
   comment: string;
   partitions: Number;
   keypad: boolean;
+  crypt: boolean;
+}
+
+
+export function decrypt(obj) {
+    var token=localStorage.getItem("token");
+    if (token=="" || token == null)
+        return obj;
+    var key=sodium.from_hex(token);
+
+if (obj instanceof Object) {
+        if ("nonce" in obj && "cipher" in obj) {
+            var nonce=sodium.from_hex(obj["nonce"]);
+           // var key=sodium.crypto_generichash(sodium.crypto_secretbox_KEYBYTES,aeskey);
+            var data=sodium.from_hex(obj["cipher"]);
+           let d1="";
+           
+           try {
+               d1=sodium.crypto_secretbox_open_easy(data,nonce,key);
+           } catch (err) {
+               //set variable to login
+               return obj;
+           }
+           let d="";
+           try {
+              d=sodium.to_string(d1);
+              } catch (err) {
+            console.log(obj);
+            console.log(d1); 
+            return obj;
+           }
+
+           try {
+                var obj;
+                if(isJson(d)) {
+                    obj = JSON.parse(d);
+                    return obj;
+                } else
+                    return d;
+            } catch (err) {
+                  console.log(d);
+                return d;
+            }
+       } 
+    } 
+    return obj;
+}
+
+export function isJson(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+
+
+export function encrypt(msg) {
+
+    var token=localStorage.getItem("token");
+    if ( token=="" || token == null)
+        return msg;
+
+var key=sodium.from_hex(token);
+let nonce=sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+let c=sodium.crypto_secretbox_easy(msg,nonce,key);
+  var out="{\"nonce\":\"" +sodium.to_hex(nonce) + "\",\"cipher\":\""+sodium.to_hex(c)+"\"}";
+  return out; 
+    
 }
 
 @customElement("esp-app")
@@ -30,7 +101,7 @@ export default class EspApp extends LitElement {
   _partitions: Number=0;
   
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 ,keypad:false};
+  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 ,keypad:false,crypt: false};
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -47,13 +118,11 @@ export default class EspApp extends LitElement {
   }
 
   setConfig(config: any) {
-    if (!("log" in config)) {
-      config.log = this.config.log;
-    }
     this.config = config;
     this._partitions=config.partitions;
     document.title = config.title;
     document.documentElement.lang = config.lang;
+    this.requestUpdate();    
   }
 
   firstUpdated(changedProperties: PropertyValues) {
@@ -76,10 +145,14 @@ export default class EspApp extends LitElement {
     
     window.source.addEventListener("ping", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
-      }
+       let data=messageEvent.data;
+      if (isJson(data)) {
+        data = decrypt(JSON.parse(data)); 
+      } 
+
+      if (data)
+        this.setConfig(data);
+
       this.ping = messageEvent.lastEventId;
     });
     window.source.onerror = function (e: Event) {
@@ -146,7 +219,29 @@ uploadFile(e) {
          `;
    
   }
- 
+  
+  login() {
+
+       const username = this.shadowRoot.querySelector("#username").value;
+       const password = this.shadowRoot.querySelector("#password").value;
+       const p=username+":"+password;
+       var key=sodium.crypto_generichash(sodium.crypto_secretbox_KEYBYTES,p);
+        localStorage.setItem("token",sodium.to_hex(key));
+ location.reload();
+
+  } 
+  
+ renderLogin() {
+      return html`
+                <div class="keypad_row">
+                   <input id="username" type="username" placeholder="Your username">
+                <input id="password" type="password" placeholder="Password">
+
+                <button @click="${this.login}">Login</button>
+            </div>
+    `;
+  }
+  
   renderKeypads() {
          if (!this.config.keypad ) return nothing;
          this.numbers=[];
@@ -177,7 +272,7 @@ uploadFile(e) {
         <span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
-      
+         ${this.renderLogin()}   
       <div class="keypad_row">
       ${this.renderKeypads()}
 </div>

@@ -1,5 +1,6 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import {decrypt,encrypt } from "./esp-app";
 
 interface recordConfig {
   type: string;
@@ -23,10 +24,11 @@ export class DebugLog extends LitElement {
     window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const msg = JSON.parse(messageEvent.data);
-
-      if (msg.type != undefined && msg.type=="log") {
-
-      const d: String = msg.data;
+      //const msg=decrypt(messageEvent.data);
+      if ("type" in msg && msg.type=="log") {
+      const c=decrypt(msg);
+      if (!("data" in c)) return;      
+      const d: String = c.data;
       let parts = d.slice(10, d.length - 4).split(":");
       let tag = parts.slice(0, 2).join(":");
       let detail = d.slice(12 + tag.length, d.length - 4);

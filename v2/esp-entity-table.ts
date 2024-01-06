@@ -2,6 +2,7 @@ import { html, css, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+import {decrypt,encrypt,isJson } from "./esp-app";
 
 interface entityConfig {
   unique_id: string;
@@ -63,7 +64,9 @@ export class EntityTable extends LitElement implements RestAction {
     super.connectedCallback();
     window.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
+      var data=messageEvent.data;
+      if (isJson(data))
+        data = decrypt(JSON.parse(data));      
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id) {
         // Dynamically add discovered..
@@ -81,7 +84,7 @@ export class EntityTable extends LitElement implements RestAction {
         this.entities.push(entity);
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
         this.requestUpdate();
-      } else {
+      } else if (data.id) {
         delete data.id;
         delete data.domain;
         delete data.unique_id;
@@ -102,7 +105,7 @@ export class EntityTable extends LitElement implements RestAction {
       `render_${entity.domain}` as ActionRendererMethodKey
     );
   }
-
+/*
   restAction(entity: entityConfig, action: string) {
     fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
@@ -111,6 +114,27 @@ export class EntityTable extends LitElement implements RestAction {
       console.log(r);
     });
   }
+*/  
+  restAction(entity: entityConfig, action : string) {
+      
+     let cmd = JSON.stringify({
+                'domain': entity.domain,
+                'oid': entity.id,
+                'action': action,
+                'method': "POST"
+            });
+            
+     fetch(`${basePath}/api`, {
+      method: "POST",
+      body: encrypt(cmd),
+    }).then((r) => {
+      console.log(r);
+    });  
+   
+    
+  }  
+
+
 
   render() {
     return html`

@@ -2,6 +2,7 @@ import { html, css, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+import {decrypt,encrypt } from "./esp-app";
 
 interface entityConfig {
   unique_id: string;
@@ -51,7 +52,7 @@ export function getBasePath() {
 let basePath = "http://" + getBasePath();
 
 interface RestAction {
-  restAction(entity?: entityConfig, action?: string): void;
+  restActionWS(entity?: entityConfig, action?: string): void;
 }
 
 @customElement("esp-entity-table")
@@ -68,8 +69,11 @@ export class EntityTable extends LitElement implements RestAction {
       const messageEvent = e as MessageEvent;
 
       const msg = JSON.parse(messageEvent.data);
-      if (msg.type != undefined && msg.type=="state" )  {
-      const data=msg.data;
+      //const msg = decrypt(messageEvent.data);
+      if ("type" in msg && msg.type=="state" )  {
+      const c=decrypt(msg);
+      if (!("data" in c)) return;  
+      const data=c.data;
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id ) {
         // Dynamically add discovered..
@@ -110,13 +114,28 @@ export class EntityTable extends LitElement implements RestAction {
     );
   }
 
+  restActionWS(entity: entityConfig, action : string) {
+      
+     let cmd = {
+                'domain': entity.domain,
+                'oid': entity.id,
+                'action': action,
+                'method': "POST"
+            };
+    window.source.send(encrypt(JSON.stringify(cmd)));;
+    
+  }
+
+
   restAction(entity: entityConfig, action: string) {
+      
     fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
     }).then((r) => {
       console.log(r);
     });
+    
   }
 
   render() {
@@ -222,7 +241,7 @@ class ActionRenderer {
     let a = action || label.toLowerCase();
     return html`<button
       class="rnd"
-      @click=${() => this.actioner?.restAction(entity, a)}
+      @click=${() => this.actioner?.restActionWS(entity, a)}
     >
       ${label}
     </button>`;
@@ -234,7 +253,7 @@ class ActionRenderer {
       .state=${entity.state}
       @state="${(e: CustomEvent) => {
         let act = "turn_" + e.detail.state;
-        this.actioner?.restAction(entity, act.toLowerCase());
+        this.actioner?.restActionWS(entity, act.toLowerCase());
       }}"
     ></esp-switch>`;
   }
@@ -249,7 +268,7 @@ class ActionRenderer {
     return html`<select
       @change="${(e: Event) => {
         let val = e.target?.value;
-        this.actioner?.restAction(
+        this.actioner?.restActionWS(
           entity,
           `${action}?${opt}=${encodeURIComponent(val)}`
         );
@@ -287,7 +306,7 @@ class ActionRenderer {
         value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
+          this.actioner?.restActionWS(entity, `${action}?${opt}=${val}`);
         }}"
       />
       <label>${max || 100}</label>
@@ -315,7 +334,7 @@ class ActionRenderer {
         value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
+          this.actioner?.restActionWS(entity, `${action}?${opt}=${val}`);
         }}"
       />
     </div>`;

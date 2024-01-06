@@ -18,9 +18,6 @@ export default({mode}) => {
  const env = loadEnv(mode, process.cwd(), "");
 return  defineConfig({
   clearScreen: false,
-define: {
-  //  'env':env,
-  },  
   plugins: [
   {
       ...nodeResolve({ exportConditions: ["development"] }),
@@ -75,7 +72,7 @@ define: {
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "_static/v2login",
+    outDir: "_static/v2",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -94,7 +91,6 @@ define: {
     port: 5001,
     strictPort: true,
     proxy: {
-      "/ws":proxy_target,
       "/light": proxy_target,
       "/select": proxy_target,
       "/cover": proxy_target,

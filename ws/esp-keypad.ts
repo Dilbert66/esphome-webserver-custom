@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-
+import {decrypt,encrypt } from "./esp-app";
 let basePath="http://" + getBasePath();
 
 @customElement("esp-keypad")
@@ -160,11 +160,13 @@ export class keyPad extends LitElement  {
     super.connectedCallback();
    window.source?.addEventListener("message", (e: Event) => {
       const messageEvent = e as MessageEvent;
-     // console.log(messageEvent.data);
+      //console.log(messageEvent.data);
        const msg = JSON.parse(messageEvent.data);
-
-        if (msg.type != undefined && msg.type =="state" ) {
-         const data=msg.data;
+        //const msg=decrypt(messageEvent.data)
+        if ("type" in msg && msg.type =="state" ) {
+         var c=decrypt(msg);
+          if (!("data" in c)) return;
+         const data=c.data;
         let parts = data.id.split("-");
         let changed=false;
     
@@ -212,8 +214,11 @@ export class keyPad extends LitElement  {
           }
           if (changed) this.requestUpdate(); 
         }        
-      } else if (msg.type != undefined && msg.type =="key_config" ) {
-                  this.setConfig(msg.data);
+      } else if ("type" in msg && msg.type =="key_config" ) {
+                    var c=decrypt(msg);
+                    if (!("data" in c)) return;
+                    console.log(c.data);
+                  this.setConfig(c.data);
       }
     });
   }
@@ -221,7 +226,10 @@ export class keyPad extends LitElement  {
 getConfig() {
   
     //console.log("path=" + basePath);
-    fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`)
+    fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`),{
+      method: "GET",
+      body: "false",
+    }
     .then(response => response.text())
     .then(data => {
         this.setConfig(JSON.parse(data));
@@ -231,10 +239,16 @@ getConfig() {
 
 sendKeyWS (key) {
      let action = {
-                'key': key,
-                'partition':this._current_partition
+                'keys': key,
+                'partition':this._current_partition,
+                'method': "POST",
+                'action': "set",
+                'oid': "alarm_panel",
+                'domain': "alarm_panel"
+
             };
-    window.source.send(JSON.stringify(action));
+    let msg=encrypt(JSON.stringify(action));
+    window.source.send(msg);
     
 }
 
@@ -242,7 +256,6 @@ sendKey(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
     data.append('partition',this._current_partition);
-
     fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
       method: "POST",
 	  headers: {

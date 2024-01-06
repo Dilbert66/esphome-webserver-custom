@@ -1,6 +1,7 @@
 import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
+import sodium from 'libsodium-wrappers';
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -9,15 +10,7 @@ import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-//window.source = new EventSource(getBasePath() + "/events");
-//window.source = new WebSocket("ws://vistaalarmtest.local/ws");
  window.source = new WebSocket("ws://" + getBasePath() + "/ws");
-//wsURL - the string URL of the websocket
-//waitTimer - the incrementing clock to use if no connection made
-//waitSeed - used to reset the waitTimer back to default on a successful connection
-//multiplier - how quickly you want the timer to grow on each unsuccessful connection attempt
-
-
 
 interface Config {
   ota: boolean;
@@ -25,6 +18,76 @@ interface Config {
   title: string;
   comment: string;
   partitions: Number;
+}
+
+export function decrypt(obj) {
+    var token=localStorage.getItem("token");
+    if (token=="" || token == null)
+        return obj;
+   // console.log(token);
+    var key=sodium.from_hex(token);
+
+if (obj instanceof Object) {
+        if ("nonce" in obj && "cipher" in obj) {
+            var nonce=sodium.from_hex(obj["nonce"]);
+           // var key=sodium.crypto_generichash(sodium.crypto_secretbox_KEYBYTES,aeskey);
+            var data=sodium.from_hex(obj["cipher"]);
+           let d1="";
+           
+           try {
+               d1=sodium.crypto_secretbox_open_easy(data,nonce,key);
+           } catch (err) {
+               //set variable to login
+               return obj;
+           }
+           let d="";
+           try {
+              d=sodium.to_string(d1);
+              } catch (err) {
+            console.log(obj);
+            console.log(d1); 
+            return obj;
+           }
+
+           try {
+                var obj1 = JSON.parse(d);
+                return obj1;
+            } catch (err) {
+                  console.log(obj);
+                return d;
+            }
+       } 
+    } 
+    return obj;
+}
+
+export function isJsonString(MyTestStr) {
+        try {
+          var MyJSON = JSON.stringify(MyTestStr);
+          var json = JSON.parse(MyJSON);
+          if (typeof(MyTestStr) == 'string')
+            if (MyTestStr.length == 0)
+              return false;
+        } catch (e) {
+          return false;
+        }
+        return true;
+}
+
+
+export function encrypt(msg) {
+    var token=localStorage.getItem("token");
+    if (token=="" || token == null)
+        return msg;
+   // console.log(token);
+    var key=sodium.from_hex(token);
+let nonce=sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES);
+//let key=sodium.crypto_generichash(sodium.crypto_secretbox_KEYBYTES,aeskey);
+//console.log("key="+sodium.to_hex(key));
+let c=sodium.crypto_secretbox_easy(msg,nonce,key);
+  var out="{\"nonce\":\"" +sodium.to_hex(nonce) + "\",\"cipher\":\""+sodium.to_hex(c)+"\"}";
+  return out; 
+    
 }
 
 @customElement("esp-app")
@@ -35,7 +98,6 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
   
   _partitions: Number=0;
-  
   version: String = import.meta.env.PACKAGE_VERSION;
   config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 };
 
@@ -74,21 +136,36 @@ export default class EspApp extends LitElement {
     this.scheme = this.isDark();
 
     window.source.addEventListener("message", (e: Event) => {
-
       const messageEvent = e as MessageEvent;
       if (messageEvent.data == '__pong__') {
         pong();
         return;
-      }      
-      const msg = JSON.parse(messageEvent.data); 
-      if (msg.type != undefined && msg.type =="app_config" ) {
-        this.setConfig(msg.data);
-      } else if (msg.type != undefined && msg.type=="ping") {
+      }     
+     
+      const msg = JSON.parse(messageEvent.data);
+     // const msg = decrypt(messageEvent.data); 
+  
+      if ("type" in msg && msg.type =="token" ) {
+          //var c=decrypt(msg);
+         // if (!("data" in c)) return;          
+        //  localStorage.setItem("token",c.data);
+        //  console.log(localStorage.getItem("token"));
+
+      } else if ("type" in msg && msg.type =="app_config" ) {
+          var c=decrypt(msg);  
+          if (!("data" in c)) return;
+console.log(c.data);          
+        this.setConfig(c.data);
+      } else if ("type" in msg && msg.type=="ping") {
+          var c=decrypt(msg); 
+          if (!"data" in c) return;
           //console.log("ping" + messageEvent.lastEventId);
-          this.ping = msg.data;
-      } else if (msg.type != undefined && msg.type=="ota") { 
+          this.ping = c.data;
+      } else if ("type" in msg && msg.type=="ota") { 
+              var c =decrypt(msg);   
+              if (!"data" in c) return;
              //console.log("data=" + msg.data);
-             this.uploadMessage=msg.data;
+             this.uploadMessage=c.data;
              this.requestUpdate();
       }
     });
@@ -102,7 +179,12 @@ export default class EspApp extends LitElement {
     };
     window.source.onclose = function() {
        console.log("web socket closed");
-       //location.reload();   
+       setTimeout(function () {
+          location.reload();
+
+
+    }, 5000)       
+
     }
   }
 
@@ -163,12 +245,11 @@ uploadFile(e) {
    
   }
   
-  
+ 
 pingServer() {
         window.source.send('__ping__');
         tm = setTimeout(function () {
-
-           /// ---connection closed ///
+          /// ---connection closed ///
 
 
     }, 5000);
@@ -178,7 +259,15 @@ pong() {
     clearTimeout(tm);
 }  
  
-  
+ login() {
+
+       const username = this.shadowRoot.querySelector("#username").value;
+       const password = this.shadowRoot.querySelector("#password").value;
+       var key=sodium.crypto_generichash(sodium.crypto_secretbox_KEYBYTES,password);
+        localStorage.setItem("token",sodium.to_hex(key));
+ location.reload();
+
+  }
   renderKeypads() {
 //this._partitions=3;
           this.numbers=[];
@@ -195,7 +284,16 @@ pong() {
       ? html`<h3>${this.config.comment}</h3>`
       : nothing;
   }
+ renderLogin() {
+    return html`
+                <div class="keypad_row">
+                   <input id="username" type="username" placeholder="Your username">
+                <input id="password" type="password" placeholder="Password">
 
+                <button @click="${this.login}">Login</button>
+            </div>
+    `;
+  }
   renderLog() {
     return this.config.log
       ? html`<section class="col"><esp-log rows="50"></esp-log></section>`
@@ -209,7 +307,7 @@ pong() {
         <span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
-      
+      ${this.renderLogin()}
       <div class="keypad_row">
       ${this.renderKeypads()}
 </div>

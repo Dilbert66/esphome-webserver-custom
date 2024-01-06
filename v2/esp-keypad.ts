@@ -1,6 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
+import {decrypt,encrypt,isJson } from "./esp-app";
 
 let basePath=getBasePath();
 
@@ -85,9 +86,9 @@ export class keyPad extends LitElement  {
   _iconH="";
   
 
- setConfig(data) {
+ setConfig(keypad_config) {
       //console.log("data="+data);
-      let keypad_config=JSON.parse(data);
+      //let keypad_config=JSON.parse(data);
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"";
       this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"";
       this._button_A=keypad_config["button_A"]!=null?keypad_config["button_A"]:"";
@@ -162,13 +163,18 @@ export class keyPad extends LitElement  {
     
     window.source?.addEventListener("key_config", (e: Event) => {
       const messageEvent = e as MessageEvent;
-       this.setConfig(messageEvent.data);
+      let data=messageEvent.data;
+      if (isJson(data))
+        data = decrypt(JSON.parse(data));
+      this.setConfig(data);
     });
     
     window.source?.addEventListener("state", (e: Event) => {
         
       const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
+      var data=messageEvent.data;
+      if (isJson(data))
+        data = decrypt(JSON.parse(data));
       if (data.id) {
         let parts = data.id.split("-");
         let changed=false;
@@ -233,6 +239,26 @@ getConfig() {
 }
 
 sendKey(key) {
+     const data=JSON.stringify({
+         'keys': key,
+         'partition':this._current_partition,
+         'method': "POST",
+         'action': "set",
+         'oid': "alarm_panel",
+         'domain': "alarm_panel"         
+     });
+
+    fetch(`${basePath}/api`, {
+      method: "POST",
+      body: encrypt(data)
+    }).then((r) => {
+      console.log(r);
+    }); 
+    
+}
+
+/*
+sendKey(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
     data.append('partition',this._current_partition);
@@ -240,7 +266,7 @@ sendKey(key) {
     fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
       method: "POST",
 	  headers: {
-		'Content-Type': 'application/x-www-form-urlencoded'
+		"Content-Type": "application/x-www-form-urlencoded"
 	  },      
       body: data,
     }).then((r) => {
@@ -248,11 +274,15 @@ sendKey(key) {
     }); 
     
 }
+*/
+
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');
     this._current_partition=p;
     this.sendKey('R');
    }
+   
+   
 setState(e) {
   
      var key=e.currentTarget.getAttribute('state');
