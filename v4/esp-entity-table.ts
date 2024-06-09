@@ -2,7 +2,7 @@ import { html, css, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-import {decrypt,encrypt,isJson } from "./esp-app";
+import {isJson } from "./esp-app";
 
 interface entityConfig {
   unique_id: string;
@@ -58,6 +58,7 @@ export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
 
+
   private _actionRenderer = new ActionRenderer();
 
   connectedCallback() {
@@ -65,9 +66,8 @@ export class EntityTable extends LitElement implements RestAction {
     window.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
       var data=messageEvent.data;
-      if (isJson(data))
-        data = JSON.parse(data); 
-      if (data['iv'] != null) data=decrypt(data);
+      if (isJson(data)) 
+        data = JSON.parse(data);   
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id) {
         // Dynamically add discovered..
@@ -127,7 +127,7 @@ export class EntityTable extends LitElement implements RestAction {
             
      fetch(`${basePath}/api`, {
       method: "POST",
-      body: encrypt(cmd),
+      body: cmd,
     }).then((r) => {
       console.log(r);
     });  

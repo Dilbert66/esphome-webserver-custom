@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
+import {decrypt,encrypt,isJson } from "./esp-app";
 
 let basePath=getBasePath();
 
@@ -87,7 +87,7 @@ export class keyPad extends LitElement  {
   
 
  setConfig(keypad_config) {
-      //console.log("data="+keypad_config);
+      //console.log("data="+data);
       //let keypad_config=JSON.parse(data);
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"";
       this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"";
@@ -149,16 +149,12 @@ export class keyPad extends LitElement  {
       this._iconE=this._sensor_E?this._labelOff:"";
       this._iconF=this._sensor_F?this._labelOff:"";
       this._iconG=this._sensor_G?this._labelOff:"";
-   
       this._iconH=this._sensor_H?this._labelOff:"";
+   
   }  
 
   protected firstUpdated() {
     // this.getConfig();
-    if (crypt)  {
-        this._line1="Enter Password!";
-       
-    }
   }
 
 
@@ -168,9 +164,9 @@ export class keyPad extends LitElement  {
     window.source?.addEventListener("key_config", (e: Event) => {
       const messageEvent = e as MessageEvent;
       let data=messageEvent.data;
+
       if (isJson(data))
-        data = JSON.parse(data);
-      if ("iv" in data) data=decrypt(data);    
+        data = decrypt(JSON.parse(data));
       this.setConfig(data);
     });
     
@@ -180,60 +176,54 @@ export class keyPad extends LitElement  {
       var data=messageEvent.data;
 
       if (isJson(data))
-        data = JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);    
+        data = decrypt(JSON.parse(data));
       if (data.id) {
         let parts = data.id.split("-");
         let changed=false;
-        let id_code=""
-        if (data.id_code)
-            id_code=data.id_code;        
-        else if (parts[2] != undefined)  //deprecated
-            id_code=parts[2];
+        if (parts[2] != undefined && parts[2] !="") {
 
-        if (id_code != "") {
-          if (id_code==this._line1id.replace("?",this._current_partition)) {
+          if (parts[2]==this._line1id.replace("?",this._current_partition)) {
               this._line1=data.value;
               changed=true;
           }  else
-          if (id_code==this._line2id.replace("?",this._current_partition)) {
+          if (parts[2]==this._line2id.replace("?",this._current_partition)) {
               this._line2=data.value;
                changed=true;
           }   else
-          if (id_code==this._sensor_A.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_A.replace("?",this._current_partition)) {
             this._iconA=data.value?this._labelOn:this._labelOff;
             changed=true ;           
           } else
-          if (id_code==this._sensor_B.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_B.replace("?",this._current_partition)) {
             this._iconB=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_C.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_C.replace("?",this._current_partition)) {
             this._iconC=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_D.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_D.replace("?",this._current_partition)) {
             this._iconD=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_E.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_E.replace("?",this._current_partition)) {
             this._iconE=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_F.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_F.replace("?",this._current_partition)) {
             this._iconF=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_G.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_G.replace("?",this._current_partition)) {
             this._iconG=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           } else
-          if (id_code==this._sensor_H.replace("?",this._current_partition)) {
+          if (parts[2]==this._sensor_H.replace("?",this._current_partition)) {
             this._iconH=data.value?this._labelOn:this._labelOff;
             changed=true ;             
           }
           if (changed) this.requestUpdate(); 
-        }   
+        }        
       } 
       
     });
@@ -251,7 +241,7 @@ getConfig() {
 }
 
 sendKey(key) {
-     let data=JSON.stringify({
+     const data=JSON.stringify({
          'keys': key,
          'partition':this._current_partition,
          'method': "POST",
@@ -264,13 +254,13 @@ sendKey(key) {
       method: "POST",
       body: encrypt(data)
     }).then((r) => {
-      //console.log(r);
+      console.log(r);
     }); 
     
 }
 
 /*
-sendKey1(key) {
+sendKey(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
     data.append('partition',this._current_partition);

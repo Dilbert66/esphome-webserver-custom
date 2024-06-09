@@ -1,6 +1,6 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {decrypt,encrypt ,isJson} from "./esp-app";
+import {isJson } from "./esp-app";
 
 interface recordConfig {
   type: string;
@@ -24,9 +24,8 @@ export class DebugLog extends LitElement {
     window.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
       var data=messageEvent.data;
-      if (isJson(data))
-         data=JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);
+      if (isJson(data)) 
+        data = JSON.parse(data);         
       const d: String = data;
       if (!d.length) return;
       let parts = d.slice(10, d.length - 4).split(":");

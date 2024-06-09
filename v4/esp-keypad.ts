@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
+import {isJson } from "./esp-app";
 
 let basePath=getBasePath();
 
@@ -149,16 +149,12 @@ export class keyPad extends LitElement  {
       this._iconE=this._sensor_E?this._labelOff:"";
       this._iconF=this._sensor_F?this._labelOff:"";
       this._iconG=this._sensor_G?this._labelOff:"";
-   
       this._iconH=this._sensor_H?this._labelOff:"";
+   
   }  
 
   protected firstUpdated() {
     // this.getConfig();
-    if (crypt)  {
-        this._line1="Enter Password!";
-       
-    }
   }
 
 
@@ -168,9 +164,8 @@ export class keyPad extends LitElement  {
     window.source?.addEventListener("key_config", (e: Event) => {
       const messageEvent = e as MessageEvent;
       let data=messageEvent.data;
-      if (isJson(data))
-        data = JSON.parse(data);
-      if ("iv" in data) data=decrypt(data);    
+      if (isJson(data)) 
+        data = JSON.parse(data);         
       this.setConfig(data);
     });
     
@@ -178,10 +173,8 @@ export class keyPad extends LitElement  {
         
       const messageEvent = e as MessageEvent;
       var data=messageEvent.data;
-
-      if (isJson(data))
-        data = JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);    
+      if (isJson(data)) 
+        data = JSON.parse(data);   
       if (data.id) {
         let parts = data.id.split("-");
         let changed=false;
@@ -262,15 +255,15 @@ sendKey(key) {
 
     fetch(`${basePath}/api`, {
       method: "POST",
-      body: encrypt(data)
+      body: data
     }).then((r) => {
-      //console.log(r);
+     // console.log(r);
     }); 
     
 }
 
 /*
-sendKey1(key) {
+sendKey(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
     data.append('partition',this._current_partition);
@@ -282,7 +275,7 @@ sendKey1(key) {
 	  },      
       body: data,
     }).then((r) => {
-      console.log(r);
+      //console.log(r);
     }); 
     
 }

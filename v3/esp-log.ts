@@ -25,8 +25,8 @@ export class DebugLog extends LitElement {
       const messageEvent = e as MessageEvent;
       var data=messageEvent.data;
       if (isJson(data))
-         data=JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);
+         data=decrypt(JSON.parse(data));
+
       const d: String = data;
       if (!d.length) return;
       let parts = d.slice(10, d.length - 4).split(":");

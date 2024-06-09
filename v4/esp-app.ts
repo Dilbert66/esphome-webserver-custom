@@ -2,11 +2,6 @@ import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
-import { Utf8,WordArray } from 'crypto-es/lib/core.js';
-import { ZeroPadding } from 'crypto-es/lib/pad-zeropadding.js';
-import { Base64 } from 'crypto-es/lib/enc-base64.js';
-import { AES } from 'crypto-es/lib/aes.js';
-import { CBC} from 'crypto-es/lib/cipher-core.js';
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -15,11 +10,7 @@ import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-let basePath = getBasePath(); 
-
-window.source = new EventSource(basePath + "/events");
-
-var crypt=false;
+window.source = new EventSource(getBasePath() + "/events");
 
 interface Config {
   ota: boolean;
@@ -29,43 +20,7 @@ interface Config {
   partitions: Number;
   keypad: boolean;
   crypt: boolean;
-  cid: Number;
 }
-
-var aeskey="";
-const KEYSIZE=32
-
-function decrypt(obj) {
-    if (obj instanceof Object && aeskey != null) {
-        if ("iv" in obj) {
-            var myiv=obj["iv"];
-            var mydata=obj["data"];
-            var iv = Base64.parse(myiv);
-            var decrypted = AES.decrypt(mydata, aeskey,{iv:iv,padding: ZeroPadding,mode: CBC});
-            try {
-                var data=decrypted.toString(Utf8);
-            } catch (e) {
-                console.log("invalid utf8 data");
-                return "";
-            }
-            if (isJson(data))
-                return JSON.parse(data);
-            else
-                return data;
-        } 
-    }
-    return "";
-}
-
-function encrypt(msg) {
-  if (!crypt || aeskey == null) return msg;
-    var iv = WordArray.random(16);
-    var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: ZeroPadding,mode: CBC});
-    var out="{\"iv\":\"" +Base64.stringify(iv) + "\",\"data\":\""+encrypted+"\"}";
-    return out;
-}
-
-export { encrypt, decrypt,crypt }
 
 export function isJson(str) {
     try {
@@ -86,7 +41,7 @@ export default class EspApp extends LitElement {
   _partitions: Number=0;
   
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: false, title: "Login", comment: "",partitions:1 ,keypad:true,crypt: false,cid:0};
+  config: Config = { ota: false, log: true, title: "", comment: "",partitions:0 ,keypad:false,crypt: false};
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -101,31 +56,12 @@ export default class EspApp extends LitElement {
     const conf = document.querySelector('script#config');
     if ( conf ) this.setConfig(JSON.parse(conf.innerText));
   }
-  
- sendAck(cid) {
-     let data=JSON.stringify({
-         'cid': cid,
-         'method': "POST",
-         'action': "set",
-         'oid': "auth",
-         'domain': "auth"         
-     });
 
-    fetch(`${basePath}/api`, {
-      method: "POST",
-      body: encrypt(data)
-    }).then((r) => {
-      //console.log(r);
-    }); 
-    
-}
   setConfig(config: any) {
     this.config = config;
     this._partitions=config.partitions;
     document.title = config.title;
-    crypt=config.crypt;
     document.documentElement.lang = config.lang;
-    if (config.cid) this.sendAck(config.cid);
     this.requestUpdate();    
   }
 
@@ -151,9 +87,8 @@ export default class EspApp extends LitElement {
       const messageEvent = e as MessageEvent;
        let data=messageEvent.data;
       if (isJson(data)) 
-        data = JSON.parse(data); 
-      if (data['iv'] != null) data=decrypt(data);
-      
+        data = JSON.parse(data);        
+    
       if (data)
         this.setConfig(data);
 
@@ -163,13 +98,13 @@ export default class EspApp extends LitElement {
       console.dir(e);
       //alert("Lost event stream!")
     };
-    aeskey=Base64.parse(localStorage.getItem("aeskey"));
-
   } 
 
   isDark() {
     return this.darkQuery.matches ? "dark" : "light";
   }
+  
+  
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
@@ -182,7 +117,7 @@ export default class EspApp extends LitElement {
     }
   }
   
-
+  
   
  uploadFileName(e) { 
   this.fileName=e.target.files[0];
@@ -193,7 +128,7 @@ uploadFile(e) {
     e.preventDefault();
     const formData = new FormData();
     formData.append('uploadfile', this.fileName);
-   fetch("${basePath}/update", {
+   fetch("http://vistaalarmtest.local/update", {
           method: 'POST',
           body: formData
         })
@@ -211,7 +146,7 @@ uploadFile(e) {
 
   ota() {
 
-      if (this.config.ota) return html`<h2>OTA Update</h2>
+      return html`<h2>OTA Update</h2>
         <form
           method="POST"
           action="/update"
@@ -225,32 +160,7 @@ uploadFile(e) {
          `;
    
   }
-  
-  login() {
-
-       const username = this.shadowRoot.querySelector("#username").value;
-       const password = this.shadowRoot.querySelector("#password").value;
-       const mypass=password.padEnd(KEYSIZE,0);
-       aeskey=Utf8.parse(mypass);
-       localStorage.setItem("aeskey",Base64.stringify(aeskey));
-     
- location.reload();
-
-  } 
-  
- renderLogin() {
-      return html`
-                <div class="login_row">
-                   <input  class="keypad" id="username" type="username" placeholder="Your username">
-                   &nbsp;
-                <input id="password" type="password" placeholder="Password">
-&nbsp;
-                <button @click="${this.login}">Login</button>
-
-            </div>
-    `;
-  }
-  
+ 
   renderKeypads() {
          if (!this.config.keypad ) return nothing;
          this.numbers=[];
@@ -281,15 +191,10 @@ uploadFile(e) {
         <span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
-  
       <div class="keypad_row">
       ${this.renderKeypads()}
-        </div>
-         ${this.renderLogin()}         
+</div>
       <main class="flex-grid-half">
-
-
-      
         <section class="col">
           <esp-entity-table></esp-entity-table>
           <h2>
@@ -337,15 +242,7 @@ uploadFile(e) {
           display: flex;
           flex-wrap:wrap;
           justify-content: center;
-
          } 
-        .login_row {
-          display: flex;
-          flex-wrap:wrap;
-          justify-content: center;
-          padding-bottom: 15px;
-
-         }          
          .keypad {
              padding: 5px;
          }

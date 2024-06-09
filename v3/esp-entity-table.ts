@@ -66,8 +66,7 @@ export class EntityTable extends LitElement implements RestAction {
       const messageEvent = e as MessageEvent;
       var data=messageEvent.data;
       if (isJson(data))
-        data = JSON.parse(data); 
-      if (data['iv'] != null) data=decrypt(data);
+        data = decrypt(JSON.parse(data));      
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id) {
         // Dynamically add discovered..

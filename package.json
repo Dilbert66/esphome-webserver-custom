@@ -12,6 +12,7 @@
     "build-v1": ""
   },
   "dependencies": {
+    "@types/sjcl": "^1.0.34",
     "Buffer": "0.0.0",
     "crypto-aes-gcm": "^2.0.3",
     "crypto-es": "^2.1.0",
@@ -29,6 +30,7 @@
     "rollup-plugin-gzip": "^2.5.1",
     "rollup-plugin-minify-html-template-literals": "^1.2.0",
     "salty-crypto": "^0.3.1",
+    "sjcl": "^1.0.8",
     "vite-plugin-html": "^2.1.2",
     "vite-plugin-package-version": "^1.1.0",
     "vite-plugin-singlefile": "^0.5.1",

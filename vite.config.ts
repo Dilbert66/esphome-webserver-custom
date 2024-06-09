@@ -12,7 +12,7 @@ import replace from "@rollup/plugin-replace";
 //import wasm from "vite-plugin-wasm";
 //import topLevelAwait from "vite-plugin-top-level-await";
 
-const proxy_target = "http://vistaalarmtest.local";
+const proxy_target = "http://dscalarmc3.local";
 
 export default({mode}) => {
  const env = loadEnv(mode, process.cwd(), "");
@@ -91,6 +91,7 @@ return  defineConfig({
     port: 5001,
     strictPort: true,
     proxy: {
+      "/api": proxy_target,
       "/light": proxy_target,
       "/select": proxy_target,
       "/cover": proxy_target,
