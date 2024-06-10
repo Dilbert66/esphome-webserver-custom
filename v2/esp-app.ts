@@ -7,6 +7,7 @@ import { AES } from 'crypto-es/lib/aes.js';
 import { CBC,Pkcs7} from 'crypto-es/lib/cipher-core.js';
 import {HMAC} from 'crypto-es/lib/hmac.js';
 import {SHA256Algo} from 'crypto-es/lib/sha256.js';
+import {SHA256} from 'crypto-es/lib/sha256.js';
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -33,7 +34,9 @@ interface Config {
 }
 
 var aeskey="";
+var hmackey="";
 const KEYSIZE=32
+const salt="77992288";
 
 function decrypt(obj) {
     if (obj instanceof Object && aeskey != null) {
@@ -41,8 +44,7 @@ function decrypt(obj) {
             var myiv=obj["iv"];
             var mydata=obj["data"];
             var hash=obj["hash"];
-            
-            var hmacHasher = HMAC.create(SHA256Algo, aeskey);
+            var hmacHasher = HMAC.create(SHA256Algo, hmackey);
             hmacHasher.update(myiv);
             var sig=hmacHasher.finalize(mydata);
             var esig=Base64.stringify(sig);
@@ -74,7 +76,7 @@ function encrypt(msg) {
     var iv = WordArray.random(16);
     var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: Pkcs7,mode: CBC});
     var eiv=Base64.stringify(iv);
-    var hmacHasher = HMAC.create(SHA256Algo, aeskey);
+    var hmacHasher = HMAC.create(SHA256Algo, hmackey);
     hmacHasher.update(eiv);
     var sig=hmacHasher.finalize(encrypted.toString());
     var esig=Base64.stringify(sig);
@@ -160,14 +162,14 @@ export default class EspApp extends LitElement {
     this.darkQuery.addEventListener("change", () => {
       this.scheme = this.isDark();
     });
-    this.scheme = this.isDark();
+    this.scheme = localStorage.getItem("color-scheme");
     
-     window.source?.addEventListener("ota", (e: Event) => {
+        /* window.source?.addEventListener("ota", (e: Event) => {
       const messageEvent = e as MessageEvent;
        this.uploadMessage=messageEvent.data;
        this.requestUpdate();
     });   
-    
+    */
     window.source.addEventListener("ping", (e: Event) => {
       const messageEvent = e as MessageEvent;
        let data=messageEvent.data;
@@ -184,7 +186,7 @@ export default class EspApp extends LitElement {
       //alert("Lost event stream!")
     };
     aeskey=Base64.parse(localStorage.getItem("aeskey"));
-
+    hmackey=aeskey;
   } 
 
   isDark() {
@@ -196,18 +198,18 @@ export default class EspApp extends LitElement {
     if (changedProperties.has("scheme")) {
       let el = document.documentElement;
       document.documentElement.style.setProperty("color-scheme", this.scheme);
+      localStorage.setItem("color-scheme",this.scheme);
     }
     if (changedProperties.has("ping")) {
       this.beat.animate(this.frames, 1000);
     }
   }
-  
-
-  
+ /*
  uploadFileName(e) { 
   this.fileName=e.target.files[0];
 }
-
+*/
+/*
 uploadFile(e) {
     console.log("uploading " + this.fileName);
     e.preventDefault();
@@ -227,10 +229,10 @@ uploadFile(e) {
 
     });
 }
-  
+ */ 
 
   ota() {
-
+/*
       if (this.config.ota) return html`<h2>OTA Update</h2>
         <form
           method="POST"
@@ -243,18 +245,23 @@ uploadFile(e) {
         </form>
         
          `;
+         */
    
   }
+  
   
   login() {
 
        const username = this.shadowRoot.querySelector("#username").value;
        const password = this.shadowRoot.querySelector("#password").value;
-       const mypass=password.padEnd(KEYSIZE,0);
+
+       var key=username + salt + password;
+       const mypass=key.padEnd(KEYSIZE,0);
        aeskey=Utf8.parse(mypass);
+       aeskey=SHA256(aeskey);
        localStorage.setItem("aeskey",Base64.stringify(aeskey));
      
- location.reload();
+       location.reload();
 
   } 
   
