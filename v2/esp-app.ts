@@ -1,12 +1,12 @@
 import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-
-import { Utf8,WordArray } from 'crypto-es/lib/core.js';
-import { ZeroPadding } from 'crypto-es/lib/pad-zeropadding.js';
+import { Utf8,WordArray} from 'crypto-es/lib/core.js';
 import { Base64 } from 'crypto-es/lib/enc-base64.js';
 import { AES } from 'crypto-es/lib/aes.js';
-import { CBC} from 'crypto-es/lib/cipher-core.js';
+import { CBC,Pkcs7} from 'crypto-es/lib/cipher-core.js';
+import {HMAC} from 'crypto-es/lib/hmac.js';
+import {SHA256Algo} from 'crypto-es/lib/sha256.js';
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -40,10 +40,21 @@ function decrypt(obj) {
         if ("iv" in obj) {
             var myiv=obj["iv"];
             var mydata=obj["data"];
+            var hash=obj["hash"];
+            
+            var hmacHasher = HMAC.create(SHA256Algo, aeskey);
+            hmacHasher.update(myiv);
+            var sig=hmacHasher.finalize(mydata);
+            var esig=Base64.stringify(sig);
+            if (esig != hash) {
+                console.log("Decrypt: hmac mismatch");
+                return "";
+            }
             var iv = Base64.parse(myiv);
-            var decrypted = AES.decrypt(mydata, aeskey,{iv:iv,padding: ZeroPadding,mode: CBC});
+            var decrypted = AES.decrypt(mydata, aeskey,{iv:iv,padding: Pkcs7,mode: CBC});
             try {
                 var data=decrypted.toString(Utf8);
+                data=data.slice(0,-1);
             } catch (e) {
                 console.log("invalid utf8 data");
                 return "";
@@ -59,18 +70,27 @@ function decrypt(obj) {
 
 function encrypt(msg) {
   if (!crypt || aeskey == null) return msg;
+    msg=msg+"\0";
     var iv = WordArray.random(16);
-    var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: ZeroPadding,mode: CBC});
-    var out="{\"iv\":\"" +Base64.stringify(iv) + "\",\"data\":\""+encrypted+"\"}";
+    var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: Pkcs7,mode: CBC});
+    var eiv=Base64.stringify(iv);
+    var hmacHasher = HMAC.create(SHA256Algo, aeskey);
+    hmacHasher.update(eiv);
+    var sig=hmacHasher.finalize(encrypted.toString());
+    var esig=Base64.stringify(sig);
+    var out="{\"iv\":\"" +eiv + "\",\"hash\":\""+esig+"\",\"data\":\""+encrypted.toString()+"\"}";
     return out;
+    
 }
 
 export { encrypt, decrypt,crypt }
 
 export function isJson(str) {
     try {
+        if (str=="") return false;
         JSON.parse(str);
     } catch (e) {
+        console.log("error parsing [" + str + "]," +e);
         return false;
     }
     return true;
@@ -124,6 +144,7 @@ export default class EspApp extends LitElement {
     this._partitions=config.partitions;
     document.title = config.title;
     crypt=config.crypt;
+    console.log(config);
     document.documentElement.lang = config.lang;
     if (config.cid) this.sendAck(config.cid);
     this.requestUpdate();    
@@ -153,7 +174,6 @@ export default class EspApp extends LitElement {
       if (isJson(data)) 
         data = JSON.parse(data); 
       if (data['iv'] != null) data=decrypt(data);
-      
       if (data)
         this.setConfig(data);
 
