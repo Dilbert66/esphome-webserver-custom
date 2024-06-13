@@ -43,7 +43,7 @@ export function getBasePath() {
   let str = window.location.pathname;
   //console.log ("str= "+ str);
   //return "http://dscalarmmoduleapi.local";
-  //return "http://vistaalarmtest.local"
+  return "http://vistaalarmtest.local"
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
@@ -124,7 +124,7 @@ export class EntityTable extends LitElement implements RestAction {
                 'action': action,
                 'method': "POST"
             });
-            
+         console.log(cmd);   
      fetch(`${basePath}/api`, {
       method: "POST",
       body: encrypt(cmd),
@@ -236,6 +236,7 @@ class ActionRenderer {
   }
 
   private _actionButton(entity: entityConfig, label: string, action: string) {
+
     if (!entity) return;
     let a = action || label.toLowerCase();
     return html`<button
@@ -411,7 +412,7 @@ class ActionRenderer {
 
   render_button() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "☐", "press ")}`;
+    return html`${this._actionButton(this.entity, "☐", "press")}`;
   }
 
   render_select() {

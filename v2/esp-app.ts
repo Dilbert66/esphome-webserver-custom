@@ -92,7 +92,7 @@ export function isJson(str) {
         if (str=="") return false;
         JSON.parse(str);
     } catch (e) {
-        console.log("error parsing [" + str + "]," +e);
+        //console.log("error parsing [" + str + "]," +e);
         return false;
     }
     return true;
@@ -149,6 +149,9 @@ export default class EspApp extends LitElement {
     console.log(config);
     document.documentElement.lang = config.lang;
     if (config.cid) this.sendAck(config.cid);
+    if (config.cid ) 
+        this.hideLoginForm();
+    
     this.requestUpdate();    
   }
 
@@ -181,7 +184,7 @@ export default class EspApp extends LitElement {
 
       this.ping = messageEvent.lastEventId;
     });
-    window.source.onerror = function (e: Event) {
+     window.source.onerror = function (e: Event) {
       console.dir(e);
       //alert("Lost event stream!")
     };
@@ -260,21 +263,23 @@ uploadFile(e) {
        aeskey=Utf8.parse(mypass);
        aeskey=SHA256(aeskey);
        localStorage.setItem("aeskey",Base64.stringify(aeskey));
-     
        location.reload();
 
   } 
   
  renderLogin() {
       return html`
+                <div id="login" >      
                 <div class="login_row">
                    <input  class="keypad" id="username" type="username" placeholder="Your username">
-                   &nbsp;
-                <input id="password" type="password" placeholder="Password">
-&nbsp;
-                <button @click="${this.login}">Login</button>
-
-            </div>
+                <input class="keypad" id="password" type="password" placeholder="Password">
+                </div>
+<div class="login_row">                
+               <button  @click="${this.login}">Submit</button>
+               </div>
+</div>
+          
+                
     `;
   }
   
@@ -294,7 +299,36 @@ uploadFile(e) {
       ? html`<h3>${this.config.comment}</h3>`
       : nothing;
   }
-
+  
+hideLoginForm() {
+        this.renderRoot.querySelector('#login').className=""  
+        this.renderRoot.querySelector('#login').classList.add("hide");
+         
+}
+showLoginForm() {
+        this.renderRoot.querySelector('#login').className="" 
+      
+}
+toggleLoginForm() {
+        if (this.renderRoot.querySelector('#login').classList=="hide")
+            this.renderRoot.querySelector('#showlogin').innerText="Hide Login"; 
+        else
+            this.renderRoot.querySelector('#showlogin').innerText="Login"; 
+        
+        this.renderRoot.querySelector('#login').classList.toggle("hide");
+      
+}
+  
+  
+  renderCryptState() {
+   if (this.config.crypt || !this.config.cid ) 
+   return html`
+  <span id="cryptstate">🔐<button id="showlogin" @click="${this.toggleLoginForm}">Login</button></span>
+`;
+  else return html`
+  <span id="cryptstate">🔓<button @click="${this.toggleLoginForm}">Show Login</button></span>  
+  `;
+  }
   renderLog() {
     return this.config.log
       ? html`<section class="col"><esp-log rows="50"></esp-log></section>`
@@ -304,15 +338,16 @@ uploadFile(e) {
   render() {
     return html`
       <h1>
+        ${this.renderCryptState()}
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
-  
+           ${this.renderLogin()}  
       <div class="keypad_row">
       ${this.renderKeypads()}
         </div>
-         ${this.renderLogin()}         
+       
       <main class="flex-grid-half">
 
 
@@ -367,7 +402,7 @@ uploadFile(e) {
 
          } 
         .login_row {
-          display: flex;
+           display: flex;
           flex-wrap:wrap;
           justify-content: center;
           padding-bottom: 15px;
@@ -411,6 +446,10 @@ uploadFile(e) {
           float: right;
           height: 1rem;
         }
+        #cryptstate {
+          float: left;
+          height: 1rem;
+        }        
         a.logo {
           height: 4rem;
           float: left;
@@ -419,6 +458,9 @@ uploadFile(e) {
         .right {
           float: right;
         }
+        .hide { 
+            display: none;
+        }        
       `,
     ];
   }
