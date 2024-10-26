@@ -12,6 +12,7 @@ import {SHA256} from 'crypto-es/lib/sha256.js';
 import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
+import "./esp-logo";
 import "./esp-keypad";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
@@ -48,6 +49,7 @@ function decrypt(obj) {
             hmacHasher.update(myiv);
             var sig=hmacHasher.finalize(mydata);
             var esig=Base64.stringify(sig);
+
             if (esig != hash) {
                 console.log("Decrypt: hmac mismatch");
                 return "";
@@ -71,7 +73,7 @@ function decrypt(obj) {
 }
 
 function encrypt(msg) {
-  if (!crypt || aeskey == null) return msg;
+  if (!crypt || aeskey == null || msg=="") return msg;
     msg=msg+"\0";
     var iv = WordArray.random(16);
     var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: Pkcs7,mode: CBC});
@@ -146,7 +148,7 @@ export default class EspApp extends LitElement {
     this._partitions=config.partitions;
     document.title = config.title;
     crypt=config.crypt;
-    console.log(config);
+    console.log(this.config);
     document.documentElement.lang = config.lang;
     if (config.cid) this.sendAck(config.cid);
     if (config.cid ) 
@@ -188,8 +190,9 @@ export default class EspApp extends LitElement {
       console.dir(e);
       //alert("Lost event stream!")
     };
+
     aeskey=Base64.parse(localStorage.getItem("aeskey"));
-    hmackey=aeskey;
+    hmackey=Base64.parse(localStorage.getItem("hmackey"));
   } 
 
   isDark() {
@@ -251,7 +254,11 @@ uploadFile(e) {
          */
    
   }
-  
+    logout() {
+       localStorage.setItem("aeskey","");
+       localStorage.setItem("hmackey","");
+       location.reload();
+  }
   
   login() {
 
@@ -259,28 +266,31 @@ uploadFile(e) {
        const password = this.shadowRoot.querySelector("#password").value;
 
        var key=username + salt + password;
-       const mypass=key.padEnd(KEYSIZE,0);
-       aeskey=Utf8.parse(mypass);
-       aeskey=SHA256(aeskey);
+       
+       var aesHasher = HMAC.create(SHA256Algo,key);
+       var aeskey=aesHasher.finalize("aeskey"); 
+       
+       var hmacHasher = HMAC.create(SHA256Algo, key);
+       var hmackey=hmacHasher.finalize("hmackey"); 
+
        localStorage.setItem("aeskey",Base64.stringify(aeskey));
+       localStorage.setItem("hmackey",Base64.stringify(hmackey));
        location.reload();
 
   } 
   
  renderLogin() {
+
       return html`
-                <div id="login" >      
+                <div id="login"  >      
                 <div class="login_row">
-                   <input  class="keypad" id="username" type="username" placeholder="Your username">
-                <input class="keypad" id="password" type="password" placeholder="Password">
+                   <input  class="keypad" id="username" type="username" placeholder="Your username" autocomplete="off">
+                &nbsp;<input class="keypad" id="password" type="password" placeholder="Password">
                 </div>
 <div class="login_row">                
                <button  @click="${this.login}">Submit</button>
                </div>
-</div>
-          
-                
-    `;
+</div>`;
   }
   
   renderKeypads() {
@@ -318,17 +328,33 @@ toggleLoginForm() {
         this.renderRoot.querySelector('#login').classList.toggle("hide");
       
 }
-  
+  renderLoginButton() {
+      if (this.config.crypt ) {
+          return html`<button id='logout' @click='${this.logout}'>Logout</button>`;  
+   }   else if (!this.config.cid) {
+        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
+   }
+      
+  }
+ 
+/* 
+  renderLoginButton() {
+    if (!this.config.cid)
+        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
+  }
+  */
   
   renderCryptState() {
-   if (this.config.crypt || !this.config.cid ) 
+    let icon="🔓";
+   if (this.config.crypt ) {
+    icon="🔐";
+   }
    return html`
-  <span id="cryptstate">🔐<button id="showlogin" @click="${this.toggleLoginForm}">Login</button></span>
+   <div id="cryptstate" >${icon}${this.renderLoginButton()}</div>
 `;
-  else return html`
-  <span id="cryptstate">🔓<button @click="${this.toggleLoginForm}">Show Login</button></span>  
-  `;
+
   }
+  
   renderLog() {
     return this.config.log
       ? html`<section class="col"><esp-log rows="50"></esp-log></section>`
@@ -337,13 +363,13 @@ toggleLoginForm() {
 
   render() {
     return html`
+          ${this.renderCryptState()}<br/>
       <h1>
-        ${this.renderCryptState()}
-        ${this.config.title}
-        <span id="beat" title="${this.version}">❤</span>
+         ${this.config.title}
+<span id="beat" title="${this.version}">❤</span>
       </h1>
       ${this.renderComment()}
-           ${this.renderLogin()}  
+      ${this.renderLogin()}  
       <div class="keypad_row">
       ${this.renderKeypads()}
         </div>
@@ -432,6 +458,7 @@ toggleLoginForm() {
           text-align: center;
           width: 100%;
           line-height: 4rem;
+ 
         }
         h1,
         h2 {

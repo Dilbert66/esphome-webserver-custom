@@ -12,8 +12,8 @@ import replace from "@rollup/plugin-replace";
 //import wasm from "vite-plugin-wasm";
 //import topLevelAwait from "vite-plugin-top-level-await";
 
-//const proxy_target = "http://dscalarmc3.local";
-const proxy_target="http://vistalarmtest.local";
+const proxy_target = "http://dscalarmc3.local";
+//const proxy_target="http://vistalarmtest.local";
 
 export default({mode}) => {
  const env = loadEnv(mode, process.cwd(), "");

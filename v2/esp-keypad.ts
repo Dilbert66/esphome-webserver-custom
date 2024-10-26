@@ -155,10 +155,6 @@ export class keyPad extends LitElement  {
 
   protected firstUpdated() {
     // this.getConfig();
-    if (crypt)  {
-        this._line1="Enter Password!";
-       
-    }
   }
 
 
@@ -181,7 +177,8 @@ export class keyPad extends LitElement  {
 
       if (isJson(data))
         data = JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);    
+      if (data['iv'] != null) data=decrypt(data); 
+     
       if (data.id) {
         let parts = data.id.split("-");
         let changed=false;
