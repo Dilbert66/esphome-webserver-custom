@@ -72,13 +72,13 @@ export class DebugLog extends LitElement {
      */ 
 
  const types: Record<string, string> = {
-        "\x27[1;31m": "e",
-        "\x27[0;33m": "w",
-        "\x27[0;32m": "i",
-        "\x27[0;35m": "c",
-        "\x27[0;36m": "d",
-        "\x27[0;37m": "v",
-        "\"27[0m":"n",
+        "\x1b[1;31m": "e",
+        "\x1b[0;33m": "w",
+        "\x1b[0;32m": "i",
+        "\x1b[0;35m": "c",
+        "\x1b[0;36m": "d",
+        "\x1b[0;37m": "v",
+        "\x1b[0m":"n",
       };  
    
       const record = {
