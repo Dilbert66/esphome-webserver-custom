@@ -69,6 +69,7 @@ export class keyPad extends LitElement  {
   
   @property({ type: Number }) _partitions=1;
   @property({ type: Number }) _current_partition=1;
+  @property({type: Number })  _vibration_duration=50;
 
 
   _labelOff="🌒"
@@ -141,6 +142,7 @@ export class keyPad extends LitElement  {
       this._view_status=keypad_config["view_status"]!=null?keypad_config["view_status"]:false;
       this._view_status2=keypad_config["view_status2"]!=null?keypad_config["view_status2"]:false;
       this._button_left=keypad_config["button_left"]!=null?keypad_config["button_left"]:false;
+      this._vibration_duration=keypad_config["vibration_duration"]!=null?keypad_config["vibration_duration"]:50;
       
       this._iconA=this._sensor_A?this._labelOff:"";
       this._iconB=this._sensor_B?this._labelOff:"";      
@@ -319,9 +321,12 @@ setState(e) {
          case '#': key='#'; break;
          
      }
-     
+     if ('vibrate' in navigator) {
+        navigator.vibrate(this._vibration_duration);
+     } 
      this.sendKey(key);
   }
+
   
   render() {
     return html`

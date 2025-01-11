@@ -375,9 +375,7 @@ toggleLoginForm() {
         </div>
        
       <main class="flex-grid-half">
-
-
-      
+    
         <section class="col">
           <esp-entity-table></esp-entity-table>
           <h2>
@@ -397,8 +395,8 @@ toggleLoginForm() {
           </h2>
           ${this.ota()}
         </section>
-
         ${this.renderLog()}
+
       </main>
     `;
   }
