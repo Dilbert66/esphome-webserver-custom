@@ -58,7 +58,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../../_static/v3",
+    outDir: "../../_static/keypadv3",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -67,7 +67,7 @@ export default defineConfig({
         }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
-        entryFileNames: "www.js",
+        entryFileNames: "www_v3.js",
       },
     },
   },
@@ -91,6 +91,7 @@ export default defineConfig({
       "/date": proxy_target,
       "/time": proxy_target,
       "/alarm_panel": proxy_target,
+      "/update" : proxy_target,
     },
   },
 });

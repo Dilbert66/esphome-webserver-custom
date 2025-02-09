@@ -1,6 +1,5 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {decrypt,encrypt ,isJson} from "./esp-app";
 
 interface recordConfig {
   type: string;
@@ -8,13 +7,12 @@ interface recordConfig {
   tag: string;
   detail: string;
   when: string;
-
 }
 
 @customElement("esp-log")
 export class DebugLog extends LitElement {
   @property({ type: Number }) rows = 10;
-  @state() logs: string = [];
+  @state() logs: recordConfig[] = [];
 
   constructor() {
     super();
@@ -24,63 +22,18 @@ export class DebugLog extends LitElement {
     super.connectedCallback();
     window.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      var data=messageEvent.data;
-      if (isJson(data))
-         data=JSON.parse(data);
-      if (data['iv'] != null) data=decrypt(data);
-      const d: String = data;
-      if (!d.length) return;
+      const d: String = messageEvent.data;
       let parts = d.slice(10, d.length - 4).split(":");
       let tag = parts.slice(0, 2).join(":");
       let detail = d.slice(12 + tag.length, d.length - 4);
-      //let t=tag.split("'");//remove extra task indicator if present
-     // tag=t[0];
-     tag=tag.split("'")[0];
-   /*   
-      let tsk="";
-      if (t.length > 1) {
-          tsk=t[1] + " ";
-               let s='[1;31m';
-               if (tsk.includes(s)) {
-                tsk=tsk.replace( s, "");
-               }
-               s='[0;33m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               }
-               s='[0;32m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               }
-               s='[0;35m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-               s='[0;36m';
-               if (tsk.includes(s)) {
-                }
-               s='[0;37m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-               s='[0m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-      }
- 
-     */ 
-
- const types: Record<string, string> = {
-        "\x1b[1;31m": "e",
-        "\x1b[0;33m": "w",
-        "\x1b[0;32m": "i",
-        "\x1b[0;35m": "c",
-        "\x1b[0;36m": "d",
-        "\x1b[0;37m": "v",
-        "\x1b[0m":"n",
-      };  
-   
+      const types: Record<string, string> = {
+        "[1;31m": "e",
+        "[0;33m": "w",
+        "[0;32m": "i",
+        "[0;35m": "c",
+        "[0;36m": "d",
+        "[0;37m": "v",
+      };
       const record = {
         type: types[d.slice(0, 7)],
         level: d.slice(7, 10),
@@ -88,8 +41,6 @@ export class DebugLog extends LitElement {
         detail: detail,
         when: new Date().toTimeString().split(" ")[0],
       } as recordConfig;
-      
-
       this.logs.push(record);
       this.logs = this.logs.slice(-this.rows);
     });
@@ -97,7 +48,7 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div class="flow-x ">
+      <div class="flow-x">
         <table>
           <thead>
             <tr>
@@ -109,15 +60,15 @@ export class DebugLog extends LitElement {
           </thead>
           <tbody>
             ${this.logs.map(
-              (log:string) =>
+              (log: recordConfig) =>
                 html`
                 <tr class="${log.type}">
                   <td>${log.when}</td>
                   <td>${log.level}</td>
                   <td>${log.tag}</td>
                   <td><pre>${log.detail}</pre></td>
+                </td>
                 </tr>
-
               `
             )}
           </tbody>

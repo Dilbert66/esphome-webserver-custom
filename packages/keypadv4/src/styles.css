@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'keypad_icons';
+  src:  url('keypad_icons.eot?o9xp94');
+  src:  url('keypad_icons.eot?o9xp94#iefix') format('embedded-opentype'),
+    url('keypad_icons.ttf?o9xp94') format('truetype'),
+    url('keypad_icons.woff?o9xp94') format('woff'),
+    url('keypad_icons.svg?o9xp94#keypad_icons') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.icon-stay_away:before {
+  content: "\e904";
+}
+

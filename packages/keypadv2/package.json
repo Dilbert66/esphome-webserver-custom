@@ -7,7 +7,7 @@
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v2 server_index_v2.h web_server 2'"
+    "deploy": "bash -c './copy.sh'"
   },
   "dependencies": {
     "crypto-es": "^2.1.0",

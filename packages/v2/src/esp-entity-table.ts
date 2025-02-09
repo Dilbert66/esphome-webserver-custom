@@ -2,7 +2,6 @@ import { html, css, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-import {decrypt,encrypt,isJson } from "./esp-app";
 
 interface entityConfig {
   unique_id: string;
@@ -41,16 +40,13 @@ interface entityConfig {
 
 export function getBasePath() {
   let str = window.location.pathname;
-  //console.log ("str= "+ str);
-  //return "http://dscalarmc3.local";
-  // return "http://vistaalarmtest.local";
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
 let basePath = getBasePath();
 
 interface RestAction {
-  restAction(entity?: entityConfig, action?: string, option?: string,value?: string): void;
+  restAction(entity?: entityConfig, action?: string): void;
 }
 
 @customElement("esp-entity-table")
@@ -64,10 +60,7 @@ export class EntityTable extends LitElement implements RestAction {
     super.connectedCallback();
     window.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      var data=messageEvent.data;
-      if (isJson(data))
-        data = JSON.parse(data); 
-      if (data['iv'] != null) data=decrypt(data);
+      const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1 && data.id) {
         // Dynamically add discovered..
@@ -85,7 +78,7 @@ export class EntityTable extends LitElement implements RestAction {
         this.entities.push(entity);
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
         this.requestUpdate();
-      } else if (data.id) {
+      } else {
         delete data.id;
         delete data.domain;
         delete data.unique_id;
@@ -106,35 +99,17 @@ export class EntityTable extends LitElement implements RestAction {
       `render_${entity.domain}` as ActionRendererMethodKey
     );
   }
-/*
+
   restAction(entity: entityConfig, action: string) {
     fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
-      body: "true",
+      headers:{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
     }).then((r) => {
       console.log(r);
     });
   }
-*/  
-  restAction(entity: entityConfig, action : string, option: string, value: string) {
-     let cmd = JSON.stringify({
-                'domain': entity.domain,
-                'oid': entity.id,
-                'action': action,
-                 [option]: value,
-                'method': "POST"
-            });
-     fetch(`${basePath}/api`, {
-      method: "POST",
-      body: encrypt(cmd),
-    }).then((r) => {
-      //console.log(r);
-    });  
-   
-    
-  }  
-
-
 
   render() {
     return html`
@@ -205,7 +180,8 @@ export class EntityTable extends LitElement implements RestAction {
           background-color: var(--primary-color, currentColor);
         }
         input[type="range"], input[type="text"] {
-          width: calc(100% - 1rem);
+          width: calc(100% - 8rem);
+          min-width: 5rem;
           height: 0.75rem;
         }
         .range, .text {
@@ -235,12 +211,11 @@ class ActionRenderer {
   }
 
   private _actionButton(entity: entityConfig, label: string, action: string) {
-
     if (!entity) return;
     let a = action || label.toLowerCase();
     return html`<button
       class="rnd"
-      @click=${() => this.actioner?.restAction(entity, a,'','')}
+      @click=${() => this.actioner?.restAction(entity, a)}
     >
       ${label}
     </button>`;
@@ -252,7 +227,7 @@ class ActionRenderer {
       .state=${entity.state}
       @state="${(e: CustomEvent) => {
         let act = "turn_" + e.detail.state;
-        this.actioner?.restAction(entity, act.toLowerCase(),'','');
+        this.actioner?.restAction(entity, act.toLowerCase());
       }}"
     ></esp-switch>`;
   }
@@ -269,9 +244,7 @@ class ActionRenderer {
         let val = e.target?.value;
         this.actioner?.restAction(
           entity,
-          `${action}`,
-          `${opt}`,
-          `${encodeURIComponent(val)}`
+          `${action}?${opt}=${encodeURIComponent(val)}`
         );
       }}"
     >
@@ -304,16 +277,39 @@ class ActionRenderer {
         step="${step || 1}"
         min="${min || Math.min(0, value as number)}"
         max="${max || Math.max(10, value as number)}"
-        value="${value!}"
+        .value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}`,`${opt}`,`${val}`);
+          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
         }}"
       />
       <label>${max || 100}</label>
     </div>`;
   }
 
+  private _datetime(
+    entity: entityConfig,
+    type: string,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    return html`
+      <input 
+        type="${type}" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        .value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val.replace('T', ' ')}`
+          );
+        }}"
+      />
+    `;
+  }
 
   private _textinput(
     entity: entityConfig,
@@ -332,10 +328,10 @@ class ActionRenderer {
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
         pattern="${pattern || ''}"
-        value="${value!}"
+        .value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}`,`${opt}`,`${val}`);
+          this.actioner?.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
         }}"
       />
     </div>`;
@@ -413,7 +409,7 @@ class ActionRenderer {
 
   render_button() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "☐", "press")}`;
+    return html`${this._actionButton(this.entity, "☐", "press ")}`;
   }
 
   render_select() {
@@ -438,6 +434,45 @@ class ActionRenderer {
       this.entity.max_value,
       this.entity.step
     );
+  }
+
+  render_date() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "date",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_time() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "time",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_datetime() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "datetime-local",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
   }
 
   render_text() {

@@ -9,7 +9,7 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
+const proxy_target = process.env.PROXY_TARGET || "http://dscalarmc3.local";
 
 export default defineConfig({
   clearScreen: false,
@@ -22,6 +22,7 @@ export default defineConfig({
     stripBanner(),
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
+    //
     {
       ...ViteMinifyHtml({ removeComments: true }),
       enforce: "post",
@@ -57,7 +58,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../../_static/v2",
+    outDir: "../../_static/keypadv3",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -66,14 +67,14 @@ export default defineConfig({
         }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
-        entryFileNames: "www.js",
+        entryFileNames: "www_v3.js",
       },
     },
   },
   server: {
     open: "/", // auto open browser in dev mode
     host: true, // dev on local and network
-    port: 5001,
+    port: 5002,
     strictPort: true,
     proxy: {
       "/light": proxy_target,
@@ -89,6 +90,8 @@ export default defineConfig({
       "/text": proxy_target,
       "/date": proxy_target,
       "/time": proxy_target,
+      "/alarm_panel": proxy_target,
+      "/update" : proxy_target,
     },
   },
 });
