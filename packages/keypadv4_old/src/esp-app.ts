@@ -7,7 +7,7 @@ import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
 import "./esp-logo";
-import "./keypad"
+import "./vista-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
@@ -405,7 +405,7 @@ toggleLoginForm() {
                 numbers.push(i);
             }
            return html`
-        ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
+        ${numbers.map(num => html`<div class="keypad"><esp-keypad _current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
   }  
 
   renderCryptState() {

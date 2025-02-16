@@ -203,28 +203,6 @@ svg.mdc-button__icon {
   padding: 0 8px 0 8px;
 }
 
-.mdc-button--unelevated {
-  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 16px 0 16px;
-}
-.mdc-button--unelevated.mdc-button--icon-trailing {
-  padding: 0 12px 0 16px;
-}
-.mdc-button--unelevated.mdc-button--icon-leading {
-  padding: 0 16px 0 12px;
-}
-
-.mdc-button--raised {
-  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0 16px 0 16px;
-}
-.mdc-button--raised.mdc-button--icon-trailing {
-  padding: 0 12px 0 16px;
-}
-.mdc-button--raised.mdc-button--icon-leading {
-  padding: 0 16px 0 12px;
-}
-
 .mdc-button--outlined {
   border-style: solid;
   transition: border 280ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -234,71 +212,8 @@ svg.mdc-button__icon {
   border-color: transparent;
 }
 
-@-webkit-keyframes mdc-ripple-fg-radius-in {
-  from {
-    -webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transform: translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1);
-            transform: translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1);
-  }
-  to {
-    -webkit-transform: translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1));
-            transform: translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1));
-  }
-}
 
-@keyframes mdc-ripple-fg-radius-in {
-  from {
-    -webkit-animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    -webkit-transform: translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1);
-            transform: translate(var(--mdc-ripple-fg-translate-start, 0)) scale(1);
-  }
-  to {
-    -webkit-transform: translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1));
-            transform: translate(var(--mdc-ripple-fg-translate-end, 0)) scale(var(--mdc-ripple-fg-scale, 1));
-  }
-}
-@-webkit-keyframes mdc-ripple-fg-opacity-in {
-  from {
-    -webkit-animation-timing-function: linear;
-            animation-timing-function: linear;
-    opacity: 0;
-  }
-  to {
-    opacity: var(--mdc-ripple-fg-opacity, 0);
-  }
-}
-@keyframes mdc-ripple-fg-opacity-in {
-  from {
-    -webkit-animation-timing-function: linear;
-            animation-timing-function: linear;
-    opacity: 0;
-  }
-  to {
-    opacity: var(--mdc-ripple-fg-opacity, 0);
-  }
-}
-@-webkit-keyframes mdc-ripple-fg-opacity-out {
-  from {
-    -webkit-animation-timing-function: linear;
-            animation-timing-function: linear;
-    opacity: var(--mdc-ripple-fg-opacity, 0);
-  }
-  to {
-    opacity: 0;
-  }
-}
-@keyframes mdc-ripple-fg-opacity-out {
-  from {
-    -webkit-animation-timing-function: linear;
-            animation-timing-function: linear;
-    opacity: var(--mdc-ripple-fg-opacity, 0);
-  }
-  to {
-    opacity: 0;
-  }
-}
+
 .mdc-button {
   --mdc-ripple-fg-size: 0;
   --mdc-ripple-left: 0;
@@ -427,9 +342,11 @@ svg.mdc-button__icon {
   /* @alternate */
   height: var(--mdc-text-button-with-icon-icon-size, 1.125rem);
 }
+.mdc-button::after,.mdc-button::before {
+    background-color: #6200ee;
+}
 .mdc-button .mdc-button__ripple::before,
 .mdc-button .mdc-button__ripple::after {
-  background-color: #6200ee;
   /* @alternate */
   background-color: var(--mdc-text-button-hover-state-layer-color, var(--mdc-theme-primary, #6200ee));
 }
@@ -453,151 +370,13 @@ svg.mdc-button__icon {
   /* @alternate */
   opacity: var(--mdc-text-button-pressed-state-layer-opacity, 0.12);
 }
-.mdc-button.mdc-ripple-upgraded {
-  --mdc-ripple-fg-opacity: var(--mdc-text-button-pressed-state-layer-opacity, 0.12);
-}
+
 .mdc-button .mdc-button__ripple {
   border-radius: 4px;
   /* @alternate */
   border-radius: var(--mdc-text-button-container-shape, var(--mdc-shape-small, 4px));
 }
 
-.mdc-button--unelevated {
-  font-family: Roboto, sans-serif;
-  /* @alternate */
-  font-family: var(--mdc-filled-button-label-text-font, var(--mdc-typography-button-font-family, var(--mdc-typography-font-family, Roboto, sans-serif)));
-  font-size: 0.875rem;
-  /* @alternate */
-  font-size: var(--mdc-filled-button-label-text-size, var(--mdc-typography-button-font-size, 0.875rem));
-  letter-spacing: 0.0892857143em;
-  /* @alternate */
-  letter-spacing: var(--mdc-filled-button-label-text-tracking, var(--mdc-typography-button-letter-spacing, 0.0892857143em));
-  font-weight: 500;
-  /* @alternate */
-  font-weight: var(--mdc-filled-button-label-text-weight, var(--mdc-typography-button-font-weight, 500));
-  text-transform: uppercase;
-  /* @alternate */
-  text-transform: var(--mdc-filled-button-label-text-transform, var(--mdc-typography-button-text-transform, uppercase));
-  height: 36px;
-  /* @alternate */
-  height: var(--mdc-filled-button-container-height, 36px);
-  border-radius: 4px;
-  /* @alternate */
-  border-radius: var(--mdc-filled-button-container-shape, var(--mdc-shape-small, 4px));
-}
-.mdc-button--unelevated:not(:disabled) {
-  background-color: #6200ee;
-  /* @alternate */
-  background-color: var(--mdc-filled-button-container-color, var(--mdc-theme-primary, #6200ee));
-}
-.mdc-button--unelevated:disabled {
-  background-color: rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  background-color: var(--mdc-filled-button-disabled-container-color, rgba(0, 0, 0, 0.12));
-}
-.mdc-button--unelevated:not(:disabled) {
-  color: #fff;
-  /* @alternate */
-  color: var(--mdc-filled-button-label-text-color, var(--mdc-theme-on-primary, #fff));
-}
-.mdc-button--unelevated:disabled {
-  color: rgba(0, 0, 0, 0.38);
-  /* @alternate */
-  color: var(--mdc-filled-button-disabled-label-text-color, rgba(0, 0, 0, 0.38));
-}
-.mdc-button--unelevated .mdc-button__icon {
-  font-size: 1.125rem;
-  /* @alternate */
-  font-size: var(--mdc-filled-button-with-icon-icon-size, 1.125rem);
-  width: 1.125rem;
-  /* @alternate */
-  width: var(--mdc-filled-button-with-icon-icon-size, 1.125rem);
-  height: 1.125rem;
-  /* @alternate */
-  height: var(--mdc-filled-button-with-icon-icon-size, 1.125rem);
-}
-.mdc-button--unelevated .mdc-button__ripple::before,
-.mdc-button--unelevated .mdc-button__ripple::after {
-  background-color: #fff;
-  /* @alternate */
-  background-color: var(--mdc-filled-button-hover-state-layer-color, var(--mdc-theme-on-primary, #fff));
-}
-.mdc-button--unelevated:hover .mdc-button__ripple::before, .mdc-button--unelevated.mdc-ripple-surface--hover .mdc-button__ripple::before {
-  opacity: 0.08;
-  /* @alternate */
-  opacity: var(--mdc-filled-button-hover-state-layer-opacity, 0.08);
-}
-.mdc-button--unelevated.mdc-ripple-upgraded--background-focused .mdc-button__ripple::before, .mdc-button--unelevated:not(.mdc-ripple-upgraded):focus .mdc-button__ripple::before {
-  transition-duration: 75ms;
-  opacity: 0.24;
-  /* @alternate */
-  opacity: var(--mdc-filled-button-focus-state-layer-opacity, 0.24);
-}
-.mdc-button--unelevated:not(.mdc-ripple-upgraded) .mdc-button__ripple::after {
-  transition: opacity 150ms linear;
-}
-.mdc-button--unelevated:not(.mdc-ripple-upgraded):active .mdc-button__ripple::after {
-  transition-duration: 75ms;
-  opacity: 0.24;
-  /* @alternate */
-  opacity: var(--mdc-filled-button-pressed-state-layer-opacity, 0.24);
-}
-.mdc-button--unelevated.mdc-ripple-upgraded {
-  --mdc-ripple-fg-opacity: var(--mdc-filled-button-pressed-state-layer-opacity, 0.24);
-}
-.mdc-button--unelevated .mdc-button__ripple {
-  border-radius: 4px;
-  /* @alternate */
-  border-radius: var(--mdc-filled-button-container-shape, var(--mdc-shape-small, 4px));
-}
-
-.mdc-button--raised {
-  font-family: Roboto, sans-serif;
-  /* @alternate */
-  font-family: var(--mdc-protected-button-label-text-font, var(--mdc-typography-button-font-family, var(--mdc-typography-font-family, Roboto, sans-serif)));
-  font-size: 0.875rem;
-  /* @alternate */
-  font-size: var(--mdc-protected-button-label-text-size, var(--mdc-typography-button-font-size, 0.875rem));
-  letter-spacing: 0.0892857143em;
-  /* @alternate */
-  letter-spacing: var(--mdc-protected-button-label-text-tracking, var(--mdc-typography-button-letter-spacing, 0.0892857143em));
-  font-weight: 500;
-  /* @alternate */
-  font-weight: var(--mdc-protected-button-label-text-weight, var(--mdc-typography-button-font-weight, 500));
-  text-transform: uppercase;
-  /* @alternate */
-  text-transform: var(--mdc-protected-button-label-text-transform, var(--mdc-typography-button-text-transform, uppercase));
-  height: 36px;
-  /* @alternate */
-  height: var(--mdc-protected-button-container-height, 36px);
-  border-radius: 4px;
-  /* @alternate */
-  border-radius: var(--mdc-protected-button-container-shape, var(--mdc-shape-small, 4px));
-  --mdc-elevation-box-shadow-for-gss: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  box-shadow: var(--mdc-protected-button-container-elevation, var(--mdc-elevation-box-shadow-for-gss));
-}
-.mdc-button--raised:not(:disabled) {
-  background-color: #6200ee;
-  /* @alternate */
-  background-color: var(--mdc-protected-button-container-color, var(--mdc-theme-primary, #6200ee));
-}
-.mdc-button--raised:disabled {
-  background-color: rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  background-color: var(--mdc-protected-button-disabled-container-color, rgba(0, 0, 0, 0.12));
-}
-.mdc-button--raised:not(:disabled) {
-  color: #fff;
-  /* @alternate */
-  color: var(--mdc-protected-button-label-text-color, var(--mdc-theme-on-primary, #fff));
-}
-.mdc-button--raised:disabled {
-  color: rgba(0, 0, 0, 0.38);
-  /* @alternate */
-  color: var(--mdc-protected-button-disabled-label-text-color, rgba(0, 0, 0, 0.38));
-}
 .mdc-button--raised .mdc-button__icon {
   font-size: 1.125rem;
   /* @alternate */
@@ -635,38 +414,8 @@ svg.mdc-button__icon {
   /* @alternate */
   opacity: var(--mdc-protected-button-pressed-state-layer-opacity, 0.24);
 }
-.mdc-button--raised.mdc-ripple-upgraded {
-  --mdc-ripple-fg-opacity: var(--mdc-protected-button-pressed-state-layer-opacity, 0.24);
-}
-.mdc-button--raised .mdc-button__ripple {
-  border-radius: 4px;
-  /* @alternate */
-  border-radius: var(--mdc-protected-button-container-shape, var(--mdc-shape-small, 4px));
-}
-.mdc-button--raised.mdc-ripple-upgraded--background-focused, .mdc-button--raised:not(.mdc-ripple-upgraded):focus {
-  --mdc-elevation-box-shadow-for-gss: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  box-shadow: var(--mdc-protected-button-focus-container-elevation, var(--mdc-elevation-box-shadow-for-gss));
-}
-.mdc-button--raised:hover {
-  --mdc-elevation-box-shadow-for-gss: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  box-shadow: var(--mdc-protected-button-hover-container-elevation, var(--mdc-elevation-box-shadow-for-gss));
-}
-.mdc-button--raised:not(:disabled):active {
-  --mdc-elevation-box-shadow-for-gss: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  box-shadow: var(--mdc-protected-button-pressed-container-elevation, var(--mdc-elevation-box-shadow-for-gss));
-}
-.mdc-button--raised:disabled {
-  --mdc-elevation-box-shadow-for-gss: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
-  box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0.2), 0px 0px 0px 0px rgba(0, 0, 0, 0.14), 0px 0px 0px 0px rgba(0, 0, 0, 0.12);
-  /* @alternate */
-  box-shadow: var(--mdc-protected-button-disabled-container-elevation, var(--mdc-elevation-box-shadow-for-gss));
-}
+
+
 .mdc-button--outlined {
   font-family: Roboto, sans-serif;
   /* @alternate */

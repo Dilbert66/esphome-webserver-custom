@@ -1,62 +1,67 @@
 import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property,state } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
 import cssKeypad from "./css/vista_keypad";
-import icons from "./vista-icons";
+import icons from "./css/dsc-icons";
 
 let basePath=getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
-    
-  @property({ type: String }) _line1id = ""; //display lines
-  @property({ type: String }) _line2id = "";  
 
-  @property({ type: String }) _cmd_A = ""; //cmds to send
-  @property({ type: String }) _cmd_B = "";
-  @property({ type: String }) _cmd_C = ""; 
-  @property({ type: String }) _cmd_D = "";
+  @property({ type: String }) scheme = "";
+  @property({ type: Number }) current_partition =1;
+    
+  private _line1id = ""; //display lines
+  private _line2id = "";  
+
+  private _cmd_A = ""; //cmds to send
+  private _cmd_B = "";
+  private _cmd_C = ""; 
+  private _cmd_D = "";
 
   
-  @property({ type: String }) _button_A = ""; //name of cmd button
-  @property({ type: String }) _button_B = "";
-  @property({ type: String }) _button_C = ""; 
-  @property({ type: String }) _button_D = "";
+  private _button_A = ""; //name of cmd button
+  private _button_B = "";
+  private _button_C = ""; 
+  private _button_D = "";
  
   
-  @property({ type: String}) _sensor_ready=""; //id of sensor
-  @property({ type: String}) _sensor_armed="";
-  @property({ type: String}) _sensor_trouble="";
-  @property({ type: String}) _sensor_ac="";
-  @property({ type: String}) _sensor_chime="";
+  private _sensor_ready=""; //id of sensor
+  private _sensor_armed="";
+  private _sensor_trouble="";
+  private _sensor_ac="";
+  private _sensor_chime="";
   
-  @property({ type: String }) _text_0="" //key label for secondary function for panel
-  @property({ type: String }) _text_1="" 
-  @property({ type: String }) _text_2=""
-  @property({ type: String }) _text_3=""
-  @property({ type: String }) _text_4=""
-  @property({ type: String }) _text_5=""
-  @property({ type: String }) _text_6=""
-  @property({ type: String }) _text_7=""
-  @property({ type: String }) _text_8=""
-  @property({ type: String }) _text_9=""
-  @property({ type: String }) _text_star=""
-  @property({ type: String }) _text_pound=""
-
-  @property({ type: Number }) _partitions=1;
-  @property({ type: Number }) _current_partition=1;
-  @property({type: Number })  _vibration_duration=5;
-
-  _line1=""
-  _line2=""
+  private _text_0="" //key label for secondary function for panel
+  private _text_1="" 
+  private _text_2=""
+  private _text_3=""
+  private _text_4=""
+  private _text_5=""
+  private _text_6=""
+  private _text_7=""
+  private _text_8=""
+  private _text_9=""
+  private _text_star=""
+  private _text_pound=""
   
-  _readyStyle="color: #ccc;";
-  _armedStyle="color: #ccc;";
-  _chimeStyle="color: #ccc;";
-  _troubleStyle="color: #ccc;";
-  _acStyle="color: #ccc;";
-  _dscKeypad=false;
+
+  private _partitions:Number  =1;
+  private  _vibration_duration:any =5;
+
+
+  private  _line1=""
+  private  _line2=""
+  
+  private  _readyStyle="color: #ccc;";
+  private  _armedStyle="color: #ccc;";
+  private  _chimeStyle="color: #ccc;";
+  private  _troubleStyle="color: #ccc;";
+  private  _acStyle="color: #ccc;";
+
+  private  _show_right_buttons=false;
   
 
  setConfig(keypad_config) {
@@ -90,15 +95,9 @@ export class keyPad extends LitElement  {
       this._text_9=keypad_config["text_9"]!=null?keypad_config["text_9"]:"CHIME"; 
       this._text_star=keypad_config["text_star"]!=null?keypad_config["text_star"]:"";
       this._text_pound=keypad_config["text_pound"]!=null?keypad_config["text_pound"]:"";
-      this._vibration_duration=keypad_config["vibration_duration"]!=null?keypad_config["vibration_duration"]:5;
+      this._vibration_duration=keypad_config["vibration_duration"]!=null?           keypad_config["vibration_duration"]:5;
 
   }  
-
-  protected firstUpdated() {
-    // this.getConfig();
-
-  }
-
 
   connectedCallback() {
     super.connectedCallback();
@@ -131,31 +130,31 @@ export class keyPad extends LitElement  {
             id_code=parts[2];
 
         if (id_code != "") {
-          if (id_code==this._line1id.replace("?",this._current_partition)) {
+          if (id_code==this._line1id.replace("?",this.current_partition)) {
               this._line1=data.value;
               changed=true;
           }  else
-          if (id_code==this._line2id.replace("?",this._current_partition)) {
+          if (id_code==this._line2id.replace("?",this.current_partition)) {
               this._line2=data.value;
                changed=true;
           }   else
-          if (id_code==this._sensor_ready.replace("?",this._current_partition)) {
+          if (id_code==this._sensor_ready.replace("?",this.current_partition)) {
             this._readyStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;           
           } else
-          if (id_code==this._sensor_armed.replace("?",this._current_partition)) {
+          if (id_code==this._sensor_armed.replace("?",this.current_partition)) {
             this._armedStyle=data.value?"color: red;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_trouble.replace("?",this._current_partition)) {
+          if (id_code==this._sensor_trouble.replace("?",this.current_partition)) {
             this._troubleStyle=data.value?"color: orange;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_ac.replace("?",this._current_partition)) {
+          if (id_code==this._sensor_ac.replace("?",this.current_partition)) {
             this._acStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_chime.replace("?",this._current_partition)) {
+          if (id_code==this._sensor_chime.replace("?",this.current_partition)) {
             this._chimeStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;             
           }
@@ -178,6 +177,7 @@ export class keyPad extends LitElement  {
   createRenderRoot() {
     this.applyStylesToRoot();
     return super.createRenderRoot();
+
   }
 
 getConfig() {
@@ -194,7 +194,7 @@ getConfig() {
 sendKey(key) {
      let data=JSON.stringify({
          'keys': key,
-         'partition':this._current_partition,
+         'partition':this.current_partition,
          'method': "POST",
          'action': "set",
          'oid': "alarm_panel",
@@ -223,7 +223,7 @@ sendKey(key) {
 sendKey1(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
-    data.append('partition',this._current_partition);
+    data.append('partition',this.current_partition);
 
     fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
       method: "POST",
@@ -240,16 +240,21 @@ sendKey1(key) {
 
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');
-    this._current_partition=p;
+    this.current_partition=p;
     this.sendKey('R');
    }
    
 confirmState(e)   {
 var key=e.currentTarget.getAttribute('state');
-if (confirm("Are you sure you want to send the cmd [" + key + "]?" ) == true)
-    setState(e);
-//else 
-//    alert("Cmd ["+key+"] cancelled");
+let msg="";
+switch (key) {
+    case 'a':msg="Alert";break;
+    case 'f':msg="Fire";break;
+    case 'p':msg="Panic";break;
+    default:break;
+}
+if (confirm("Are you sure you want to trigger the "+msg + " command" ) == true)
+    this.setState(e);
 }
 
 setState(e) {
@@ -299,8 +304,9 @@ setState(e) {
 
   
   render() {
+
     return html`
-    <div class="container" >
+    <div  class="container" color-scheme="${this.scheme}" >
 
       <div id="lcd_container">
         <div class="virtual_lcd">
@@ -314,25 +320,25 @@ setState(e) {
           <i class="keypad-icon icon-trouble" id="trouble_icon" title="System Trouble" style="${this._troubleStyle}"></i>
           <i class="keypad-icon icon-ac" id="ac_icon" title="AC Power" style="${this._acStyle}"></i>
         </div>
-      </div>
+      </div> <!-- lcd -->
 
 
       <div id="buttons_area">
+
         <div id="left_buttons">
           <div class="keypad_button_row">
             <button type="button" id="btn_A" class="btn btn-outline-dark keypad_button keypad_button_control" state="A"  @click="${this.setState}" title="A">${this._button_A}</button>
-</div>
+        </div>
           <div class="keypad_button_row">
             <button type="button" id="btn_B" class="btn btn-outline-dark keypad_button keypad_button_control" state="B"  @click="${this.setState}" title="B">${this._button_B}</button>
-</div>
+        </div>
           <div class="keypad_button_row">
             <button type="button" id="btn_C" class="btn btn-outline-dark keypad_button keypad_button_control" state="C"  @click="${this.setState}" title="C">${this._button_C}</button>
-</div>
+        </div>
           <div class="keypad_button_row">
             <button type="button" id="btn_D" class="btn btn-outline-dark keypad_button keypad_button_control" state="D"  @click="${this.setState}" title="D">${this._button_D}</button>
-</div>
-</div>
-
+        </div>
+  </div> <!-- left buttons -->
 
         <div id="keypad_container">
           <div class="keypad_button_row">
@@ -341,25 +347,41 @@ setState(e) {
             <button type="button" id="btn_3" class="btn btn-outline-dark keypad_button" state="3"  @click="${this.setState}" title="3">3<span class="keypad_cmd_text">${this._text_3}</span></button>
           </div>
           <div class="keypad_button_row">
-
             <button type="button" id="btn_4" class="btn btn-outline-dark keypad_button" state="4"  @click="${this.setState}" title="4">4<span class="keypad_cmd_text">${this._text_4}</span></button>
             <button type="button" id="btn_5" class="btn btn-outline-dark keypad_button" state="5"  @click="${this.setState}" title="5">5<span class="keypad_cmd_text">${this._text_5}</span></button>
             <button type="button" id="btn_6" class="btn btn-outline-dark keypad_button" state="6"  @click="${this.setState}" title="6">6<span class="keypad_cmd_text">${this._text_6}</span></button>
           </div>
           <div class="keypad_button_row">
-
             <button type="button" id="btn_7" class="btn btn-outline-dark keypad_button" state="7"  @click="${this.setState}" title="7">7<span class="keypad_cmd_text">${this._text_7}</span></button>
             <button type="button" id="btn_8" class="btn btn-outline-dark keypad_button" state="8"  @click="${this.setState}" title="8">8<span class="keypad_cmd_text">${this._text_8}</span></button>
             <button type="button" id="btn_9" class="btn btn-outline-dark keypad_button" state="9"  @click="${this.setState}" title="9">9<span class="keypad_cmd_text">${this._text_9}</span></button>
           </div>
           <div class="keypad_button_row">
-
             <button type="button" id="btn_*" class="btn btn-outline-dark keypad_button" state="*"  @click="${this.setState}" title="*"><i class="keypad-icon icon-star"></i><span class="keypad_cmd_text">${this._text_star}</span></button>
             <button type="button" id="btn_0" class="btn btn-outline-dark keypad_button" state="0"  @click="${this.setState}" title="0">0</button>
             <button type="button" id="btn_#" class="btn btn-outline-dark keypad_button"  state="#"  @click="${this.setState}" title="#">#<span class="keypad_cmd_text">${this._text_pound}</span></button>
           </div>
+        </div> <!-- keypad -->
+${this._show_right_buttons?html`
+        <div id="right_buttons">
+          <div class="keypad_button_row">
+            <button type="button" id="btn_A" class="btn btn-outline-dark keypad_button keypad_button_control" state="A"  @click="${this.setState}" title="A">${this._button_A}</button>
         </div>
-    </div>
+          <div class="keypad_button_row">
+            <button type="button" id="btn_B" class="btn btn-outline-dark keypad_button keypad_button_control" state="B"  @click="${this.setState}" title="B">${this._button_B}</button>
+        </div>
+          <div class="keypad_button_row">
+            <button type="button" id="btn_C" class="btn btn-outline-dark keypad_button keypad_button_control" state="C"  @click="${this.setState}" title="C">${this._button_C}</button>
+        </div>
+          <div class="keypad_button_row">
+            <button type="button" id="btn_D" class="btn btn-outline-dark keypad_button keypad_button_control" state="D"  @click="${this.setState}" title="D">${this._button_D}</button>
+        </div>
+  </div> 
+`:''}
+<!-- right buttons -->
+
+    </div> <!-- buttons -->
+</div> <!-- container -->
     `;
   }
   

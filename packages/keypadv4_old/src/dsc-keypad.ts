@@ -3,16 +3,14 @@ import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
 import cssKeypad from "./css/dsc_keypad";
-import icons from "./css/dsc-icons";
+import icons from "./dsc-icons";
 
 let basePath=getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
 
-  @property({ type: String }) scheme = "";   
-  @property({ type: Number })  current_partition=1; 
-
+  @property({ type: String }) scheme = "";    
   private  _line1id = ""; //display lines
   private  _line2id = "";  
 
@@ -51,6 +49,7 @@ export class keyPad extends LitElement  {
    
   
   private _partitions=1;
+  private _current_partition=1;
   private _vibration_duration=5;
 
 
@@ -137,31 +136,31 @@ export class keyPad extends LitElement  {
             id_code=parts[2];
 
         if (id_code != "") {
-          if (id_code==this._line1id.replace("?",this.current_partition)) {
+          if (id_code==this._line1id.replace("?",this._current_partition)) {
               this._line1=data.value;
               changed=true;
           }  else
-          if (id_code==this._line2id.replace("?",this.current_partition)) {
+          if (id_code==this._line2id.replace("?",this._current_partition)) {
               this._line2=data.value;
                changed=true;
           }   else
-          if (id_code==this._sensor_ready.replace("?",this.current_partition)) {
+          if (id_code==this._sensor_ready.replace("?",this._current_partition)) {
             this._readyStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;           
           } else
-          if (id_code==this._sensor_armed.replace("?",this.current_partition)) {
+          if (id_code==this._sensor_armed.replace("?",this._current_partition)) {
             this._armedStyle=data.value?"color: red;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_trouble.replace("?",this.current_partition)) {
+          if (id_code==this._sensor_trouble.replace("?",this._current_partition)) {
             this._troubleStyle=data.value?"color: orange;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_ac.replace("?",this.current_partition)) {
+          if (id_code==this._sensor_ac.replace("?",this._current_partition)) {
             this._acStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;             
           } else
-          if (id_code==this._sensor_chime.replace("?",this.current_partition)) {
+          if (id_code==this._sensor_chime.replace("?",this._current_partition)) {
             this._chimeStyle=data.value?"color: green;":"color: #ccc;";
             changed=true ;             
           }
@@ -200,7 +199,7 @@ getConfig() {
 sendKey(key) {
      let data=JSON.stringify({
          'keys': key,
-         'partition':this.current_partition,
+         'partition':this._current_partition,
          'method': "POST",
          'action': "set",
          'oid': "alarm_panel",
@@ -229,7 +228,7 @@ sendKey(key) {
 sendKey1(key) {
     const data=new URLSearchParams();
     data.append('keys',key);
-    data.append('partition',this.current_partition);
+    data.append('partition',this._current_partition);
 
     fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
       method: "POST",
@@ -246,7 +245,7 @@ sendKey1(key) {
 
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');
-    this.current_partition=p;
+    this._current_partition=p;
     this.sendKey('R');
    }
    

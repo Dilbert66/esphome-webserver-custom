@@ -2,14 +2,12 @@ import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
-import * as mdc from 'material-components-web';
-//import '@material/web/button/outlined-button.js';
-
+import cssKeypad from "./css/esp_keypad";
 let basePath=getBasePath();
 
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
-    
+
   @property({ type: String }) _line1id = ""; //display lines
   @property({ type: String }) _line2id = "";  
 
@@ -342,6 +340,7 @@ setState(e) {
   
   render() {
     return html`
+
    <ha-card header="${this._title}">
         <div id="zoom" style="${this._scale}">
           <div class='flex-container' @click="${this.stopPropagation}">
@@ -356,7 +355,7 @@ setState(e) {
 
                 ${this._view_status?html`
                 <div class='pad'>
-                    <div class='mdc-button  mdc-icon'>${this._status_A}
+                    <div class='mdc-button  mdc-icon'>1${this._status_A}
                       <div>${this._iconA}</div>
                     </div>
                     <div class='mdc-button  mdc-icon'>${this._status_B}
@@ -431,9 +430,8 @@ setState(e) {
                     
                     <div>
                       <button
-                        class='mdc-button mdc-icon-button'
+                        class='mdc-button mdc-button--outlined'
                          state="1" 
-                        data-mdc-auto-init="MDCIconButtonToggle" 
                        @click="${this.setState}"
                         title='1'>1<span class="keypad_cmd_text">${this._text_1}</span>
                       </button>
@@ -584,145 +582,11 @@ setState(e) {
           </div>
       </div>
     </ha-card>
-<script>mdc.autoInit()</script>
     `;
   }
   
   static get styles() {
-    return [
-      css`
-        
-  ha-card {
-    cursor: pointer;
-    overflow: hidden;
-    box-sizing: border-box;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    line-height: normal;
-
-    -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Old versions of Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
-    user-select: none; /* Non-prefixed version, currently
-                          supported by Chrome, Opera and Firefox */
-  }
-
-        .flex-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 1em;
-            border: 1px solid currentColor;            
-            background-color: var(--c-bg);
-            
-            
-        }
-
-     
-
-
-
-        .keypad_display {
-          background: #35758c;
-          border-radius: 10px;
-          width: 260px;
-          height: 50px;
-          margin: auto;
-          padding-top: 15px;
-          padding-bottom: 10px;
-          margin-bottom: 10px;
-        }
-         .keypad_title {
-          margin: auto;
-          padding-bottom: 5px;
-          display: flex;
-          justify-content: center          
-         }             
-         .keypad {
-          margin: auto;
-          padding: 15px;
-        } 
-        .keypad_line_block {
-
-        }       
-        .keypad_state {
-          font-size: calc(var(--base-unit) * 1);
-          line-height: 1.1;
-          font-family: monospace;
-          display: flex;
-          justify-content: center;
-        }
-
-        #keypad_state1 {
-          padding-bottom: 10px;
-          white-space: pre-wrap;
-        }
-        #keypad_state2 {
-          white-space: pre-wrap;
-        } 
-
-        .pad {
-          display: flex;
-          justify-content: center;
-        }
-        .pad div {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .mdc-button {
-          margin-top: 8px;
-          margin-right: 8px;
-          margin-bottom: 8px;
-          margin-left: 8px;
-          
-        }
-        
-        .mdc-icon {
-          height: 42px;
-          margin-top: 4px;
-          margin-right: 4px;
-          margin-bottom: 4px;
-          margin-left: 4px;
-        }
-
-        .bottom {
-          padding-left: 2px;
-          text-align:center;
-          justify-content: center;
-          margin: auto;
-        }
-
-        .under {
-          text-decoration: underline;
-        }
-  
-        /* text blinking */
-        .blink{
-          animation:blinkingText 1.2s infinite;
-        }
-  
-        @keyframes blinkingText{
-            0%  { color: #000;        }
-            49% { color: #000;        }
-            60% { color: transparent; }
-            99% { color:transparent;  }
-            100%{ color: #000;        }
-        }
-        
-       .keypad_cmd_text {
-           
-        font-size: calc(.3rem + .2vw);
-        font-style: italic; 
-        padding-left: .2rem;
-       }        
-
-    `,
-    ];
+    return [cssKeypad];
   }
 }
 

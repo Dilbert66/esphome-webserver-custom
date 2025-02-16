@@ -3,12 +3,8 @@
   "version": "3.0.0",
   "scripts": {
     "start": "npm run dev",
-    "start_dsc": "cp src/dsc-keypad.ts src/keypad.ts && npm run start",
-    "start_vista": "cp src/vista-keypad.ts src/keypad.ts && npm run start",
     "dev": "vite",
     "xbuild": "vite build --emptyOutDir",
-    "build_dsc": "cp src/dsc-keypad.ts src/keypad.ts && vite build --emptyOutDir && bash -c './copy_dsc.sh'",
-    "build_vista": "cp src/vista-keypad.ts src/keypad.ts && vite build --emptyOutDir && bash -c './copy_vista.sh'",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
     "deploy": "bash -c './copy.sh'"

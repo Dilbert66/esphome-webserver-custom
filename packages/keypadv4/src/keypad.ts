@@ -1,8 +1,8 @@
 import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property,state } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
-import cssKeypad from "./css/dsc_keypad";
+import cssKeypad from "./css/vista_keypad";
 import icons from "./css/dsc-icons";
 
 let basePath=getBasePath();
@@ -10,31 +10,29 @@ let basePath=getBasePath();
 @customElement("esp-keypad")
 export class keyPad extends LitElement  {
 
-  @property({ type: String }) scheme = "";   
-  @property({ type: Number })  current_partition=1; 
+  @property({ type: String }) scheme = "";
+  @property({ type: Number }) current_partition =1;
+    
+  private _line1id = ""; //display lines
+  private _line2id = "";  
 
-  private  _line1id = ""; //display lines
-  private  _line2id = "";  
+  private _cmd_A = ""; //cmds to send
+  private _cmd_B = "";
+  private _cmd_C = ""; 
+  private _cmd_D = "";
 
-  private _cmd_stay = ""; //cmds to send
-  private _cmd_away = "";
-  private _cmd_chime = ""; 
-  private _cmd_reset = "";
-  private _cmd_exit = "";  
-  private _cmd_fire = "";  
-  private _cmd_alert = "";
-  private _cmd_panic = "";  
   
+  private _button_A = ""; //name of cmd button
+  private _button_B = "";
+  private _button_C = ""; 
+  private _button_D = "";
+ 
   
   private _sensor_ready=""; //id of sensor
   private _sensor_armed="";
   private _sensor_trouble="";
   private _sensor_ac="";
   private _sensor_chime="";
-  private _cmd_A = ""; //cmds to send
-  private _cmd_B = "";
-  private _cmd_C = ""; 
-  private _cmd_D = "";
   
   private _text_0="" //key label for secondary function for panel
   private _text_1="" 
@@ -48,10 +46,10 @@ export class keyPad extends LitElement  {
   private _text_9=""
   private _text_star=""
   private _text_pound=""
-   
   
-  private _partitions=1;
-  private _vibration_duration=5;
+
+  private _partitions:Number  =1;
+  private  _vibration_duration:any =5;
 
 
   private  _line1=""
@@ -59,52 +57,46 @@ export class keyPad extends LitElement  {
   
   private  _readyStyle="color: #ccc;";
   private  _armedStyle="color: #ccc;";
-  private _chimeStyle="color: #ccc;";
+  private  _chimeStyle="color: #ccc;";
   private  _troubleStyle="color: #ccc;";
-  private _acStyle="color: #ccc;";
-  private _dscKeypad=false;
+  private  _acStyle="color: #ccc;";
+  private  _dscKeypad=false;
   
 
  setConfig(keypad_config) {
+
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"ln1_?";
       this._line2id=keypad_config["line_2"]!=null?keypad_config["line_2"]:"ln2_?";
 
+      this._button_A=keypad_config["button_A"]!=null?keypad_config["button_A"]:"";
+      this._button_B=keypad_config["button_B"]!=null?keypad_config["button_B"]:"";
+      this._button_C=keypad_config["button_C"]!=null?keypad_config["button_C"]:"";
+      this._button_D=keypad_config["button_D"]!=null?keypad_config["button_D"]:"";
+      this._cmd_A=keypad_config["cmd_A"]!=null?keypad_config["cmd_A"]:"";
+      this._cmd_B=keypad_config["cmd_B"]!=null?keypad_config["cmd_B"]:""; 
+      this._cmd_C=keypad_config["cmd_C"]!=null?keypad_config["cmd_C"]:"";
+      this._cmd_D=keypad_config["cmd_D"]!=null?keypad_config["cmd_D"]:"";  
       this._sensor_ready=keypad_config["sensor_ready"]!=null?keypad_config["sensor_ready"]:"rdy_?"; 
       this._sensor_armed=keypad_config["sensor_armed"]!=null?keypad_config["sensor_armed"]:"arm_?"; 
-      this._sensor_trouble=keypad_config["sensor_trouble"]!=null?keypad_config["sensor_trouble"]:"tr"; 
+      this._sensor_trouble=keypad_config["sensor_trouble"]!=null?keypad_config["sensor_trouble"]:"trbl_?"; 
       this._sensor_ac=keypad_config["sensor_ac"]!=null?keypad_config["sensor_ac"]:"ac"; 
-     // this._sensor_chime=keypad_config["sensor_chime"]!=null?keypad_config["sensor_chime"]:""; 
-
-      this._cmd_stay=keypad_config["cmd_stay"]!=null?keypad_config["cmd_stay"]:"S";
-      this._cmd_away=keypad_config["cmd_away"]!=null?keypad_config["cmd_away"]:"W"; 
-      this._cmd_chime=keypad_config["cmd_chime"]!=null?keypad_config["cmd_chime"]:"C";
-      this._cmd_reset=keypad_config["cmd_reset"]!=null?keypad_config["cmd_reset"]:"R";  
-      this._cmd_exit=keypad_config["cmd_exit"]!=null?keypad_config["cmd_exit"]:"X"; 
-      this._cmd_fire=keypad_config["cmd_fire"]!=null?keypad_config["cmd_fire"]:"F"; 
-      this._cmd_alert=keypad_config["cmd_alert"]!=null?keypad_config["cmd_alert"]:"A"; 
-      this._cmd_panic=keypad_config["cmd_panic"]!=null?keypad_config["cmd_panic"]:"P"; 
+      this._sensor_chime=keypad_config["sensor_chime"]!=null?keypad_config["sensor_chime"]:"chm_?"; 
 
       this._text_0=keypad_config["text_0"]!=null?keypad_config["text_0"]:"";
-      this._text_1=keypad_config["text_1"]!=null?keypad_config["text_1"]:"BYPASS";  
-      this._text_2=keypad_config["text_2"]!=null?keypad_config["text_2"]:"SERV";  
-      this._text_3=keypad_config["text_3"]!=null?keypad_config["text_3"]:"ALARMS";  
-      this._text_4=keypad_config["text_4"]!=null?keypad_config["text_4"]:"CHIME";  
-      this._text_5=keypad_config["text_5"]!=null?keypad_config["text_5"]:"CODES";  
-      this._text_6=keypad_config["text_6"]!=null?keypad_config["text_6"]:"FUNC";  
-      this._text_7=keypad_config["text_7"]!=null?keypad_config["text_7"]:"OUTP";  
-      this._text_8=keypad_config["text_8"]!=null?keypad_config["text_8"]:"PROG"; 
-      this._text_9=keypad_config["text_9"]!=null?keypad_config["text_9"]:"NIGHT"; 
-      this._text_star=keypad_config["text_star"]!=null?keypad_config["text_star"]:"SELECT";
-      this._text_pound=keypad_config["text_pound"]!=null?keypad_config["text_pound"]:"ENTER";
-      this._vibration_duration=keypad_config["vibration_duration"]!=null?keypad_config["vibration_duration"]:5;
+      this._text_1=keypad_config["text_1"]!=null?keypad_config["text_1"]:"OFF";  
+      this._text_2=keypad_config["text_2"]!=null?keypad_config["text_2"]:"AWAY";  
+      this._text_3=keypad_config["text_3"]!=null?keypad_config["text_3"]:"STAY";  
+      this._text_4=keypad_config["text_4"]!=null?keypad_config["text_4"]:"MAX";  
+      this._text_5=keypad_config["text_5"]!=null?keypad_config["text_5"]:"TEST";  
+      this._text_6=keypad_config["text_6"]!=null?keypad_config["text_6"]:"BYPASS";  
+      this._text_7=keypad_config["text_7"]!=null?keypad_config["text_7"]:"INSTANT";  
+      this._text_8=keypad_config["text_8"]!=null?keypad_config["text_8"]:"CODE"; 
+      this._text_9=keypad_config["text_9"]!=null?keypad_config["text_9"]:"CHIME"; 
+      this._text_star=keypad_config["text_star"]!=null?keypad_config["text_star"]:"";
+      this._text_pound=keypad_config["text_pound"]!=null?keypad_config["text_pound"]:"";
+      this._vibration_duration=keypad_config["vibration_duration"]!=null?           keypad_config["vibration_duration"]:5;
 
   }  
-
-  protected firstUpdated() {
-    // this.getConfig();
-
-  }
-
 
   connectedCallback() {
     super.connectedCallback();
@@ -184,6 +176,7 @@ export class keyPad extends LitElement  {
   createRenderRoot() {
     this.applyStylesToRoot();
     return super.createRenderRoot();
+
   }
 
 getConfig() {
@@ -268,14 +261,25 @@ setState(e) {
      var key=e.currentTarget.getAttribute('state');
       if (key==null|| key == "") return;
      switch (key) {
-         case 's': key=this._cmd_stay; break;
-         case 'w': key=this._cmd_away; break;
-         case 'r': key=this._cmd_reset; break;
-         case 'x': key=this._cmd_exit; break;  
-         case 'c': key=this._cmd_chime; break;  
-         case 'a': key=this._cmd_alert; break;  
-         case 'f': key=this._cmd_fire; break; 
-         case 'p': key=this._cmd_panic; break; 
+         case 'A': key=this._cmd_A; break;
+         case 'B': key=this._cmd_B; break;
+         case 'C': key=this._cmd_C; break;
+         case 'D': key=this._cmd_D; break;
+//         case 'E': key=this._cmd_E; break;
+//         case 'F': key=this._cmd_F; break;
+//         case 'G': key=this._cmd_G; break;
+//         case 'H': key=this._cmd_H; break;   
+//         case 'I': key=this._cmd_I; break;  
+//         case 'J': key=this._cmd_J; break; 
+         
+//         case 's': key=this._cmd_stay; break;
+//         case 'w': key=this._cmd_away; break;
+//         case 'r': key=this._cmd_reset; break;
+//         case 'x': key=this._cmd_exit; break;  
+//         case 'c': key=this._cmd_chime; break;  
+//         case 'a': key=this._cmd_alert; break;  
+//         case 'f': key=this._cmd_fire; break; 
+//         case 'p': key=this._cmd_panic; break; 
 
          case '0': key='0'; break;
          case '1': key='1'; break;
@@ -289,8 +293,6 @@ setState(e) {
          case '9': key='9'; break;
          case '*': key='*'; break;
          case '#': key='#'; break;
-         case '>': key='>';break;
-         case '<': key='<';break;
          
      }
      if ('vibrate' in navigator) {
@@ -301,8 +303,9 @@ setState(e) {
 
   
   render() {
+
     return html`
-    <div class="container" color-scheme="${this.scheme}" >
+    <div  class="container" color-scheme="${this.scheme}" >
 
       <div id="lcd_container">
         <div class="virtual_lcd">
@@ -312,9 +315,7 @@ setState(e) {
         <div class="status_icons">
           <i class="keypad-icon icon-check" id="ready_icon" title="Ready" style="${this._readyStyle}"></i>
           <i class="keypad-icon icon-armed" id="armed_icon" title="Armed" style="${this._armedStyle}"></i>
-          ${this._sensor_chime?html`
           <i class="keypad-icon icon-bell" id="chime_icon" title="Chime" style="${this._chimeStyle}"></i>  
-          `:''}        
           <i class="keypad-icon icon-trouble" id="trouble_icon" title="System Trouble" style="${this._troubleStyle}"></i>
           <i class="keypad-icon icon-ac" id="ac_icon" title="AC Power" style="${this._acStyle}"></i>
         </div>
@@ -324,27 +325,19 @@ setState(e) {
       <div id="buttons_area">
 
         <div id="left_buttons">
- 
           <div class="keypad_button_row">
-            <button type="button" id="btn_<" class="btn btn-outline-dark keypad_button keypad_button_small" state="<"  @click="${this.setState}" title="<">&lt;</button>
-            <button type="button" id="btn_>" class="btn btn-outline-dark keypad_button keypad_button_small" state=">"  @click="${this.setState}" title=">">&gt;</i></button>
-          </div>
+            <button type="button" id="btn_A" class="btn btn-outline-dark keypad_button keypad_button_control" state="A"  @click="${this.setState}" title="A">${this._button_A}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_f" class="btn btn-outline-dark keypad_button keypad_button_slim" state="f"  @click="${this.confirmState}" title="Fire">
-          <i class="keypad-icon icon-flame" ></i>
-          </button>
-          </div>
+            <button type="button" id="btn_B" class="btn btn-outline-dark keypad_button keypad_button_control" state="B"  @click="${this.setState}" title="B">${this._button_B}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_a" class="btn btn-outline-dark keypad_button keypad_button_slim" state="a"  @click="${this.confirmState}" title="Alert">
-            <i class="keypad-icon icon-alert" ></i>
-          </button>
-          </div>
+            <button type="button" id="btn_C" class="btn btn-outline-dark keypad_button keypad_button_control" state="C"  @click="${this.setState}" title="C">${this._button_C}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_p" class="btn btn-outline-dark keypad_button keypad_button_slim" state="p"  @click="${this.confirmState}" title="Panic">
-            <i class="keypad-icon icon-thief" ></i>
-          </button>
-           </div>
-       </div> <!-- left buttons -->
+            <button type="button" id="btn_D" class="btn btn-outline-dark keypad_button keypad_button_control" state="D"  @click="${this.setState}" title="D">${this._button_D}</button>
+        </div>
+  </div> <!-- left buttons -->
 
         <div id="keypad_container">
           <div class="keypad_button_row">
@@ -368,41 +361,26 @@ setState(e) {
             <button type="button" id="btn_#" class="btn btn-outline-dark keypad_button"  state="#"  @click="${this.setState}" title="#">#<span class="keypad_cmd_text">${this._text_pound}</span></button>
           </div>
         </div> <!-- keypad -->
-
-
+${this._show_right_buttons?html`
         <div id="right_buttons">
- 
           <div class="keypad_button_row">
-            <button type="button" id="btn_s" class="btn btn-outline-dark keypad_button keypad_button_control" state="s"  @click="${this.setState}" title="stay">
-            <i class="keypad-icon icon-stay_away"></i>
-          </button>
-          </div>
+            <button type="button" id="btn_A" class="btn btn-outline-dark keypad_button keypad_button_control" state="A"  @click="${this.setState}" title="A">${this._button_A}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_w" class="btn btn-outline-dark keypad_button keypad_button_control" state="w"  @click="${this.setState}" title="away">
-            <i class="keypad-icon icon-stay_empty"></i>
-          </button>
-          </div>
+            <button type="button" id="btn_B" class="btn btn-outline-dark keypad_button keypad_button_control" state="B"  @click="${this.setState}" title="B">${this._button_B}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_c" class="btn btn-outline-dark keypad_button keypad_button_control" state="c"  @click="${this.setState}" title="chime">
-          <i class="keypad-icon icon-bell"></i>
-          </button>
-          </div>
+            <button type="button" id="btn_C" class="btn btn-outline-dark keypad_button keypad_button_control" state="C"  @click="${this.setState}" title="C">${this._button_C}</button>
+        </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_r" class="btn btn-outline-dark keypad_button keypad_button_control" state="r"  @click="${this.setState}" title="reset">
-          <i class="keypad-icon icon-refresh"></i>
-          </button>
-          </div>
-          <div class="keypad_button_row">
-            <button type="button" id="btn_x" class="btn btn-outline-dark keypad_button keypad_button_control" state="x"  @click="${this.setState}" title="exit">
-            <i class="keypad-icon icon-exit"></i>
-          </button>
-          </div>
-        </div> <!-- right -->
+            <button type="button" id="btn_D" class="btn btn-outline-dark keypad_button keypad_button_control" state="D"  @click="${this.setState}" title="D">${this._button_D}</button>
+        </div>
+  </div> 
+`:''}
+<!-- right buttons -->
 
-     </div> <!-- buttons -->
-    </div> <!-- container -->
-
-
+    </div> <!-- buttons -->
+</div> <!-- container -->
     `;
   }
   

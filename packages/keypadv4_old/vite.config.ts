@@ -58,7 +58,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../../_static/keypad",
+    outDir: "../../_static/keypadv4",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -67,7 +67,7 @@ export default defineConfig({
         }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
-        entryFileNames: "www_keypad.js",
+        entryFileNames: "www_v4.js",
       },
     },
   },

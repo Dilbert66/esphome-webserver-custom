@@ -126,7 +126,7 @@ i.keypad-icon {
         width: calc(0.6rem + 10vw);
         border-radius: 1.5rem;
         font-weight: bold;
-        font-size: calc(1rem );
+        font-size: calc(0.6rem + 1vw);
         padding: 2px;
         max-width: 4rem;
         
@@ -143,8 +143,7 @@ i.keypad-icon {
         max-width: 2.2rem;
         line-height: 1 !important;
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94; 
-                
+        border: 2px solid #898e94;         
       }
       button.keypad_button_medium {
         width: 7.0vw;
@@ -172,7 +171,6 @@ i.keypad-icon {
         padding: 0.2rem;
         max-width: 4.5rem;
       }
-
        .keypad_cmd_text {
         font-size: calc(.4rem + .2vw);
         font-style: italic; 
@@ -181,13 +179,13 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--bgkeycolor);
-        padding: .15rem;
+
+        padding: 1px;
         font-size: calc(0.6rem + 1vw);
         line-height: 0.8 !important;
         max-width: 3.0rem;
-        font-size: calc(0.7rem);
-        min-height: 1.6em;
-        max-height: 2em;
+        font-size: calc(0.35rem + 1vw);
+        min-height: 1.8em;
       }
 
 
