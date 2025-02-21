@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import cssTab from "./css/tab";
-import {decrypt,encrypt ,isJson} from "./esp-app";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 
 interface recordConfig {
   type: string;

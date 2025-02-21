@@ -7,7 +7,7 @@ import cssEntityTable from "./css/esp-entity-table";
 import cssTab from "./css/tab";
 import "./esp-entity-chart";
 import "iconify-icon";
-import {decrypt,encrypt,isJson } from "./esp-app";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 
 interface entityConfig {
   unique_id: string;
@@ -62,8 +62,8 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   let str = window.location.pathname;
- // return "http://dscalarmc3.local";
-  return "http://vistaalarmtest1.local";
+  return "http://dscalarmc3.local";
+  //return "http://vistaalarmtest1.local";
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 

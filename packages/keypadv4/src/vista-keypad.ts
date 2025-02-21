@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property,state } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 import cssKeypad from "./css/vista_keypad";
 import icons from "./css/dsc-icons";
 
@@ -12,6 +12,15 @@ export class keyPad extends LitElement  {
 
   @property({ type: String }) scheme = "";
   @property({ type: Number }) current_partition =1;
+
+  @state({ type: String })  _line1=""
+  @state({ type: String })  _line2=""
+  @state({ type: String })  _readyStyle="color: var(--unavailable);";
+  @state({ type: String })  _armedStyle="color: var(--unavailable);";
+  @state({ type: String }) _chimeStyle="color: var(--unavailable);";
+  @state({ type: String })  _troubleStyle="color: var(--unavailable);";
+  @state({ type: String }) _acStyle="color: var(--unavailable);";
+  @state({ type: String }) _dscKeypad=false;
     
   private _line1id = ""; //display lines
   private _line2id = "";  
@@ -46,21 +55,9 @@ export class keyPad extends LitElement  {
   private _text_9=""
   private _text_star=""
   private _text_pound=""
-  
 
   private _partitions:Number  =1;
   private  _vibration_duration:any =5;
-
-
-  private  _line1=""
-  private  _line2=""
-  
-  private  _readyStyle="color: #ccc;";
-  private  _armedStyle="color: #ccc;";
-  private  _chimeStyle="color: #ccc;";
-  private  _troubleStyle="color: #ccc;";
-  private  _acStyle="color: #ccc;";
-
   private  _show_right_buttons=false;
   
 
@@ -95,7 +92,7 @@ export class keyPad extends LitElement  {
       this._text_9=keypad_config["text_9"]!=null?keypad_config["text_9"]:"CHIME"; 
       this._text_star=keypad_config["text_star"]!=null?keypad_config["text_star"]:"";
       this._text_pound=keypad_config["text_pound"]!=null?keypad_config["text_pound"]:"";
-      this._vibration_duration=keypad_config["vibration_duration"]!=null?           keypad_config["vibration_duration"]:5;
+      this._vibration_duration=keypad_config["vibration_duration"]!=null?keypad_config["vibration_duration"]:5;
 
   }  
 
@@ -122,7 +119,6 @@ export class keyPad extends LitElement  {
      
       if (data.id) {
         let parts = data.id.split("-");
-        let changed=false;
         let id_code=""
         if (data.id_code)
             id_code=data.id_code;        
@@ -132,33 +128,25 @@ export class keyPad extends LitElement  {
         if (id_code != "") {
           if (id_code==this._line1id.replace("?",this.current_partition)) {
               this._line1=data.value;
-              changed=true;
           }  else
           if (id_code==this._line2id.replace("?",this.current_partition)) {
               this._line2=data.value;
-               changed=true;
           }   else
           if (id_code==this._sensor_ready.replace("?",this.current_partition)) {
-            this._readyStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;           
+            this._readyStyle=data.value?"color: green;":"color: var(--unavailable);";
           } else
           if (id_code==this._sensor_armed.replace("?",this.current_partition)) {
-            this._armedStyle=data.value?"color: red;":"color: #ccc;";
-            changed=true ;             
+            this._armedStyle=data.value?"color: red;":"color: var(--unavailable);";
           } else
           if (id_code==this._sensor_trouble.replace("?",this.current_partition)) {
-            this._troubleStyle=data.value?"color: orange;":"color: #ccc;";
-            changed=true ;             
+            this._troubleStyle=data.value?"color: orange;":"color: var(--unavailable);";
           } else
           if (id_code==this._sensor_ac.replace("?",this.current_partition)) {
-            this._acStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;             
+            this._acStyle=data.value?"color: green;":"color: var(--unavailable);";
           } else
           if (id_code==this._sensor_chime.replace("?",this.current_partition)) {
-            this._chimeStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;             
+            this._chimeStyle=data.value?"color: green;":"color: var(--unavailable);";
           }
-            if (changed) this.requestUpdate(); 
         }   
       } 
       
@@ -219,24 +207,6 @@ sendKey(key) {
     
 )}
 
-/*
-sendKey1(key) {
-    const data=new URLSearchParams();
-    data.append('keys',key);
-    data.append('partition',this.current_partition);
-
-    fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
-      method: "POST",
-	  headers: {
-		"Content-Type": "application/x-www-form-urlencoded"
-	  },      
-      body: data,
-    }).then((r) => {
-      console.log(r);
-    }); 
-    
-}
-*/
 
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');
@@ -270,17 +240,7 @@ setState(e) {
 //         case 'F': key=this._cmd_F; break;
 //         case 'G': key=this._cmd_G; break;
 //         case 'H': key=this._cmd_H; break;   
-//         case 'I': key=this._cmd_I; break;  
-//         case 'J': key=this._cmd_J; break; 
-         
-//         case 's': key=this._cmd_stay; break;
-//         case 'w': key=this._cmd_away; break;
-//         case 'r': key=this._cmd_reset; break;
-//         case 'x': key=this._cmd_exit; break;  
-//         case 'c': key=this._cmd_chime; break;  
-//         case 'a': key=this._cmd_alert; break;  
-//         case 'f': key=this._cmd_fire; break; 
-//         case 'p': key=this._cmd_panic; break; 
+ 
 
          case '0': key='0'; break;
          case '1': key='1'; break;

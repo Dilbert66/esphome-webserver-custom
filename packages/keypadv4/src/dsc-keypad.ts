@@ -1,9 +1,9 @@
 import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property,state } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-import {decrypt,encrypt,isJson ,crypt} from "./esp-app";
 import cssKeypad from "./css/dsc_keypad";
 import icons from "./css/dsc-icons";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 
 let basePath=getBasePath();
 
@@ -12,6 +12,15 @@ export class keyPad extends LitElement  {
 
   @property({ type: String }) scheme = "";   
   @property({ type: Number })  current_partition=1; 
+
+  @state({ type: String })  _line1=""
+  @state({ type: String })  _line2=""
+  @state({ type: String })  _readyStyle="color: var(--unavailable);";
+  @state({ type: String })  _armedStyle="color: var(--unavailable);";
+  @state({ type: String }) _chimeStyle="color: var(--unavailable);";
+  @state({ type: String })  _troubleStyle="color: var(--unavailable);";
+  @state({ type: String }) _acStyle="color: var(--unavailable);";
+  @state({ type: String }) _dscKeypad=false;
 
   private  _line1id = ""; //display lines
   private  _line2id = "";  
@@ -54,15 +63,7 @@ export class keyPad extends LitElement  {
   private _vibration_duration=5;
 
 
-  private  _line1=""
-  private  _line2=""
-  
-  private  _readyStyle="color: #ccc;";
-  private  _armedStyle="color: #ccc;";
-  private _chimeStyle="color: #ccc;";
-  private  _troubleStyle="color: #ccc;";
-  private _acStyle="color: #ccc;";
-  private _dscKeypad=false;
+
   
 
  setConfig(keypad_config) {
@@ -129,7 +130,6 @@ export class keyPad extends LitElement  {
      
       if (data.id) {
         let parts = data.id.split("-");
-        let changed=false;
         let id_code=""
         if (data.id_code)
             id_code=data.id_code;        
@@ -139,39 +139,37 @@ export class keyPad extends LitElement  {
         if (id_code != "") {
           if (id_code==this._line1id.replace("?",this.current_partition)) {
               this._line1=data.value;
-              changed=true;
+
           }  else
           if (id_code==this._line2id.replace("?",this.current_partition)) {
               this._line2=data.value;
-               changed=true;
+
           }   else
           if (id_code==this._sensor_ready.replace("?",this.current_partition)) {
-            this._readyStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;           
+            this._readyStyle=data.value?"color: green;":"color: var(--unavailable);";
+      
           } else
           if (id_code==this._sensor_armed.replace("?",this.current_partition)) {
-            this._armedStyle=data.value?"color: red;":"color: #ccc;";
-            changed=true ;             
+            this._armedStyle=data.value?"color: red;":"color: var(--unavailable);";
+          
           } else
           if (id_code==this._sensor_trouble.replace("?",this.current_partition)) {
-            this._troubleStyle=data.value?"color: orange;":"color: #ccc;";
-            changed=true ;             
+            this._troubleStyle=data.value?"color: orange;":"color: var(--unavailable);";
+          
           } else
           if (id_code==this._sensor_ac.replace("?",this.current_partition)) {
-            this._acStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;             
+            this._acStyle=data.value?"color: green;":"color: var(--unavailable);";
+            
           } else
           if (id_code==this._sensor_chime.replace("?",this.current_partition)) {
-            this._chimeStyle=data.value?"color: green;":"color: #ccc;";
-            changed=true ;             
+            this._chimeStyle=data.value?"color: green;":"color: var(--unavailable);";
           }
-            if (changed) this.requestUpdate(); 
+
         }   
       } 
       
     });
   }
-
 
 
   applyStylesToRoot() {
@@ -225,24 +223,6 @@ sendKey(key) {
     
 )}
 
-/*
-sendKey1(key) {
-    const data=new URLSearchParams();
-    data.append('keys',key);
-    data.append('partition',this.current_partition);
-
-    fetch(`${basePath}/alarm_panel/alarm_panel/set`, {
-      method: "POST",
-	  headers: {
-		"Content-Type": "application/x-www-form-urlencoded"
-	  },      
-      body: data,
-    }).then((r) => {
-      console.log(r);
-    }); 
-    
-}
-*/
 
 setPartition(e) {
     var p=e.currentTarget.getAttribute('state');

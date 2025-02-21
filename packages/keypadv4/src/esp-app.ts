@@ -7,25 +7,16 @@ import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
 import "./esp-logo";
-import "./keypad"
+import "./dsc-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
 import cssTab from "./css/tab";
-import { Utf8,WordArray} from 'crypto-es/lib/core.js';
-import { Base64 } from 'crypto-es/lib/enc-base64.js';
-import { AES } from 'crypto-es/lib/aes.js';
-import { CBC,Pkcs7} from 'crypto-es/lib/cipher-core.js';
-import {HMAC} from 'crypto-es/lib/hmac.js';
-import {SHA256Algo} from 'crypto-es/lib/sha256.js';
-import {SHA256} from 'crypto-es/lib/sha256.js';
+import {encrypt,decrypt,isJson,initcrypt,cryptconf,login,logout} from "./esp-crypt";
+
 let basePath = getBasePath(); 
 window.source = new EventSource(getBasePath() + "/events");
-var crypt=false;
-var f;
-var token="";
-var cid=0;
-var seq=1;
+
 
 interface Config {
   ota: boolean;
@@ -38,81 +29,10 @@ interface Config {
   cid: Number;
   token: string;
 }
-var aeskey;
-var hmackey;
-var sessionkey;
-const KEYSIZE=32
-const salt="77992288";
-var partitions=0;
+
+//const salt:string="77992288";
+var partitions:Number=0;
 var numbers=[];
-
-
-function decrypt(obj) {
-    if (obj instanceof Object && aeskey != null) {
-        if ("iv" in obj) {
-            var myiv=obj["iv"];
-            var mydata=obj["data"];
-            var hash=obj["hash"];
-            var hmacHasher = HMAC.create(SHA256Algo, hmackey);
-            hmacHasher.update(myiv);
-            var sig=hmacHasher.finalize(mydata);
-            var esig=Base64.stringify(sig);
-
-            if (esig != hash) {
-                console.log("Decrypt: hmac mismatch");
-                return "";
-            }
-            var iv = Base64.parse(myiv);
-            var decrypted = AES.decrypt(mydata, aeskey,{iv:iv,padding: Pkcs7,mode: CBC});
-            try {
-                var data=decrypted.toString(Utf8);
-                data=data.slice(0,-1);
-            } catch (e) {
-                console.log("invalid utf8 data");
-                return "";
-            }
-            if (isJson(data))
-                return JSON.parse(data);
-            else
-                return data;
-        } 
-    }
-    return "";
-}
-
-function encrypt(msg) {
-  if (!crypt || aeskey == null || msg=="") return msg;
-    msg=msg+"\0";
-    var iv = WordArray.random(16);
-    var encrypted = AES.encrypt(msg,aeskey,{iv: iv ,padding: Pkcs7,mode: CBC});
-    var eiv=Base64.stringify(iv);
-    var hmacHasher = HMAC.create(SHA256Algo, hmackey);
-    hmacHasher.update(eiv);
-    if (token != undefined && token != "" && cid > 0) {
-      hmacHasher.update(token);
-    }
-    hmacHasher.update(seq.toString());
-
-    var sig=hmacHasher.finalize(encrypted.toString());
-    var esig=Base64.stringify(sig);
-    var out="{\"iv\":\"" +eiv + "\",\"hash\":\""+esig+"\",\"data\":\""+encrypted.toString()+"\",\"cid\":\""+cid+"\",\"seq\":\""+seq+"\"}";
-    seq=seq+1;
-    return out;
-    
-}
-
-export { encrypt, decrypt,crypt}
-
-export function isJson(str) {
-    try {
-        if (str=="") return false;
-        JSON.parse(str);
-    } catch (e) {
-        //console.log("error parsing [" + str + "]," +e);
-        return false;
-    }
-    return true;
-}
 
 function getRelativeTime(diff: number) {
   const mark = Math.sign(diff);
@@ -201,12 +121,16 @@ export default class EspApp extends LitElement {
     this.config = config;
     partitions=config.partitions;
     document.title = config.title;
-    crypt=config.crypt;
+
     document.title = config.title;
     document.documentElement.lang = config.lang;
-    cid=config.cid;
-    token=config.token;  
-    seq=1; 
+    var c:cryptconf={};
+    c.cid=config.cid;
+    c.token=config.token;
+    c.seq=1;
+    c.crypt=config.crypt;
+    initcrypt(c);
+
     if (config.cid) this.sendAck(config.cid);
     if (config.cid ) 
         this.hideLoginForm();
@@ -269,9 +193,12 @@ export default class EspApp extends LitElement {
       const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
       mainElement?.classList.toggle('expanded_logs');
     });
-    aeskey=Base64.parse(localStorage.getItem("aeskey"));
-    hmackey=Base64.parse(localStorage.getItem("hmackey"));
-    sessionkey=localStorage.getItem("sessionkey");
+    var c:cryptconf={};
+    c.cid=this.config.cid;
+    c.token=this.config.token;
+    c.seq=1;
+    c.crypt=this.config.crypt;
+    initcrypt(c);
   
   }
 
@@ -333,8 +260,7 @@ upload(ev: any) {
         ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
         fetch('/update/' + encodeURIComponent(f.name), {
           method: 'POST',
-         // headers: {"cid":this.config.cid,Authorization: encrypt(sessionkey)},
-          body: r.result,
+            body: r.result,
         }).then(function(res) {
             if (!res.ok) {
             console.log(res);
@@ -347,92 +273,6 @@ upload(ev: any) {
       };
     };
 
-  logout() {
-       localStorage.setItem("aeskey","");
-       localStorage.setItem("hmackey","");
-       location.reload();
-  }
-  
-  login() {
-
-       const username = this.shadowRoot.querySelector("#username").value;
-       const password = this.shadowRoot.querySelector("#password").value;
-
-       var key=username + salt + password;
-       
-       var aesHasher = HMAC.create(SHA256Algo,key);
-       var aeskey=aesHasher.finalize("aeskey"); 
-       
-       var hmacHasher = HMAC.create(SHA256Algo, key);
-       var hmackey=hmacHasher.finalize("hmackey"); 
-
-       localStorage.setItem("aeskey",Base64.stringify(aeskey));
-       localStorage.setItem("hmackey",Base64.stringify(hmackey));
-       location.reload();
-
-  } 
-hideLoginForm() {
-        this.renderRoot.querySelector('#login').className=""  
-        this.renderRoot.querySelector('#login').classList.add("hide");
-         
-}
-showLoginForm() {
-        this.renderRoot.querySelector('#login').className="" 
-      
-}
-toggleLoginForm() {
-        if (this.renderRoot.querySelector('#login').classList=="hide")
-            this.renderRoot.querySelector('#showlogin').innerText="Hide Login"; 
-        else
-            this.renderRoot.querySelector('#showlogin').innerText="Login"; 
-        
-        this.renderRoot.querySelector('#login').classList.toggle("hide");
-      
-}
-  renderLoginButton() {
-      if (this.config.crypt ) {
-          return html`<button id='logout' @click='${this.logout}'>Logout</button>`;  
-   }   else if (!this.config.cid) {
-        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
-   }
-      
-  }
-
-  renderKeypads() {
-         if (!this.config.keypad ) return nothing;
-         numbers=[];
-          for (let i=1; i<=partitions;i++) {
-                numbers.push(i);
-            }
-           return html`
-        ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
-  }  
-
-  renderCryptState() {
-    let icon="🔓";
-   if (this.config.crypt ) {
-    icon="🔐";
-   }
-   return html`
-   <div id="cryptstate" >${icon}${this.renderLoginButton()}</div>
-`;
-
-  }
-
- renderLogin() {
-
-      return html`
-                <div id="login"  >   
-                <h3 class="login_row">Alarm Panel Login</h3>
-                <div class="login_row">
-                   <input  class="keypad" id="username" type="username" placeholder="Your username" autocomplete="off">
-                &nbsp;<input class="keypad" id="password" type="password" placeholder="Password">
-                </div>
-<div class="login_row">                
-               <button  @click="${this.login}">Submit</button>
-               </div>
-</div>`;
-  }
 
   renderLog() {
     if (!this.config.cid) return nothing;
@@ -509,6 +349,71 @@ toggleLoginForm() {
       this.requestUpdate();
     }
   }
+
+
+hideLoginForm() {
+        this.renderRoot.querySelector('#login').className=""  
+        this.renderRoot.querySelector('#login').classList.add("hide");
+         
+}
+showLoginForm() {
+        this.renderRoot.querySelector('#login').className="" 
+      
+}
+toggleLoginForm() {
+        if (this.renderRoot.querySelector('#login').classList=="hide")
+            this.renderRoot.querySelector('#showlogin').innerText="Hide Login"; 
+        else
+            this.renderRoot.querySelector('#showlogin').innerText="Login"; 
+        
+        this.renderRoot.querySelector('#login').classList.toggle("hide");
+      
+}
+  renderLoginButton() {
+      if (this.config.crypt ) {
+          return html`<button id='logout' @click='${logout}'>Logout</button>`;  
+   }   else if (!this.config.cid) {
+        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
+   }
+      
+  }
+
+  renderKeypads() {
+         if (!this.config.keypad ) return nothing;
+         numbers=[];
+          for (let i=1; i<=partitions;i++) {
+                numbers.push(i);
+            }
+           return html`
+        ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
+  }  
+
+  renderCryptState() {
+    let icon="🔓";
+   if (this.config.crypt ) {
+    icon="🔐";
+   }
+   return html`
+   <div id="cryptstate" >${icon}${this.renderLoginButton()}</div>
+`;
+
+  }
+
+ renderLogin() {
+
+      return html`
+                <div id="login"  >   
+                <h3 class="login_row">Alarm Panel Login</h3>
+                <div class="login_row">
+                   <input  class="keypad" id="username" type="username" placeholder="Your username" autocomplete="off">
+                &nbsp;<input class="keypad" id="password" type="password" placeholder="Password">
+                </div>
+<div class="login_row">                
+               <button  @click="${login}">Submit</button>
+               </div>
+</div>`;
+  }
+
 
   static get styles() {
     return [cssReset, cssButton, cssApp, cssTab,   css`

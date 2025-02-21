@@ -8,17 +8,16 @@ export default css`
 }
 
 div.container[color-scheme="dark"] {
- --btngrpbgcolor:  #000;
---maingrpbgcolor: #000;
---bgkeycolor: #000;
+ --btngrpbgcolor: #101010;
+--maingrpbgcolor: #101010;
+--bgkeycolor: #101010;
 --cmdkeycolor: #000;
---textcolor: #ccc;
+--textcolor: #03a9f4;
 --bglcd: #748C74;
 --lcdtextcolor: #000;
-    --error-color: #db4437;
-    --warning-color: #ffa600;
-    --success-color: #43a047;
-    --info-color: #039be5;
+--unavailable:#303030;
+--bordercolor: #404040;
+--hovercolor: #303030;
 
 }
 
@@ -31,13 +30,10 @@ div.container[color-scheme="light"] {
 --cmdkeycolor: #fff;
 --textcolor: #000;
 --bglcd: #748C74;
---lcdtextcolor: #000; 
-/*
-    --error-color: #db4437;
-    --warning-color: #ffa600;
-    --success-color: #43a047;
-    --info-color: #039be5;   
-*/
+--lcdtextcolor: #000;  
+--unavailable:#ccc;
+--bordercolor: #898e94;
+--hovercolor: #c0c0c0;
 }
 
 
@@ -114,8 +110,8 @@ i.keypad-icon {
 }
       .btn {
         &:hover {
-          background-color: var(--textcolor) !important;
-          color: var(--btngrpbgcolor) !important;
+        background-color: var(--hovercolor);
+          color: var(--textcolor) !important;
           }
         }
       html {
@@ -137,14 +133,15 @@ i.keypad-icon {
         width: calc(0.6rem + 10vw);
         border-radius: 0.5rem;
         font-weight: bold;
-        font-size: calc(0.4rem + 0.5vw);
+        font-size: calc(0.7rem);
         padding: 0.2rem;
         max-width: 4rem;
         min-width: 2.5rem;
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94;
+        border: 2px solid var(--bordercolor);
         min-height: 1.5em;
         color: var(--textcolor);
+        height: 2rem;
       }
 
       button.keypad_button_small {
@@ -153,7 +150,7 @@ i.keypad-icon {
         max-width: 2.2rem;
         line-height: 1 !important;
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94;         
+        border: 2px solid var(--bordercolor);         
       }
       button.keypad_button_medium {
         width: 7.0vw;
@@ -161,7 +158,7 @@ i.keypad-icon {
         max-width: 2.4rem;
         line-height: 1 !important;
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94;         
+        border: 2px solid var(--bordercolor);         
       }
 
       button.keypad_button_slim {
@@ -171,7 +168,7 @@ i.keypad-icon {
         max-width: 4.5rem;
         line-height: 1 !important;
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94;        
+        border: 2px solid var(--bordercolor);        
       }
 
       button.keypad_text {
@@ -190,10 +187,11 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--bgkeycolor);
-        border: 2px solid #898e94; 
+        border: 2px solid var(--bordercolor); 
         min-width: 3.0rem;
         min-height: 1.6rem;
-
+        padding: 0.2rem;
+        height: 2rem;
       }
 
 
@@ -202,17 +200,18 @@ i.keypad-icon {
                 justify-content: center;
                 align-items: center;
                 margin: 0;
-                border: 1px solid #898e94; 
+                border: 1px solid var(--bordercolor); 
                 /*font-family: "Dot Matrix";*/
                 font-family: "Arial";
                 background-color: var(--bglcd);
                 border-radius: 10px;
                 align-content: center;
                 text-align: center; 
-                font-size: calc(0.8rem + .6vw);
+               /* font-size: calc(0.8rem + .6vw);*/
+                font-size: 1.1rem;
                 color: var(--lcdtextcolor);
                 letter-spacing: 1px;
-                overflow:auto;
+                overflow: auto;
                 padding: 5px;
             }
 
@@ -229,7 +228,7 @@ i.keypad-icon {
       div#lcd_container {
       
         margin: 0 auto;
-        border: 1px solid #898e94;
+        border: 1px solid v;
         padding: 7px;
         background-color: var(--btngrpbgcolor);
         border-radius: 10px;
@@ -245,12 +244,12 @@ i.keypad-icon {
       }
 
       div.container {
-        border: 1px solid #939393;
+        border: 1px solid var(--bordercolor);
         border-radius: 20px;
         padding: 8px;
         background-color: var(--maingrpbgcolor);
-        max-width: 500px;
-        min-width: 300px;
+        max-width: 600px;
+        min-width: 340px;
         margin-bottom: 5px;
       }
 
@@ -275,7 +274,7 @@ i.keypad-icon {
       div#left_buttons,
       div#right_buttons,
       div#keypad_container {
-        border: 1px solid #f2f2f2;
+        border: 1px solid var(--bordercolor);
         padding: 7px 0px;
         border-radius: 8px;
         background-color: var(--btngrpbgcolor);
@@ -288,12 +287,12 @@ i.keypad-icon {
         margin-right: 5px;
       }
 
-      div#right_buttons div.keypad_button_row div#.left_buttons {
+      div#right_buttons, div.keypad_button_row, div#.left_buttons {
         margin: 8px 10px;
       }
 
       div#keypad_container {
-        flex: 2;
+        flex: 1;
         line-height: 1.5 !important;
       }
 
@@ -378,7 +377,6 @@ fieldset:disabled a.btn {
 
 .btn-outline-dark:hover {
   color: #fff;
-  background-color: #343a40;
   border-color: #343a40;
 }
 
@@ -394,7 +392,6 @@ fieldset:disabled a.btn {
 .btn-outline-dark:not(:disabled):not(.disabled):active, .btn-outline-dark:not(:disabled):not(.disabled).active,
 .show > .btn-outline-dark.dropdown-toggle {
   color: #fff;
-  background-color: #343a40;
   border-color: #343a40;
 }
 
