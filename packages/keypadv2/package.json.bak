@@ -1,0 +1,40 @@
+{
+  "name": "@esphome-webserver/v3",
+  "version": "3.0.0",
+  "scripts": {
+    "start": "npm run dev",
+    "start_dsc": "sed -i 's/vista-keypad/dsc-keypad/g' src/esp-app.ts && npm run start",
+    "start_vista": "sed -i 's/dsc-keypad/vista-keypad/g' src/esp-app.ts && npm run start",
+    "dev": "vite",
+    "xbuild": "vite build --emptyOutDir",
+    "build_dsc": "sed -i 's/vista-keypad/dsc-keypad/g' src/esp-app.ts  && vite build --emptyOutDir && bash -c './copy_dsc.sh'",
+    "build_vista": "sed -i 's/dsc-keypad/vista-keypad/g' src/esp-app.ts && vite build --emptyOutDir && bash -c './copy_vista.sh'",
+    "build": "vite build --emptyOutDir && npm run deploy",
+    "serve": "vite preview",
+    "deploy": "bash -c './copy.sh'"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.1",
+    "crypto-es": "^2.1.0",
+    "fa": "^1.0.1",
+    "fa-icons": "^0.2.0",
+    "http-proxy-middleware": "^2.0.1",
+    "iconify-icon": "^1.0.8",
+    "lit": "^2.0.2",
+    "lit-fontawesome": "^0.1.3"
+  },
+  "devDependencies": {
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-minify-html-template-literals": "^1.2.0",
+    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-replace": "^3.0.0",
+    "@types/node": "^15.12.1",
+    "rollup-plugin-strip-banner": "^2.0.0",
+    "typescript": "^4.1.3",
+    "vite": "^2.3.6",
+    "vite-plugin-html": "^2.1.1",
+    "vite-plugin-package-version": "^1.0.2",
+    "vite-plugin-singlefile": "^0.5.1"
+  }
+}
