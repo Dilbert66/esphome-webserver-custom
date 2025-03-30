@@ -197,20 +197,15 @@ i.keypad-icon {
 
           div.virtual_lcd {
                 flex: 1;
-                justify-content: center;
-                align-items: center;
-                margin: 0;
                 border: 1px solid var(--bordercolor); 
                 /*font-family: "Dot Matrix";*/
                 font-family: "Arial";
                 background-color: var(--bglcd);
                 border-radius: 10px;
-                align-content: center;
                 text-align: center; 
-               /* font-size: calc(0.8rem + .6vw);*/
-                font-size: 1.1rem;
+                width: 300px;
+                font-size: 1.4rem;
                 color: var(--lcdtextcolor);
-                letter-spacing: 1px;
                 overflow: auto;
                 padding: 5px;
             }

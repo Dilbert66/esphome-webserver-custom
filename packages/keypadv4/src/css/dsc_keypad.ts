@@ -140,14 +140,14 @@ i.keypad-icon {
         line-height: 1;
         background-color: var(--bgkeycolor);
         border: 2px solid var(--bordercolor);
-        min-height: 2.0rem;
+        min-height: 2.1rem;
         color: var(--textcolor);
       }
 
       button.keypad_button_small {
         padding: 2px;
         max-width: 2.2rem;
-        line-height: 1 !important;
+        line-height: 1;
         background-color: var(--bgkeycolor);
         border: 2px solid var(--bordercolor); 
         min-width: 2.2rem;
@@ -163,11 +163,10 @@ i.keypad-icon {
       }
 
       button.keypad_button_slim {
-
+        width: 4.5rem;
         padding: 2px;
+        max-width: 5rem;
         line-height: 1;
-        max-width: 4.5rem;
-        line-height: 1 !important;
         background-color: var(--bgkeycolor);
         border: 2px solid var(--bordercolor);        
       }
@@ -194,27 +193,23 @@ i.keypad-icon {
         max-width: 3.0rem;
         font-size: calc(0.7rem);
         min-height: 1.5rem;
-        max-height: 2rem;
+        max-height: 2.1rem;
       }
 
 
             div.virtual_lcd {
                 flex: 1;
-                justify-content: center;
-                align-items: center;
-                background-color: #fff;
-                 margin: 0 auto;
+
                 /*font-family: "Dot Matrix", sans-serif;*/
                 font-family: "Arial";
                 background-color: var(--bglcd);
                 font-size: 1.3rem;
                 border-radius: 8px;
-                align-content: center;
-                text-align: center; /* Added text align center */
+                text-align: center; 
                 color: var(--lcdtextcolor);
-                letter-spacing: 1.px;
                 overflow: auto;
                 padding: 5px;
+                width: 300px;
             }
 
 
@@ -230,7 +225,7 @@ i.keypad-icon {
       div#lcd_container {
         margin: 0 auto;
         border: 1px solid var(--bordercolor);
-        padding: 8px;
+        padding: 5px;
         background-color: var(--btngrpbgcolor);
         border-radius: 10px;
         white-space: nowrap;
@@ -275,7 +270,6 @@ i.keypad-icon {
       div#right_buttons,
       div#keypad_container {
         border: 1px solid var(--bordercolor);
-        padding: 7px 0px;
         border-radius: 8px;
         background-color: var(--btngrpbgcolor);
       }
@@ -283,7 +277,7 @@ i.keypad-icon {
       div#left_buttons {
         flex: 1;
         max-width: 5.9rem;
-        line-height: 1.5 !important;
+
       }
 
 
@@ -297,7 +291,6 @@ i.keypad-icon {
       div#right_buttons {
         flex: 1;
         max-width: 5.8rem;
-        padding: 0px !important;
       }
 
       div#buttons_area {

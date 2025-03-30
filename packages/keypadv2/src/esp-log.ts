@@ -1,6 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
-import {decrypt,encrypt ,isJson} from "./esp-app";
+import cssTab from "./css/tab";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 
 interface recordConfig {
   type: string;
@@ -8,13 +9,13 @@ interface recordConfig {
   tag: string;
   detail: string;
   when: string;
-
 }
 
 @customElement("esp-log")
 export class DebugLog extends LitElement {
   @property({ type: Number }) rows = 10;
-  @state() logs: string = [];
+  @property({ type: String }) scheme = "";
+  @state() logs: recordConfig[] = [];
 
   constructor() {
     super();
@@ -28,59 +29,19 @@ export class DebugLog extends LitElement {
       if (isJson(data))
          data=JSON.parse(data);
       if (data['iv'] != null) data=decrypt(data);
+
       const d: String = data;
-      if (!d.length) return;
       let parts = d.slice(10, d.length - 4).split(":");
       let tag = parts.slice(0, 2).join(":");
       let detail = d.slice(12 + tag.length, d.length - 4);
-      //let t=tag.split("'");//remove extra task indicator if present
-     // tag=t[0];
-     tag=tag.split("'")[0];
-   /*   
-      let tsk="";
-      if (t.length > 1) {
-          tsk=t[1] + " ";
-               let s='[1;31m';
-               if (tsk.includes(s)) {
-                tsk=tsk.replace( s, "");
-               }
-               s='[0;33m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               }
-               s='[0;32m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               }
-               s='[0;35m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-               s='[0;36m';
-               if (tsk.includes(s)) {
-                }
-               s='[0;37m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-               s='[0m';
-               if (tsk.includes(s)) {
-                 tsk=tsk.replace( s, "");
-               } 
-      }
- 
-     */ 
-
- const types: Record<string, string> = {
-        "\x1b[1;31m": "e",
-        "\x1b[0;33m": "w",
-        "\x1b[0;32m": "i",
-        "\x1b[0;35m": "c",
-        "\x1b[0;36m": "d",
-        "\x1b[0;37m": "v",
-        "\x1b[0m":"n",
-      };  
-   
+      const types: Record<string, string> = {
+        "[1;31m": "e",
+        "[0;33m": "w",
+        "[0;32m": "i",
+        "[0;35m": "c",
+        "[0;36m": "d",
+        "[0;37m": "v",
+      };
       const record = {
         type: types[d.slice(0, 7)],
         level: d.slice(7, 10),
@@ -88,8 +49,6 @@ export class DebugLog extends LitElement {
         detail: detail,
         when: new Date().toTimeString().split(" ")[0],
       } as recordConfig;
-      
-
       this.logs.push(record);
       this.logs = this.logs.slice(-this.rows);
     });
@@ -97,82 +56,143 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div class="flow-x ">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>level</th>
-              <th>Tag</th>
-              <th>Message</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div 
+        class="tab-header"
+        @dblclick="${this._handleTabHeaderDblClick}"
+      >
+        Debug Log
+      </div>
+      <div class="tab-container">
+        <div class="logs" color-scheme="${this.scheme}">
+          <div class="thead trow">
+            <div>Time</div>
+            <div>Level</div>
+            <div>Tag</div>
+            <div>Message</div>
+          </div>
+          <div class="tbody">
             ${this.logs.map(
-              (log:string) =>
+              (log: recordConfig) =>
                 html`
-                <tr class="${log.type}">
-                  <td>${log.when}</td>
-                  <td>${log.level}</td>
-                  <td>${log.tag}</td>
-                  <td><pre>${log.detail}</pre></td>
-                </tr>
-
-              `
+              <div class="trow ${log.type}">
+                <div>${log.when}</div>
+                <div>${log.level}</div>
+                <div>${log.tag}</div>
+                <div>${log.detail}</div>
+              </td>
+            `
             )}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
     `;
   }
 
-  static get styles() {
-    return css`
-      table {
-        font-family: monospace;
-        background-color: #1c1c1c;
-        color: white;
-        width: 100%;
-        border: 1px solid #dfe2e5;
-        line-height: 1;
-      }
+  _handleTabHeaderDblClick(e: Event) {
+    const doubleClickEvent = new CustomEvent('log-tab-header-double-clicked', {
+      bubbles: true,
+      composed: true,
+    });
+    e.target?.dispatchEvent(doubleClickEvent);
+  }
 
-      thead {
-        border: 1px solid #dfe2e5;
-        line-height: 1rem;
-      }
-      th {
-        text-align: left;
-      }
-      th,
-      td {
-        padding: 0.25rem 0.5rem;
-      }
-      pre {
-        margin: 0;
-      }
-      .v {
-        color: #888888;
-      }
-      .d {
-        color: #00dddd;
-      }
-      .c {
-        color: magenta;
-      }
-      .i {
-        color: limegreen;
-      }
-      .w {
-        color: yellow;
-      }
-      .e {
-        color: red;
-        font-weight: bold;
-      }
-      .flow-x {
-        overflow-x: auto;
-      }
-    `;
+  static get styles() {
+    return [
+      cssTab,
+      css`
+        .thead,
+        .tbody .trow:nth-child(2n) {
+          background-color: rgba(127, 127, 127, 0.05);
+        }
+        .trow div {
+          font-family: monospace;
+          width: 100%;
+          line-height: 1.2rem;
+        }
+        .trow {
+          display: flex;
+        }
+        .thead {
+          line-height: 1rem;
+        }
+        .thead .trow {
+          text-align: left;
+          padding: 0.25rem 0.5rem;
+        }
+        .trow {
+          display: flex;
+        }
+        .trow > div {
+          align-self: flex-start;
+          padding-right: 0.25em;
+          flex: 2 0;
+          min-width: 70px;
+
+        }
+        .trow > div:nth-child(2) {
+          flex: 1 0;          
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 40px;
+        }
+        .trow > div:nth-child(3) {
+          flex: 3 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .trow > div:last-child {
+          flex: 15 0;
+          padding-right: 0em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        pre {
+          margin: 0;
+        }
+        .v {
+          color: #888888;
+        }
+        .d {
+          color: #00dddd;
+        }
+        .c {
+          color: magenta;
+        }
+        .i {
+          color: limegreen;
+        }
+        .w {
+          color: yellow;
+        }
+        .e {
+          color: red;
+          font-weight: bold;
+        }
+        .logs[color-scheme="light"] {
+          font-weight: bold;
+        }
+        .logs[color-scheme="light"] .w {
+          color: #cccc00;
+        }
+        .logs[color-scheme="dark"] .d {
+          color: #00aaaa;
+        }
+        .logs {
+          overflow-x: auto;
+          border-radius: 12px;
+          border-width: 1px;
+          border-style: solid;
+          border-color: rgba(127, 127, 127, 0.12);
+          transition: all 0.3s ease-out 0s;
+          font-size: 14px;
+          padding: 16px;
+        }
+        @media (max-width: 1024px) {
+          .trow > div:nth-child(2) {
+            display: none !important;
+          }
+        }
+      `,
+    ];
   }
 }

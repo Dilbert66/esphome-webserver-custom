@@ -1,29 +1,39 @@
-import { html, css, LitElement, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { html, css, LitElement, TemplateResult, nothing } from "lit";
+import { customElement, state, property } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-import {decrypt,encrypt,isJson } from "./esp-app";
+import cssInput from "./css/input";
+import cssEntityTable from "./css/esp-entity-table";
+import cssTab from "./css/tab";
+import "./esp-entity-chart";
+import "iconify-icon";
+import {isJson,encrypt,decrypt} from "./esp-crypt";
 
 interface entityConfig {
   unique_id: string;
+  sorting_weight: number;
+  sorting_group?: string;
   domain: string;
   id: string;
   state: string;
   detail: string;
   value: string;
   name: string;
+  entity_category?: number;
   when: string;
   icon?: string;
   option?: string[];
   assumed_state?: boolean;
   brightness?: number;
+  color_mode?: string;
+  color: object;
   target_temperature?: number;
   target_temperature_low?: number;
   target_temperature_high?: number;
   min_temp?: number;
   max_temp?: number;
-  min_value?: number;
-  max_value?: number;
+  min_value?: string;
+  max_value?: string;
   step?: number;
   min_length?: number;
   max_length?: number;
@@ -37,17 +47,25 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
+  value_numeric_history: number[];
+  uom?: string;
+  is_disabled_by_default?: boolean;
 }
+
+interface groupConfig {
+  name: string;
+  sorting_weight: number;  
+}
+
+export const stateOn = "ON";
+export const stateOff = "OFF";
 
 export function getBasePath() {
   let str = window.location.pathname;
-  //console.log ("str= "+ str);
   return "http://dscalarmc3.local";
-  // return "http://vistaalarmtest.local";
-//  return str.endsWith("/") ? str.slice(0, -1) : str;
+  //return "http://vistaalarmtest1.local";
+  return str.endsWith("/") ? str.slice(0, -1) : str;
 }
-
-let basePath = getBasePath();
 
 interface RestAction {
   restAction(entity?: entityConfig, action?: string, option?: string,value?: string): void;
@@ -57,42 +75,185 @@ interface RestAction {
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
+  @state() show_all: boolean = false;
 
   private _actionRenderer = new ActionRenderer();
+  private _basePath = getBasePath();
+  private groups: groupConfig[] = [] 
+  private static ENTITY_UNDEFINED = "States";
+  private static ENTITY_CATEGORIES = [
+    "Sensor and Control",
+    "Configuration",
+    "Diagnostic",
+  ];
+
+  private _unknown_state_events: {[key: string]: number} = {};
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("state", (e: Event) => {
+
+    window.source?.addEventListener('state', (e: Event) => {
       const messageEvent = e as MessageEvent;
+
       var data=messageEvent.data;
       if (isJson(data))
         data = JSON.parse(data); 
       if (data['iv'] != null) data=decrypt(data);
+     // const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-      if (idx === -1 && data.id) {
-        // Dynamically add discovered..
-        let parts = data.id.split("-");
-        let entity = {
-          ...data,
-          domain: parts[0],
-          unique_id: data.id,
-          id: parts.slice(1).join("-"),
-        } as entityConfig;
-        entity.has_action = this.hasAction(entity);
-        if (entity.has_action) {
-          this.has_controls = true;
+      if (idx != -1 && data.id) {
+        if (typeof data.value === 'number') {
+          let history = [...this.entities[idx].value_numeric_history];
+          history.push(data.value);
+          this.entities[idx].value_numeric_history = history.splice(-50);
         }
-        this.entities.push(entity);
-        this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
-        this.requestUpdate();
-      } else if (data.id) {
+
         delete data.id;
         delete data.domain;
         delete data.unique_id;
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
+      } else {
+        // is it a `detail_all` event already?
+        if (data?.name) {
+          this.addEntity(data);
+        } else {
+          if (this._unknown_state_events[data.id]) {
+            this._unknown_state_events[data.id]++;
+          } else {
+            this._unknown_state_events[data.id] = 1;
+          }
+          // ignore the first few events, maybe the esp will send a detail_all
+          // event soon
+          if (this._unknown_state_events[data.id] < 1) {
+            return;
+          }
+
+          let parts = data.id.split('-');
+          let domain = parts[0];
+          let id = parts.slice(1).join('-');
+          let cmd = JSON.stringify({
+                'domain': domain,
+                'oid': id,
+                'detail':"all",
+                'method': "POST"
+            });
+
+          fetch(`${this._basePath}/api`, {
+           method: "POST",
+           body: encrypt(cmd),
+          })
+              .then((r) => {
+          //      console.log(r);
+                if (!r.ok) {
+                  throw new Error(`HTTP error! Status: ${r.status}`);
+                }
+                return r.json();
+              })
+              .then((data) => {
+                if (isJson(data))
+                    data = JSON.parse(data); 
+                if (data['iv'] != null) data=decrypt(data);
+            //    console.log(data);
+                this.addEntity(data);
+              })
+              .catch((error) => {
+                console.error('Fetch error:', error);
+              });
+
+//          fetch(`${this._basePath}/${domain}/${id}?detail=all`, {
+//            method: 'GET',
+//         })
+//              .then((r) => {
+//                console.log(r);
+//                if (!r.ok) {
+//                  throw new Error(`HTTP error! Status: ${r.status}`);
+//                }
+//                return r.json();
+//              })
+//              .then((data) => {
+//                if (isJson(data))
+//                    data = JSON.parse(data); 
+//                 if (data['iv'] != null) data=decrypt(data);
+//                 console.log(data);
+//                this.addEntity(data);
+//              })
+//              .catch((error) => {
+//                console.error('Fetch error:', error);
+//              });
+        }
       }
     });
+
+    window.source?.addEventListener("sorting_group", (e: Event) => {
+      const messageEvent = e as MessageEvent;
+    //  const data = JSON.parse(messageEvent.data);
+      var data=messageEvent.data;
+      if (isJson(data))
+        data = JSON.parse(data); 
+      if (data['iv'] != null) data=decrypt(data);
+      const groupIndex = this.groups.findIndex((x) => x.name === data.name);
+      if (groupIndex === -1) {
+        let group = {
+           ...data,
+        } as groupConfig;
+        this.groups.push(group);
+        this.groups.sort((a, b) => {
+          return a.sorting_weight < b.sorting_weight  
+            ? -1  
+            : 1  
+        });
+      }
+    });
+
+    this.groups = EntityTable.ENTITY_CATEGORIES.map((category, index) => ({
+      name: category,
+      sorting_weight: index
+    }));
+
+    this.groups.push({
+      name: EntityTable.ENTITY_UNDEFINED,
+      sorting_weight: -1 
+    });
+  }
+
+  addEntity(data: any) {
+    let idx = this.entities.findIndex((x) => x.unique_id === data.id);
+    if (idx === -1 && data.id) {
+      // Dynamically add discovered..
+      let parts = data.id.split("-");
+      let entity = {
+        ...data,
+        domain: parts[0],
+        unique_id: data.id,
+        id: parts.slice(1).join("-"),
+        entity_category: data.entity_category,
+        sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
+        value_numeric_history: [data.value],
+      } as entityConfig;
+      entity.has_action = this.hasAction(entity);
+      if (entity.has_action) {
+        this.has_controls = true;
+      }
+      this.entities.push(entity);
+      this.entities.sort((a, b) => {  
+        const sortA = a.sorting_weight ?? a.name;  
+        const sortB = b.sorting_weight ?? b.name;  
+        return a.sorting_group < b.sorting_group
+          ? -1  
+          : a.sorting_group === b.sorting_group
+          ? sortA === sortB
+            ? a.name.toLowerCase() < b.name.toLowerCase()
+              ? -1
+              : 1
+            : sortA < sortB
+              ? -1
+              : 1
+          : 1
+      });
+      this.requestUpdate();
+    }
+    
   }
 
   hasAction(entity: entityConfig): boolean {
@@ -106,16 +267,18 @@ export class EntityTable extends LitElement implements RestAction {
       `render_${entity.domain}` as ActionRendererMethodKey
     );
   }
-/*
-  restAction(entity: entityConfig, action: string) {
-    fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
-      method: "POST",
-      body: "true",
-    }).then((r) => {
-      console.log(r);
-    });
-  }
-*/  
+
+//  restAction(entity: entityConfig, action: string) {
+//    fetch(`${this._basePath}/${entity.domain}/${entity.id}/${action}`, {
+//      method: "POST",
+//      headers:{
+//        'Content-Type': 'application/x-www-form-urlencoded'
+//      },
+//    }).then((r) => {
+//      console.log(r);
+//    });
+//  }
+
   restAction(entity: entityConfig, action : string, option: string, value: string) {
      let cmd = JSON.stringify({
                 'domain': entity.domain,
@@ -124,7 +287,7 @@ export class EntityTable extends LitElement implements RestAction {
                  [option]: value,
                 'method': "POST"
             });
-     fetch(`${basePath}/api`, {
+     fetch(`${this._basePath}/api`, {
       method: "POST",
       body: encrypt(cmd),
     }).then((r) => {
@@ -135,86 +298,123 @@ export class EntityTable extends LitElement implements RestAction {
   }  
 
 
+  renderShowAll() {
+    if (
+      !this.show_all &&
+      this.entities.find((elem) => elem.is_disabled_by_default)
+    ) {
+      return html`<div class="singlebutton-row">
+        <button
+          class="abutton"
+          @click="${(e: Event) => (this.show_all = true)}"
+        >
+          Show All
+        </button>
+      </div>`;
+    }
+  }
 
   render() {
+    const groupBy = (xs: Array<any>, key: string): Map<string, Array<any>> => {
+      const groupedMap = xs.reduce(function (rv, x) {
+        (
+          rv.get(x[key]) ||
+          (() => {
+            let tmp: Array<any> = [];
+            rv.set(x[key], tmp);
+            return tmp;
+          })()
+        ).push(x);
+        return rv;
+      }, new Map<string, Array<any>>());
+      
+      const sortedGroupedMap = new Map<string, Array<any>>();
+      for (const group of this.groups) {
+        const groupName = group.name;
+        if (groupedMap.has(groupName)) {
+          sortedGroupedMap.set(groupName, groupedMap.get(groupName) || []);
+        }
+      }
+
+      return sortedGroupedMap;
+    }
+
+    const entities = this.show_all
+      ? this.entities
+      : this.entities.filter((elem) => !elem.is_disabled_by_default);
+    const grouped = groupBy(entities, "sorting_group");
+    const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>State</th>
-            ${this.has_controls ? html`<th>Actions</th>` : html``}
-          </tr>
-        </thead>
-        <tbody>
-          ${this.entities.map(
-            (component) => html`
-              <tr>
-                <td>${component.name}</td>
-                <td>${component.state}</td>
-                ${this.has_controls
-                  ? html`<td>
-                      ${component.has_action ? this.control(component) : html``}
-                    </td>`
-                  : html``}
-              </tr>
-            `
-          )}
-        </tbody>
-      </table>
+      <div>
+        ${elems.map(
+          (group) => html`
+            <div 
+              class="tab-header"
+              @dblclick="${this._handleTabHeaderDblClick}"
+            >
+              ${group.name ||
+              EntityTable.ENTITY_UNDEFINED}
+            </div>
+            <div class="tab-container">
+              ${group.value.map(
+                (component, idx) => html`
+                  <div
+                    class="entity-row"
+                    .domain="${component.domain}"
+                    @click="${this._handleEntityRowClick}"
+                  >
+                    <div>
+                      ${component.icon
+                        ? html`<iconify-icon
+                            icon="${component.icon}"
+                            height="24px"
+                          ></iconify-icon>`
+                        : nothing}
+                    </div>
+                    <div>${component.name}</div>
+                    <div>
+                      ${this.has_controls && component.has_action
+                        ? this.control(component)
+                        : html`<div>${component.state}</div>`}
+                    </div>
+                    ${component.domain === "sensor"
+                      ? html`<esp-entity-chart
+                          .chartdata="${component.value_numeric_history}"
+                        ></esp-entity-chart>`
+                      : nothing}
+                  </div>
+                `
+              )}
+            </div>
+          `
+        )}
+        ${this.renderShowAll()}
+      </div>
     `;
   }
 
   static get styles() {
-    return [
-      cssReset,
-      cssButton,
-      css`
-        table {
-          border-spacing: 0;
-          border-collapse: collapse;
-          width: 100%;
-          border: 1px solid currentColor;
-          background-color: var(--c-bg);
-        }
-        th {
-          font-weight: 600;
-          text-align: left;
-        }
-        th,
-        td {
-          padding: 0.25rem 0.5rem;
-          border: 1px solid currentColor;
-        }
-        td:nth-child(2),
-        th:nth-child(2) {
-          text-align: center;
-        }
-        tr th,
-        tr:nth-child(2n) {
-          background-color: rgba(127, 127, 127, 0.3);
-        }
-        select {
-          background-color: inherit;
-          color: inherit;
-          width: 100%;
-          border-radius: 4px;
-        }
-        option {
-          color: currentColor;
-          background-color: var(--primary-color, currentColor);
-        }
-        input[type="range"], input[type="text"] {
-          width: calc(100% - 1rem);
-          height: 0.75rem;
-        }
-        .range, .text {
-          text-align: center;
-        }
-      `,
-    ];
+    return [cssReset, cssButton, cssInput, cssEntityTable, cssTab];
+  }
+
+  _handleEntityRowClick(e: any) {
+    if (e?.currentTarget?.domain === "sensor") {
+      if (!e?.ctrlKey) e.stopPropagation();
+      e?.currentTarget?.classList.toggle(
+        "expanded",
+        !e.ctrlKey ? undefined : true
+      );
+    }
+  }
+  _handleTabHeaderDblClick(e: Event) {
+    const doubleClickEvent = new CustomEvent('entity-tab-header-double-clicked', {
+      bubbles: true,
+      composed: true,
+    });
+    e.target?.dispatchEvent(doubleClickEvent);
   }
 }
+
 
 type ActionRendererNonCallable = "entity" | "actioner" | "exec";
 type ActionRendererMethodKey = keyof Omit<
@@ -235,15 +435,38 @@ class ActionRenderer {
   }
 
   private _actionButton(entity: entityConfig, label: string, action: string) {
-
     if (!entity) return;
     let a = action || label.toLowerCase();
     return html`<button
-      class="rnd"
+      class="abutton"
       @click=${() => this.actioner?.restAction(entity, a,'','')}
     >
       ${label}
     </button>`;
+  }
+
+  private _datetime(
+    entity: entityConfig,
+    type: string,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    return html`
+      <input 
+        type="${type}" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        .value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val.replace('T', ' ')}`
+          );
+        }}"
+      />
+    `;
   }
 
   private _switch(entity: entityConfig) {
@@ -266,12 +489,11 @@ class ActionRenderer {
   ) {
     return html`<select
       @change="${(e: Event) => {
-        let val = e.target?.value;
+        const val = (<HTMLTextAreaElement>e.target)?.value;
         this.actioner?.restAction(
-          entity,
-          `${action}`,
-          `${opt}`,
-          `${encodeURIComponent(val)}`
+//          entity,
+//          `${action}?${opt}=${encodeURIComponent(val)}`
+entity, `${action}`,`${opt}`,`${val}`
         );
       }}"
     >
@@ -291,29 +513,46 @@ class ActionRenderer {
     action: string,
     opt: string,
     value: string | number,
-    min: number | undefined,
-    max: number | undefined,
-    step: number | undefined
+    min?: string | undefined,
+    max?: string | undefined,
+    step = 1
   ) {
-    return html`<div class="range">
-      <label>${min || 0}</label>
-      <input
-        type="${entity.mode == 1 ? "number" : "range"}"
-        name="${entity.unique_id}"
-        id="${entity.unique_id}"
-        step="${step || 1}"
-        min="${min || Math.min(0, value as number)}"
-        max="${max || Math.max(10, value as number)}"
-        value="${value!}"
-        @change="${(e: Event) => {
-          let val = e.target?.value;
+    if(entity.mode == 1) {
+      return html`<div class="range">
+        <label>${min || 0}</label>
+        <input
+          type="${entity.mode == 1 ? "number" : "range"}"
+          name="${entity.unique_id}"
+          id="${entity.unique_id}"
+          step="${step}"
+          min="${min || Math.min(0, value as number)}"
+          max="${max || Math.max(10, value as number)}"
+          .value="${value}"
+          @change="${(e: Event) => {
+            const val = (<HTMLTextAreaElement>e.target)?.value;
+           // this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
           this.actioner?.restAction(entity, `${action}`,`${opt}`,`${val}`);
-        }}"
-      />
-      <label>${max || 100}</label>
-    </div>`;
-  }
+          }}"
+        />
+        <label>${max || 100}</label>
+      </div>`;      
+    } else {
+      return html`    
+      <esp-range-slider
+        name="${entity.unique_id}"
+        step="${step}"
+        min="${min}"
+        max="${max}"
+        .value="${value}"
+        @state="${(e: CustomEvent) => {
+            const val = (<HTMLTextAreaElement>e.target)?.value;
+           // this.actioner?.restAction(entity, `${action}?${opt}=${e.detail.state}`);
+          this.actioner?.restAction(entity, `${action}`,`${opt}`,`${e.detail.state}`);
+          }}"
+      ></esp-range-slider>`;
+    }
 
+  }
 
   private _textinput(
     entity: entityConfig,
@@ -324,21 +563,100 @@ class ActionRenderer {
     max: number | undefined,
     pattern: string | undefined
   ) {
-    return html`<div class="text">
+    return html`
       <input
         type="${entity.mode == 1 ? "password" : "text"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
-        pattern="${pattern || ''}"
-        value="${value!}"
+        pattern="${pattern || ""}"
+        .value="${value!}"
         @change="${(e: Event) => {
-          let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}`,`${opt}`,`${val}`);
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+//          this.actioner?.restAction(
+//            entity,
+//            `${action}?${opt}=${encodeURIComponent(val)}`
+//          );
+          this.actioner?.restAction(entity, `${action}`,`${opt}`,`${encodeURIComponent(val)}`);
+        }}"
+      />
+    `;
+  }
+
+  private _colorpicker(entity: entityConfig, action: string, value: any) {
+    function u16tohex(d: number) {
+      return Number(d).toString(16).padStart(2, "0");
+    }
+    function rgb_to_str(rgbhex: string) {
+      const rgb = rgbhex
+        .match(/[0-9a-f]{2}/gi)
+        ?.map((x) => parseInt(x, 16)) || [0, 0, 0];
+      return `r=${rgb[0]}&g=${rgb[1]}&b=${rgb[2]}`;
+    }
+
+    return html`<div class="colorpicker">
+      <input
+        type="color"
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="#${u16tohex(value?.r)}${u16tohex(value?.g)}${u16tohex(value?.b)}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+         // this.actioner?.restAction(entity, `${action}?${rgb_to_str(val)}`);
+             this.actioner?.restAction(entity, `${action}`,``,`${rgb_to_str(val)}`);
         }}"
       />
     </div>`;
+  }
+
+  render_binary_sensor() {
+    if (!this.entity) return;
+    const isOn = this.entity.state == stateOn;
+    return html`<iconify-icon
+      class="binary_sensor_${this.entity.state?.toLowerCase()}"
+      icon="mdi:checkbox-${isOn ? "marked-circle" : "blank-circle-outline"}"
+      height="24px"
+    ></iconify-icon>`;
+  }
+
+  render_date() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "date",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_time() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "time",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_datetime() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "datetime-local",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
   }
 
   render_switch() {
@@ -373,27 +691,33 @@ class ActionRenderer {
   render_light() {
     if (!this.entity) return;
     return [
-      this._switch(this.entity),
-      this.entity.brightness
-        ? this._range(
-            this.entity,
-            "turn_on",
-            "brightness",
-            this.entity.brightness,
-            0,
-            255,
-            1
-          )
-        : "",
-      this.entity.effects?.filter((v) => v != "None").length
-        ? this._select(
-            this.entity,
-            "turn_on",
-            "effect",
-            this.entity.effects || [],
-            this.entity.effect
-          )
-        : "",
+      html`<div class="entity" style="
+      width: 100%;">
+        ${this._switch(this.entity)}
+        ${this.entity.brightness
+          ? this._range(
+              this.entity,
+              "turn_on",
+              "brightness",
+              this.entity.brightness,
+              0,
+              255,
+              1
+            )
+          : ""}
+        ${this.entity.color_mode === "rgb" || this.entity.color_mode === "rgbw"
+          ? this._colorpicker(this.entity, "turn_on", this.entity?.color)
+          : ""}
+        ${this.entity.effects?.filter((v) => v != "None").length
+          ? this._select(
+              this.entity,
+              "turn_on",
+              "effect",
+              this.entity.effects || [],
+              this.entity.effect
+            )
+          : ""}
+      </div> `,
     ];
   }
 
@@ -413,7 +737,7 @@ class ActionRenderer {
 
   render_button() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "☐", "press")}`;
+    return html`${this._actionButton(this.entity, "PRESS", "press")}`;
   }
 
   render_select() {
@@ -429,15 +753,18 @@ class ActionRenderer {
 
   render_number() {
     if (!this.entity) return;
-    return this._range(
-      this.entity,
-      "set",
-      "value",
-      this.entity.value,
-      this.entity.min_value,
-      this.entity.max_value,
-      this.entity.step
-    );
+    return html`
+      ${this._range(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
+        this.entity.min_value,
+        this.entity.max_value,
+        this.entity.step
+      )}
+      ${this.entity.uom}
+    `;
   }
 
   render_text() {
@@ -449,71 +776,79 @@ class ActionRenderer {
       this.entity.value,
       this.entity.min_length,
       this.entity.max_length,
-      this.entity.pattern,
+      this.entity.pattern
     );
   }
 
   render_climate() {
     if (!this.entity) return;
-    let target_temp_slider, target_temp_label;
+    let target_temp_slider, target_temp_label, target_temp;
+    let current_temp = html`<div class="climate-row" style="padding-bottom: 10px";>
+                              <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
+                            </div>`;
+    
     if (
       this.entity.target_temperature_low !== undefined &&
       this.entity.target_temperature_high !== undefined
     ) {
-      target_temp_label = html`${this.entity
-        .target_temperature_low}&nbsp;..&nbsp;${this.entity
-        .target_temperature_high}`;
-      target_temp_slider = html`
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature_low",
-          this.entity.target_temperature_low,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature_high",
-          this.entity.target_temperature_high,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-      `;
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target Low:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_low",
+            this.entity.target_temperature_low,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>
+        <div class="climate-row">
+          <label>Target High:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_high",
+            this.entity.target_temperature_high,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
     } else {
-      target_temp_label = html`${this.entity.target_temperature}`;
-      target_temp_slider = html`
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature",
-          this.entity.target_temperature!!,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-      `;
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature",
+            this.entity.target_temperature!!,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
     }
     let modes = html``;
     if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
-      modes = html`Mode:<br />
-        ${this._select(
-          this.entity,
-          "set",
-          "mode",
-          this.entity.modes || [],
-          this.entity.mode || ""
-        )}`;
+      modes = html`
+        <div class="climate-row">
+          <label>Mode:&nbsp;</label>
+          ${this._select(
+            this.entity,
+            "set",
+            "mode",
+            this.entity.modes || [],
+            this.entity.mode || ""
+          )}
+        </div>`;
     }
     return html`
-      <label
-        >Current:&nbsp;${this.entity.current_temperature},
-        Target:&nbsp;${target_temp_label}</label
-      >
-      ${target_temp_slider} ${modes}
+      <div class="climate-wrap">
+        ${current_temp} ${target_temp} ${modes}
+      </div>
     `;
   }
 }

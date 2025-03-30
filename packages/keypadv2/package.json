@@ -1,6 +1,6 @@
 {
-  "name": "@esphome-webserver/v2",
-  "version": "2.0.0",
+  "name": "@esphome-webserver/keypadv2",
+  "version": "3.0.0",
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
@@ -10,10 +10,14 @@
     "deploy": "bash -c './copy.sh'"
   },
   "dependencies": {
+    "chart.js": "^4.4.1",
     "crypto-es": "^2.1.0",
-    "crypto-js": "^4.2.0",
+    "fa": "^1.0.1",
+    "fa-icons": "^0.2.0",
     "http-proxy-middleware": "^2.0.1",
-    "lit": "^2.0.2"
+    "iconify-icon": "^1.0.8",
+    "lit": "^2.0.2",
+    "lit-fontawesome": "^0.1.3"
   },
   "devDependencies": {
     "rollup-plugin-copy": "^3.4.0",

@@ -13,8 +13,8 @@ export class keyPad extends LitElement  {
   @property({ type: String }) scheme = "";   
   @property({ type: Number })  current_partition=1; 
 
-  @state({ type: String })  _line1=""
-  @state({ type: String })  _line2=""
+  @state({ type: String })  _line1="";
+  @state({ type: String })  _line2="";
   @state({ type: String })  _readyStyle="color: var(--unavailable);";
   @state({ type: String })  _armedStyle="color: var(--unavailable);";
   @state({ type: String }) _chimeStyle="color: var(--unavailable);";

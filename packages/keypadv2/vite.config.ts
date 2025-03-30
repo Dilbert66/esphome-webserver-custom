@@ -22,6 +22,7 @@ export default defineConfig({
     stripBanner(),
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
+    //
     {
       ...ViteMinifyHtml({ removeComments: true }),
       enforce: "post",
@@ -57,7 +58,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../../_static/keypadv2",
+    outDir: "../../_static/keypad",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
@@ -66,7 +67,7 @@ export default defineConfig({
         }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
-        entryFileNames: "www.js",
+        entryFileNames: "www_keypad.js",
       },
     },
   },
@@ -90,6 +91,7 @@ export default defineConfig({
       "/date": proxy_target,
       "/time": proxy_target,
       "/alarm_panel": proxy_target,
+      "/update" : proxy_target,
     },
   },
 });

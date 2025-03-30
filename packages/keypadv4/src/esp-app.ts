@@ -7,7 +7,7 @@ import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
 import "./esp-logo";
-import "./dsc-keypad"
+import "./esp-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";

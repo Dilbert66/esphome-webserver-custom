@@ -1,2 +1,2 @@
 #!/bin/sh
-cp ~/dev/esphome-webserver-custom/_static/dsc_keypad/www_dsc.js ~/dev/dilbert66.github.io/js_files/
+cp ~/dev/esphome-webserver-custom/_static/keypad/www_keypad.js ~/dev/dilbert66.github.io/js_files/www_v4.js
