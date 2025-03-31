@@ -9,6 +9,7 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
+//const proxy_target = process.env.PROXY_TARGET || "http://vistaalarmtest1.local";
 const proxy_target = process.env.PROXY_TARGET || "http://dscalarmc3.local";
 
 export default defineConfig({

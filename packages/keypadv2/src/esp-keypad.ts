@@ -11,24 +11,25 @@ export class keyPad extends LitElement {
     @property({ type: String }) scheme = "";
     @property({ type: Number }) current_partition = 1;
 
-    @state({ type: String }) _line1 = "";
-    @state({ type: String }) _line2 = "";
-    @state({ type: String }) _iconA = "";
-    @state({ type: String }) _status_A_state = "";
-    @state({ type: String }) _iconB = "";
-    @state({ type: String }) _status_B_state = "";
-    @state({ type: String }) _iconC = "";
-    @state({ type: String }) _status_C_state = "";
-    @state({ type: String }) _iconD = "";
-    @state({ type: String }) _status_D_state = "";
-    @state({ type: String }) _iconE = "";
-    @state({ type: String }) _status_E_state = "";
-    @state({ type: String }) _iconF = "";
-    @state({ type: String }) _status_F_state = "";
-    @state({ type: String }) _iconG = "";
-    @state({ type: String }) _status_G_state = "";
-    @state({ type: String }) _iconH = "";
-    @state({ type: String }) _status_H_state = "";
+    @state({type: Object }) _config;
+    @state({ type: String }) _line1;
+    @state({ type: String }) _line2;
+    @state({ type: String }) _iconA;
+    @state({ type: String }) _status_A_state;
+    @state({ type: String }) _iconB;
+    @state({ type: String }) _status_B_state;
+    @state({ type: String }) _iconC;
+    @state({ type: String }) _status_C_state;
+    @state({ type: String }) _iconD;
+    @state({ type: String }) _status_D_state;
+    @state({ type: String }) _iconE;
+    @state({ type: String }) _status_E_state;
+    @state({ type: String }) _iconF;
+    @state({ type: String }) _status_F_state;
+    @state({ type: String }) _iconG;
+    @state({ type: String }) _status_G_state;
+    @state({ type: String }) _iconH;
+    @state({ type: String }) _status_H_state;
 
 
 
@@ -114,7 +115,7 @@ export class keyPad extends LitElement {
         ></iconify-icon>
                     </div>
 
-                    <div class='mdc-button ' ><span class="icon-label">${this._status_G}</span>
+                    <div class='mdc-button' ><span class="icon-label">${this._status_G}</span>
  <iconify-icon
           icon=${this._iconG}
           height="20px"
@@ -366,7 +367,7 @@ export class keyPad extends LitElement {
         this._sensor_G = keypad_config["sensor_G"] != null ? keypad_config["sensor_G"] : "";
         this._sensor_H = keypad_config["sensor_H"] != null ? keypad_config["sensor_H"] : "";
 
-        this._status_A_on_icon = (keypad_config["status_A_on_icon"] != null) ? keypad_config["status_A_on_icon"] : "mdi:check-circle-outline"
+        this._status_A_on_icon = (keypad_config["status_A_on_icon"] != null ) ? keypad_config["status_A_on_icon"] : "mdi:check-circle-outline"
         this._status_A_off_icon = (keypad_config["status_A_off_icon"] != null) ? keypad_config["status_A_off_icon"] : "mdi:circle-outline"
         this._status_B_on_icon = (keypad_config["status_B_on_icon"] != null) ? keypad_config["status_B_on_icon"] : "mdi:check-circle-outline"
         this._status_B_off_icon = (keypad_config["status_B_off_icon"] != null) ? keypad_config["status_B_off_icon"] : "mdi:circle-outline"
@@ -433,13 +434,39 @@ export class keyPad extends LitElement {
         this._view_status2 = keypad_config["view_status2"] != null ? keypad_config["view_status2"] : false;
         this._button_left = keypad_config["button_left"] != null ? keypad_config["button_left"] : false;
         this._vibration_duration = keypad_config["vibration_duration"] != null ? keypad_config["vibration_duration"] : 50;
-        this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
+
+
+       this._iconA = this._sensor_A!=""? this._status_A_off_icon:"";
+       this._status_A_state = 'var(--sensoroff)';
+       this._iconB = this._sensor_B!=""? this._status_B_off_icon:"";
+       this._status_B_state ='var(--sensoroff)';
+       this._iconC = this._sensor_C!=""? this._status_C_off_icon:"";
+       this._status_C_state = 'var(--sensoroff)';
+       this._iconD = this._sensor_D!=""? this._status_D_off_icon:"";
+       this._status_D_state ='var(--sensoroff)';
+       this._iconE = this._sensor_E!=""? this._status_E_off_icon:"";
+       this._status_E_state = 'var(--sensoroff)';
+       this._iconF = this._sensor_F!=""? this._status_F_off_icon:"";
+       this._status_F_state = 'var(--sensoroff)';
+       this._iconG = this._sensor_G!=""? this._status_G_off_icon:"";
+       this._status_G_state = 'var(--sensoroff)';
+       this._iconH = this._sensor_H!=""? this._status_H_off_icon:"";
+       this._status_H_state = 'var(--sensoroff)';
+
+       this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
+
+       for (let i in this._style) {
+        if (this._style[i] == null) continue;
+        var v=this._style[i].replace(/;/gi,'');
+        //console.log(i,v);
+        this.style.setProperty(i,v);
+       }
 
 }
-    protected firstUpdated() {
-        // this.getConfig();
-
-    }
+//    protected firstUpdated() {
+//         this.getConfig();
+//
+//    }
 
 
     connectedCallback() {
@@ -447,16 +474,11 @@ export class keyPad extends LitElement {
 
         window.source?.addEventListener("key_config", (e: Event) => {
             const messageEvent = e as MessageEvent;
-            let data = messageEvent.data;
-            if (isJson(data))
-                data = JSON.parse(data);
-            if ("iv" in data) data = decrypt(data);
-            this.setConfig(data);
-           for (let i in this._style) {
-            var v=this._style[i].replace(/;/gi,'');
-            console.log(i,v);
-            this.style.setProperty(i,v);
-           }
+            this._config = messageEvent.data;
+            if (isJson(this._config))
+                this._config = JSON.parse(this._config);
+            if ("iv" in this._config) this._config = decrypt(this._config);
+            this.setConfig(this._config);
         });
 
 
@@ -521,16 +543,16 @@ export class keyPad extends LitElement {
         });
     }
 
-    getConfig() {
-
-        //console.log("path=" + basePath);
-        fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`)
-            .then(response => response.text())
-            .then(data => {
-                this.setConfig(data);
-            })
-            .catch(error => console.error(error));
-    }
+//    getConfig() {
+//
+//        //console.log("path=" + basePath);
+//        fetch(`${basePath}/alarm_panel/alarm_panel/getconfig`)
+//            .then(response => response.text())
+//            .then(data => {
+//                this.setConfig(data);
+//            })
+//            .catch(error => console.error(error));
+//    }
 
     sendKey(key) {
         let data = JSON.stringify({
@@ -580,11 +602,11 @@ export class keyPad extends LitElement {
     }
     */
 
-    setPartition(e) {
-        var p = e.currentTarget.getAttribute('state');
-        this.current_partition = p;
-        this.sendKey('R');
-    }
+//    setPartition(e) {
+//        var p = e.currentTarget.getAttribute('state');
+//        this.current_partition = p;
+//        this.sendKey('R');
+//    }
 
 
     setState(e) {

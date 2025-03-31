@@ -25,7 +25,7 @@ div.container[color-scheme="dark"] {
 --hovercolor: var(--hovercolordark,#303030);
 --focuscolor: var(--focuscolordark,#404040);
 --activecolor: var(--activecolordark,#505050);
---sensorlabelcolor: var(--sensorlabelcolordark,#ff9800);
+--sensorlabelcolor: var(--sensorlabelcolordark,#ff9000);
 --buttonbgcolor: var(--buttonbgcolordark,#252525);
 --buttontextcolor: var(--buttontextcolordark,#03a9f4);
 --lcdbgcolor: var(--lcdbgcolordark,#888);
@@ -39,11 +39,11 @@ div.container[color-scheme="light"] {
 --hovercolor: var(--hovercolorlight,#eee);
 --focuscolor: var(--focuscolorlight,#ddd);
 --activecolor: var(--activecolorlight,#999);
---sensorlabelcolor: var(--sensorlabelcolorlight,#ff9800);
+--sensorlabelcolor: var(--sensorlabelcolorlight,#222);
 --buttonbgcolor: var(--buttonbgcolorlight,#f5f5f5);
 --buttontextcolor: var(--buttontextcolorlight,#03a9f4);
 --lcdbgcolor: var(--lcdbgcolorlight,#ccc);
---lcdtextcolor: var(--lcdtextcolorlight,#000);
+--lcdtextcolor: var(--lcdtextcolorlight,#222);
 --bordercolor: var(--bordercolorlight, #898e94);
 --sensoroff: var(--sensoroffcolorlight,#bbb);
 }
@@ -64,11 +64,11 @@ div.container[color-scheme="light"] {
           border-radius: 10px;
           border: 1px solid var(--bordercolor);
           width: 260px;
-          min-height: 40px;
+          min-height: 54px;
           margin: auto;
           padding-top: 8px;
           padding-bottom: 8px;
-          margin-bottom: 10px;
+          margin-bottom: 8px;
           color: var(--lcdtextcolor);
         }
 
@@ -84,7 +84,7 @@ div.container[color-scheme="light"] {
         } 
     
         .display_line {
-          font-size: calc(var(--base-unit) * 1);
+          font-size: .9rem;
           line-height: 1.2;
           font-family: monospace;
           display: flex;
@@ -121,7 +121,7 @@ div.container[color-scheme="light"] {
            border: 1px solid var(--bordercolor);
            background-color:  var(--buttonbgcolor);
            color: var(--buttontextcolor);
-
+           font-size: 0.8rem;
         }
         
         .mdc-button--outlined:hover {
@@ -147,6 +147,7 @@ div.container[color-scheme="light"] {
         }
 
         .mdc-icon {
+
           margin-top: 4px;
           margin-right: 4px;
           margin-bottom: 4px;
@@ -155,7 +156,7 @@ div.container[color-scheme="light"] {
         
         .icon-label:not(:disabled) {
          color: var(--sensorlabelcolor);
-         font-size: calc(.6rem);
+         font-size: 0.52rem;
 
         }
         
@@ -174,9 +175,9 @@ div.container[color-scheme="light"] {
 
         
        .keypad_cmd_text {
-        font-size: calc(.3rem + .2vw);
+        font-size: 0.4rem;
         font-style: italic; 
-        padding-left: .2rem;
+        padding-left: 0.2rem;
        }        
 
 
