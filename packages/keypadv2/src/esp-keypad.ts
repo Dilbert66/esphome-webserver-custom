@@ -399,10 +399,10 @@ export class keyPad extends LitElement {
         this._cmd_B = keypad_config["cmd_B"] != null ? keypad_config["cmd_B"] : "";
         this._cmd_C = keypad_config["cmd_C"] != null ? keypad_config["cmd_C"] : "";
         this._cmd_D = keypad_config["cmd_D"] != null ? keypad_config["cmd_D"] : "";
-        this._cmd_E = keypad_config["cmd_E"] != null ? keypad_config["cmd_E"] : "disabled";
+        this._cmd_E = keypad_config["cmd_E"] != null ? keypad_config["cmd_E"] : "";
         this._cmd_F = keypad_config["cmd_F"] != null ? keypad_config["cmd_F"] : "";
         this._cmd_G = keypad_config["cmd_G"] != null ? keypad_config["cmd_G"] : "";
-        this._cmd_H = keypad_config["cmd_H"] != null ? keypad_config["cmd_H"] : "disabled";
+        this._cmd_H = keypad_config["cmd_H"] != null ? keypad_config["cmd_H"] : "";
 
 
         this._button_disabled_A = keypad_config["button_disabled_A"] || this._cmd_A == "disabled" ? " disabled" : "";
