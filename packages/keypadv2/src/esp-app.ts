@@ -122,6 +122,7 @@ export default class EspApp extends LitElement {
 
     document.title = config.title;
     document.documentElement.lang = config.lang;
+// start
     var c:cryptconf={};
     c.cid=config.cid;
     c.token=config.token;
@@ -133,6 +134,7 @@ export default class EspApp extends LitElement {
     if (config.cid ) 
         this.hideLoginForm();
     this.requestUpdate(); 
+//end
 
   }
 
@@ -146,6 +148,7 @@ export default class EspApp extends LitElement {
     this.scheme = this.schemeDefault();
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
+//start
       let data=e.data
       if (isJson(data)) 
         data = JSON.parse(data); 
@@ -154,10 +157,12 @@ export default class EspApp extends LitElement {
         this.setConfig(data);
         this.requestUpdate();
       }
+//end
       this._updateUptime(e);
       this.lastUpdate = Date.now();
+
     });
-    
+    //start
       window.source?.addEventListener("ota", (e: Event) => {
       var data = e.data
       if (isJson(data)) 
@@ -166,7 +171,7 @@ export default class EspApp extends LitElement {
        this.renderRoot.querySelector('#el3').innerText=data;
        this.requestUpdate();
     });  
- 
+ //end
     window.source.addEventListener("log", (e: MessageEvent) => {
       this._updateUptime(e);
       this.lastUpdate = Date.now();
@@ -191,13 +196,14 @@ export default class EspApp extends LitElement {
       const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
       mainElement?.classList.toggle('expanded_logs');
     });
+//start
     var c:cryptconf={};
     c.cid=this.config.cid;
     c.token=this.config.token;
     c.seq=1;
     c.crypt=this.config.crypt;
     initcrypt(c);
-  
+  //end
   }
 
   schemeDefault() {
@@ -218,7 +224,7 @@ export default class EspApp extends LitElement {
   uptime() {
     return `${getRelativeTime(-this.ping | 0)}`;
   }
-
+//start
 selectfile(ev: any) {
       f = ev.target.files[0];
       if (!f) return;
@@ -270,7 +276,7 @@ upload(ev: any) {
         }).catch((error)=>console.log(error));
       };
     };
-
+//end
 
   renderLog() {
     if (!this.config.cid) return nothing;
@@ -323,6 +329,7 @@ upload(ev: any) {
         </a>
         ${this.renderTitle()}
       </header>
+
       ${this.renderLogin()}  
       <div class="keypad_row">
       ${this.renderKeypads()}
@@ -347,7 +354,7 @@ upload(ev: any) {
       this.requestUpdate();
     }
   }
-
+//start
 
 hideLoginForm() {
         this.renderRoot.querySelector('#login').className=""  
@@ -411,7 +418,7 @@ toggleLoginForm() {
                </div>
 </div>`;
   }
-
+//end
 
   static get styles() {
     return [cssReset, cssButton, cssApp, cssTab,   css`
