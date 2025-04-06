@@ -7,39 +7,51 @@ export default css`
   box-sizing: border-box;
 }
 
+:host {
+position: relative;
+}
+
+
+
 div.container[color-scheme="dark"] {
- --btngrpbgcolor: #101010;
---maingrpbgcolor: #101010;
---bgkeycolor: #101010;
---cmdkeycolor: #000;
---textcolor: #03a9f4;
---bglcd: #748C74;
---lcdtextcolor: #000;
---unavailable:#303030;
---bordercolor: #404040;
---hovercolor: #303030;
+--maingrpbgcolor: var(--maingrpbgcolordark,#111);
+--btngrpbgcolor: var(--btngrpbgcolordark,#111);
+--buttonbgcolor: var(--buttonbgcolordark,#252525);
+--buttontextcolor: var(--buttontextcolordark,#03a9f4);
+--lcdbgcolor: var(--lcdbgcolordark,#748C74);
+--lcdtextcolor: var(--lcdtextcolordark,#000);
+--sensoroff: var(--sensoroffdark,#303030);
+--bordercolor: var(--bordercolordark,#333);
+--hovercolor: var(--hovercolordark,#444);
+--activecolor: var(--activecolordark,#555);
+--focuscolor: var(--focuscolordark,#454545);
 
 }
 
 
 div.container[color-scheme="light"] {
-
---btngrpbgcolor:  whitesmoke;
---maingrpbgcolor: #cacaca;
---bgkeycolor: #d9dcdf;
---cmdkeycolor: #fff;
---textcolor: #000;
---bglcd: #748C74;
---lcdtextcolor: #000;  
---unavailable:#ccc;
---bordercolor: #898e94;
---hovercolor: #c0c0c0;
+--maingrpbgcolor: var(--maingrpbgcolorlight,#ddd);
+--btngrpbgcolor:  var(--btngrpbgcolorlight,whitesmoke);
+--buttonbgcolor: var(--buttonbgcolorlight,#d9dcdf);
+--buttontextcolor: var(--buttontextcolorlight, #000);
+--lcdbgcolor: var(--lcdbgcolorlight,#748C74);
+--lcdtextcolor: var(--lcdtextcolorlight,#000); 
+--sensoroff: var(--sensorofflight,#ccc);
+--bordercolor: var(--bordercolorlight,#bbb);
+--hovercolor: var(--hovercolorlight,#c0c0c0);
+--activecolor: var(--activecolorlight,#d0d0d0);
+--focuscolor: var(--focuscolorlight,#c5c5c5);
 }
 
-div.container {
-  margin-top: 5px;
+        .container {
 
-}
+            justify-content: center;
+            align-items: center;
+            border-radius: 1em;
+            border: 1px solid var(--bordercolor);            
+        }
+
+
 
 i.keypad-icon {
   /* use !important to prevent issues with browser extensions that change fonts */
@@ -58,6 +70,7 @@ i.keypad-icon {
 
 .icon-star:before {
   content: "\\e905";
+  font-size: .5rem;
 }
 .icon-ac:before {
   content: "\\e90d";
@@ -107,110 +120,104 @@ i.keypad-icon {
 .icon-exit:before {
   content: "\\e901";
 }
-      .btn {
+      .btn{
         &:hover {
-        background-color: var(--hovercolor);
-          color: var(--textcolor) !important;
+            background-color: var(--hovercolor);
+            color: var(--buttontextcolor);
+          }
+        &:focus {
+            background-color: var(--focuscolor);
+            color: var(--buttontextcolor);
+          }
+        &:active {
+            background-color: var(--activecolor);
+            color: var(--buttontextcolor);
           }
         }
-      html {
-        font-size: 16px;
-      }
 
-      .greenbullet {
-        color: #28a745;
-      }
-
-      .redbullet {
-        color: #dc3545;
-      }
-        i.keypad-icon.icon-star {
-          font-size: 0.7rem;
-        }
 
       button.keypad_button {
-        width: calc(0.6rem + 10vw);
         border-radius: 1.5rem;
-        font-weight: bold;
-        font-size: calc(0.8rem );
-        padding: 2px;
-        max-width: 4rem;
-        min-height: 1.4rem;
-        
-        line-height: 1;
-        background-color: var(--bgkeycolor);
+        background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor);
-        min-height: 2.1rem;
-        color: var(--textcolor);
+        color: var(--buttontextcolor);
+
       }
 
+      button.keypad_button_pad {
+        width: 3.5rem;
+        font-weight: bold;
+        font-size: 0.8rem;
+        max-width: 3.5rem;
+        background-color: var(--buttonbgcolor);
+        border: 2px solid var(--bordercolor);
+        min-height: 2.1rem;
+        color: var(--buttontextcolor);
+        line-height: 1;
+        margin: auto;
+       
+
+      }
+
+
       button.keypad_button_small {
+        font-weight: bold;
+        font-size: 0.8rem;
+        min-height: 1.8rem;
+        min-width: 1.8rem;
         padding: 2px;
         max-width: 2.2rem;
         line-height: 1;
-        background-color: var(--bgkeycolor);
+        background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
-        min-width: 2.2rem;
                 
       }
-      button.keypad_button_medium {
-        width: 7.0vw;
-        padding: 2px;
-        max-width: 2.4rem;
-        line-height: 1 !important;
-        background-color: var(--bgkeycolor);
-        border: 2px solid #898e94;         
-      }
+
 
       button.keypad_button_slim {
-        width: 4.5rem;
         padding: 2px;
-        max-width: 5rem;
+        max-width: 3rem;
+        min-width: 3.6rem;
         line-height: 1;
-        background-color: var(--bgkeycolor);
+        min-height: 1.5rem;
+        background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor);        
       }
 
-      button.keypad_text {
-        width: calc(0.6rem + 10vw);
-        border-radius: 1.5rem;
-        font-size: calc(0.1rem + 1vw);
-        padding: 0.2rem;
-        max-width: 4.5rem;
-      }
 
        .keypad_cmd_text {
-        font-size: calc(.3rem + .3vw);
+        font-size: .4rem;
         font-style: italic; 
         padding-left: .2rem;
        }
 
       button.keypad_button_control {
-        background-color: var(--bgkeycolor);
-        padding: .15rem;
-        font-size: calc(0.6rem + 1vw);
-        line-height: 0.6 !important;
-        max-width: 3.0rem;
-        font-size: calc(0.7rem);
+        background-color: var(--buttonbgcolor);
+        padding: 2px;
+        line-height: 0.6;
+        max-width: 3rem;
+        font-size:  1rem;
         min-height: 1.5rem;
-        max-height: 2.1rem;
+        min-width: 2.5rem;
       }
 
 
             div.virtual_lcd {
                 flex: 1;
-
                 /*font-family: "Dot Matrix", sans-serif;*/
                 font-family: "Arial";
-                background-color: var(--bglcd);
+                background-color: var(--lcdbgcolor);
                 font-size: 1.3rem;
                 border-radius: 8px;
                 text-align: center; 
                 color: var(--lcdtextcolor);
+                width: 260px;
                 overflow: auto;
+                margin: 5px 0px 5px 5px;
                 padding: 5px;
-                width: 300px;
-            }
+                
+             }
+    
 
 
 
@@ -223,29 +230,30 @@ i.keypad-icon {
 
       
       div#lcd_container {
-        margin: 0 auto;
+        margin: 4px 6px 4px 6px;
         border: 1px solid var(--bordercolor);
-        padding: 5px;
+        padding: 4px;
         background-color: var(--btngrpbgcolor);
         border-radius: 10px;
         white-space: nowrap;
-        margin-bottom: 5px;
         display: flex;
       }
 
       div.keypad_button_row {
-        margin: 12px 10px;
+        margin:8px;
         text-align: center;
         white-space: nowrap;
       }
 
+
+
       div.container {
         border: 1px solid var(--bordercolor);
         border-radius: 20px;
-        padding: 8px;
+        padding: 4px;
         background-color: var(--maingrpbgcolor);
         max-width: 500px;
-        margin-bottom: 5px;
+        margin: 5px;
       }
 
       div.inline_container {
@@ -269,6 +277,7 @@ i.keypad-icon {
       div#left_buttons,
       div#right_buttons,
       div#keypad_container {
+        margin: 4px;
         border: 1px solid var(--bordercolor);
         border-radius: 8px;
         background-color: var(--btngrpbgcolor);
@@ -282,10 +291,10 @@ i.keypad-icon {
 
 
       div#keypad_container {
-        flex: 2;
-        margin: 0px 5px;
-        max-width: 17.5rem;
-        line-height: 1.5 !important;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+
       }
 
       div#right_buttons {
@@ -303,17 +312,6 @@ i.keypad-icon {
         justify-content: space-between;
       }
 
-      .green_circle {
-        color: green;
-      }
-
-      .red_circle {
-        color: red;
-      }
-
-      .orange_color {
-        color: orange;
-      }
 
  
 /*boot strap css */
@@ -340,8 +338,9 @@ i.keypad-icon {
 }
 
 .btn:focus, .btn.focus {
-  outline: 0;
+/*  outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+*/
 }
 
 .btn.disabled, .btn:disabled {
@@ -357,33 +356,18 @@ fieldset:disabled a.btn {
   pointer-events: none;
 }
 
-.btn-outline-dark {
-  color: #343a40;
-  background-color: transparent;
-  background-image: none;
-  border-color: #343a40;
-}
-
-.btn-outline-dark:hover {
-  color: #fff;
-  border-color: #343a40;
-}
 
 .btn-outline-dark:focus, .btn-outline-dark.focus {
-  box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);
+ /* box-shadow: 0 0 0 0.2rem rgba(52, 58, 64, 0.5);*/
 }
 
+
 .btn-outline-dark.disabled, .btn-outline-dark:disabled {
-  color: #343a40;
+
   background-color: transparent;
 }
 
-.btn-outline-dark:not(:disabled):not(.disabled):active, .btn-outline-dark:not(:disabled):not(.disabled).active,
-.show > .btn-outline-dark.dropdown-toggle {
-  color: #fff;
-  background-color: #343a40;
-  border-color: #343a40;
-}
+
 
 .btn-outline-dark:not(:disabled):not(.disabled):active:focus, .btn-outline-dark:not(:disabled):not(.disabled).active:focus,
 .show > .btn-outline-dark.dropdown-toggle:focus {

@@ -145,7 +145,9 @@ export default class EspApp extends LitElement {
     const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
     l.href =
       'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
-    this.scheme = this.schemeDefault();
+    //this.scheme = this.schemeDefault();
+     this.scheme=localStorage.getItem("scheme")===null?this.schemeDefault():localStorage.getItem("scheme");
+
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
       let data=e.data
@@ -211,6 +213,7 @@ export default class EspApp extends LitElement {
     if (changedProperties.has("scheme")) {
       let el = document.documentElement;
       document.documentElement.style.setProperty("color-scheme", this.scheme);
+      localStorage.setItem("scheme",this.scheme);
     }
     if (changedProperties.has("ping")) {
       if (!!this.ping) this.beat.animate(this.frames, 1000);
