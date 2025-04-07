@@ -164,24 +164,21 @@ i.keypad-icon {
         font-weight: bold;
         font-size: 0.8rem;
         min-height: 1.8rem;
-        min-width: 1.8rem;
-        padding: 2px;
-        max-width: 2.2rem;
+        width: 2.2rem;
         line-height: 1;
         background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
-                
+        margin: auto;       
       }
 
 
       button.keypad_button_slim {
-        padding: 2px;
-        max-width: 3rem;
-        min-width: 3.6rem;
         line-height: 1;
         min-height: 1.5rem;
         background-color: var(--buttonbgcolor);
-        border: 2px solid var(--bordercolor);        
+        border: 2px solid var(--bordercolor);  
+        margin-top: 6px;
+        width: 100%;      
       }
 
 
@@ -189,17 +186,24 @@ i.keypad-icon {
         font-size: .4rem;
         font-style: italic; 
         padding-left: .2rem;
+        margin-top: 2px;
        }
+
 
       button.keypad_button_control {
         background-color: var(--buttonbgcolor);
-        padding: 2px;
         line-height: 0.6;
-        max-width: 3rem;
-        font-size:  1rem;
         min-height: 1.5rem;
-        min-width: 2.5rem;
+        width: 100%
+        margin: auto;
       }
+
+         .keypad_title {
+          margin: auto;
+          padding-bottom: 5px;
+          display: flex;
+          justify-content: center          
+         }    
 
 
             div.virtual_lcd {
@@ -284,8 +288,7 @@ i.keypad-icon {
       }
 
       div#left_buttons {
-        flex: 1;
-        max-width: 5.9rem;
+
 
       }
 
@@ -298,8 +301,7 @@ i.keypad-icon {
       }
 
       div#right_buttons {
-        flex: 1;
-        max-width: 5.8rem;
+
       }
 
       div#buttons_area {

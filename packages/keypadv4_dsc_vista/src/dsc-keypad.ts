@@ -65,7 +65,7 @@ export class keyPad extends LitElement  {
   render() {
     return html`
     <div class="container" color-scheme="${this.scheme}" >
-
+             <div class="keypad_title">Partition: ${this.current_partition}</div>   
       <div id="lcd_container">
         <div class="virtual_lcd">
           <div id="first_line">${this._line1}</div>
@@ -110,24 +110,24 @@ export class keyPad extends LitElement  {
 
         <div id="keypad_container">
           <div class="keypad_button_row">
-            <button type="button" id="btn_1" class="btn btn-outline-dark keypad_button keypad_button_pad" state="1"  @click="${this.setState}" title="1">1<span class="keypad_cmd_text">${this._text_1}</span></button>
-            <button type="button" id="btn_2" class="btn btn-outline-dark keypad_button keypad_button_pad" state="2"  @click="${this.setState}" title="2">2<span class="keypad_cmd_text">${this._text_2}</span></button>
-            <button type="button" id="btn_3" class="btn btn-outline-dark keypad_button keypad_button_pad" state="3"  @click="${this.setState}" title="3">3<span class="keypad_cmd_text">${this._text_3}</span></button>
+            <button type="button" id="btn_1" class="btn btn-outline-dark keypad_button keypad_button_pad" state="1"  @click="${this.setState}" title="1">1<div class="keypad_cmd_text">${this._text_1}</div></button>
+            <button type="button" id="btn_2" class="btn btn-outline-dark keypad_button keypad_button_pad" state="2"  @click="${this.setState}" title="2">2<div class="keypad_cmd_text">${this._text_2}</div></button>
+            <button type="button" id="btn_3" class="btn btn-outline-dark keypad_button keypad_button_pad" state="3"  @click="${this.setState}" title="3">3<div class="keypad_cmd_text">${this._text_3}</div></button>
           </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_4" class="btn btn-outline-dark keypad_button keypad_button_pad" state="4"  @click="${this.setState}" title="4">4<span class="keypad_cmd_text">${this._text_4}</span></button>
-            <button type="button" id="btn_5" class="btn btn-outline-dark keypad_button keypad_button_pad" state="5"  @click="${this.setState}" title="5">5<span class="keypad_cmd_text">${this._text_5}</span></button>
-            <button type="button" id="btn_6" class="btn btn-outline-dark keypad_button keypad_button_pad" state="6"  @click="${this.setState}" title="6">6<span class="keypad_cmd_text">${this._text_6}</span></button>
+            <button type="button" id="btn_4" class="btn btn-outline-dark keypad_button keypad_button_pad" state="4"  @click="${this.setState}" title="4">4<div class="keypad_cmd_text">${this._text_4}</div></button>
+            <button type="button" id="btn_5" class="btn btn-outline-dark keypad_button keypad_button_pad" state="5"  @click="${this.setState}" title="5">5<div class="keypad_cmd_text">${this._text_5}</div></button>
+            <button type="button" id="btn_6" class="btn btn-outline-dark keypad_button keypad_button_pad" state="6"  @click="${this.setState}" title="6">6<div class="keypad_cmd_text">${this._text_6}</div></button>
           </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_7" class="btn btn-outline-dark keypad_button keypad_button_pad" state="7"  @click="${this.setState}" title="7">7<span class="keypad_cmd_text">${this._text_7}</span></button>
-            <button type="button" id="btn_8" class="btn btn-outline-dark keypad_button keypad_button_pad" state="8"  @click="${this.setState}" title="8">8<span class="keypad_cmd_text">${this._text_8}</span></button>
-            <button type="button" id="btn_9" class="btn btn-outline-dark keypad_button keypad_button_pad" state="9"  @click="${this.setState}" title="9">9<span class="keypad_cmd_text">${this._text_9}</span></button>
+            <button type="button" id="btn_7" class="btn btn-outline-dark keypad_button keypad_button_pad" state="7"  @click="${this.setState}" title="7">7<div class="keypad_cmd_text">${this._text_7}</div></button>
+            <button type="button" id="btn_8" class="btn btn-outline-dark keypad_button keypad_button_pad" state="8"  @click="${this.setState}" title="8">8<div class="keypad_cmd_text">${this._text_8}</div></button>
+            <button type="button" id="btn_9" class="btn btn-outline-dark keypad_button keypad_button_pad" state="9"  @click="${this.setState}" title="9">9<div class="keypad_cmd_text">${this._text_9}</div></button>
           </div>
           <div class="keypad_button_row">
-            <button type="button" id="btn_*" class="btn btn-outline-dark keypad_button keypad_button_pad" state="*"  @click="${this.setState}" title="*"><i class="keypad-icon icon-star"></i><span class="keypad_cmd_text">${this._text_star}</span></button>
-            <button type="button" id="btn_0" class="btn btn-outline-dark keypad_button keypad_button_pad" state="0"  @click="${this.setState}" title="0">0<span class="keypad_cmd_text"> </span></button>
-            <button type="button" id="btn_#" class="btn btn-outline-dark keypad_button keypad_button_pad"  state="#"  @click="${this.setState}" title="#">#<span class="keypad_cmd_text">${this._text_pound}</span></button>
+            <button type="button" id="btn_*" class="btn btn-outline-dark keypad_button keypad_button_pad" state="*"  @click="${this.setState}" title="*"><i class="keypad-icon icon-star"></i><div class="keypad_cmd_text">${this._text_star}</div></button>
+            <button type="button" id="btn_0" class="btn btn-outline-dark keypad_button keypad_button_pad" state="0"  @click="${this.setState}" title="0">0<div class="keypad_cmd_text">${this._text_0}</div></button>
+            <button type="button" id="btn_#" class="btn btn-outline-dark keypad_button keypad_button_pad"  state="#"  @click="${this.setState}" title="#">#<div class="keypad_cmd_text">${this._text_pound}</div></button>
           </div>
         </div> <!-- keypad -->
 
