@@ -329,10 +329,11 @@ upload(ev: any) {
         ${this.renderTitle()}
       </header>
       ${this.renderLogin()}  
-      <div class="keypad_row">
+      <div class="keypad_col">
       ${this.renderKeypads()}
-        </div>
+</div>
       <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
+
         <section
           id="col_entities"
           class="col"          
@@ -421,15 +422,18 @@ toggleLoginForm() {
   static get styles() {
     return [cssReset, cssButton, cssApp, cssTab,   css`
        
-        .keypad_row {
+        .keypad_col{
           display: flex;
           flex-wrap:wrap;
           justify-content: center;
+        } 
 
-         } 
         .keypad {
+          max-width:450px;
           padding: 5px; 
+          width: 100%;    
         }
+
         .login_row {
            display: flex;
           flex-wrap:wrap;

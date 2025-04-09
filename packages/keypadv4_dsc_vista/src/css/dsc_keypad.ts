@@ -74,52 +74,77 @@ i.keypad-icon {
 }
 .icon-ac:before {
   content: "\\e90d";
+  font-size: 0.8rem;
 }
 .icon-trouble:before {
   content: "\\e90e";
+  font-size: 0.8rem;
 }
 .icon-armed:before {
   content: "\\e90f";
+  font-size: 0.8rem;
 }
 .icon-check:before {
   content: "\\e910";
+  font-size: 0.8rem;
 }
 .icon-thief:before {
   content: "\\e90b";
+  font-size: 1rem;
 }
 .icon-alert:before {
   content: "\\e90c";
+  font-size: 1rem;
 }
 .icon-sleep:before {
   content: "\\e90a";
+  font-size: 0.8rem;
 }
 .icon-bypass:before {
   content: "\\e909";
+  font-size: 0.8rem;
 }
 .icon-programming:before {
   content: "\\e908";
+  font-size: 0.8rem;
 }
 .icon-flame:before {
   content: "\\e907";
+  font-size: 1rem;
 }
 .icon-info:before {
   content: "\\e906";
+  font-size: 0.8rem;
 }
 .icon-stay_away:before {
   content: "\\e904";
+  font-size: 0.8rem;
 }
 .icon-stay_empty:before {
   content: "\\e903";
+  font-size: 0.8rem;
 }
 .icon-bell:before {
   content: "\\e900";
+  font-size: 0.8rem;
 }
 .icon-refresh:before {
   content: "\\e902";
+  font-size: 0.8rem;
 }
 .icon-exit:before {
   content: "\\e901";
+  font-size: 0.8rem;
 }
+
+      .flex-keypad {
+        border-radius: 20px;
+        padding: 4px;
+        background-color: var(--maingrpbgcolor);
+        max-width: 600px;
+        margin: 5px;
+
+      }
       .btn{
         &:hover {
             background-color: var(--hovercolor);
@@ -153,7 +178,8 @@ i.keypad-icon {
         min-height: 2.3rem;
         color: var(--buttontextcolor);
         line-height: 1;
-        margin: auto;
+        margin-bottom: 8px;
+
 
       }
 
@@ -166,16 +192,16 @@ i.keypad-icon {
         line-height: 1;
         background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
-        margin: auto;       
+        margin-top: 0.1rem;
+        margin-bottom: 0.6rem;     
       }
 
 
       button.keypad_button_slim {
-        line-height: 1;
-        min-height: 1.5rem;
+        line-height: 0.8;
         background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor);  
-        margin-top: 6px;
+        margin-top: 12px;
         width: 100%;      
       }
 
@@ -189,8 +215,7 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--buttonbgcolor);
-        line-height: 0.6;
-        min-height: 1.5rem;
+        line-height: 0.4;
         width: 100%
         margin: auto;
       }
@@ -242,7 +267,7 @@ i.keypad-icon {
       }
 
       div.keypad_button_row {
-        margin:8px;
+        margin:6px;
         text-align: center;
         white-space: nowrap;
       }
@@ -253,7 +278,7 @@ i.keypad-icon {
         border-radius: 20px;
         padding: 4px;
         background-color: var(--maingrpbgcolor);
-        max-width: 600px;
+        max-width: 450px;
         margin: 5px;
 
       }
@@ -290,7 +315,7 @@ i.keypad-icon {
 
 
       div#keypad_container {
-        display: flex;
+        width: 100%;
         justify-content: center;
         flex-direction: column;
 
