@@ -189,7 +189,7 @@ export class keyPad extends LitElement  {
       this._cmd_alert=keypad_config["cmd_alert"]!=null?keypad_config["cmd_alert"]:"A"; 
       this._cmd_panic=keypad_config["cmd_panic"]!=null?keypad_config["cmd_panic"]:"P"; 
 
-      this._text_0=keypad_config["text_0"]!=null?keypad_config["text_0"]:"";
+      this._text_0=keypad_config["text_0"]!=null?keypad_config["text_0"]:" ";
       this._text_1=keypad_config["text_1"]!=null?keypad_config["text_1"]:"BYPASS";  
       this._text_2=keypad_config["text_2"]!=null?keypad_config["text_2"]:"SERV";  
       this._text_3=keypad_config["text_3"]!=null?keypad_config["text_3"]:"ALARMS";  
