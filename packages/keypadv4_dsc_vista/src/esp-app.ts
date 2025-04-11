@@ -429,9 +429,9 @@ toggleLoginForm() {
         } 
 
         .keypad {
-          max-width:450px;
-          padding: 5px; 
-          width: 100%;    
+          max-width: 450px;
+          width: 100%;   
+          margin: 5px; 
         }
 
         .login_row {

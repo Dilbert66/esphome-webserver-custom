@@ -16,6 +16,7 @@
     "fa-icons": "^0.2.0",
     "http-proxy-middleware": "^2.0.1",
     "iconify-icon": "^1.0.8",
+    "js-yaml": "^4.1.0",
     "lit": "^2.0.2",
     "lit-fontawesome": "^0.1.3"
   },

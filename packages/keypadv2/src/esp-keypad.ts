@@ -3,8 +3,9 @@ import { customElement, state, property } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 import cssKeypad from "./css/esp_keypad";
 import { isJson, encrypt, decrypt } from "./esp-crypt";
-let basePath = getBasePath();
 
+
+let basePath = getBasePath();
 @customElement("esp-keypad")
 export class keyPad extends LitElement {
 
@@ -37,9 +38,9 @@ export class keyPad extends LitElement {
         return html`
 
          <div class='container' @click="${this.stopPropagation}" color-scheme="${this.scheme}">
-          
+    
               <div class='keypad'>
-                <div class="keypad_title">Partition: ${this.current_partition}</div>              
+                <div class="keypad_title">Partition: ${this.current_partition}</div>     
                 ${this._view_display ? html`
                   <div class="display">
                     <div class="display_line" id="display_line1">${this._line1}</div>
@@ -322,11 +323,9 @@ export class keyPad extends LitElement {
                 </div>`: ''}
                   
 
-                
-
               </div>
               
-              
+    
               
           </div>
 
@@ -337,6 +336,8 @@ export class keyPad extends LitElement {
     setConfig(keypad_config) {
         //console.log("data="+keypad_config);
         //let keypad_config=JSON.parse(data);
+
+
         this._line1id = keypad_config["line_1"] != null ? keypad_config["line_1"] : "";
         this._line2id = keypad_config["line_2"] != null ? keypad_config["line_2"] : "";
 
@@ -473,12 +474,21 @@ export class keyPad extends LitElement {
         super.connectedCallback();
 
         window.source?.addEventListener("key_config", (e: Event) => {
-            const messageEvent = e as MessageEvent;
-            this._config = messageEvent.data;
-            if (isJson(this._config))
-                this._config = JSON.parse(this._config);
-            if ("iv" in this._config) this._config = decrypt(this._config);
-            this.setConfig(this._config);
+
+           let conf=localStorage.getItem("keypad_config");
+            if (conf === null) {
+                const messageEvent = e as MessageEvent;
+                this._config = messageEvent.data;
+                if (isJson(this._config))
+                    this._config = JSON.parse(this._config);
+                if ("iv" in this._config) this._config = decrypt(this._config);
+                this.setConfig(this._config);
+                localStorage.setItem("keypad_config",JSON.stringify(this._config));
+            } else {
+                this._config=JSON.parse(conf);
+                this.setConfig(this._config);
+            }
+
         });
 
 
@@ -645,10 +655,12 @@ export class keyPad extends LitElement {
 
     }
 
-
     static get styles() {
         return [cssKeypad];
     }
+
+
+
 }
 
 

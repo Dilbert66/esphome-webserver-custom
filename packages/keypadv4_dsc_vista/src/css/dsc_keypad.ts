@@ -33,7 +33,7 @@ div.container[color-scheme="light"] {
 --maingrpbgcolor: var(--maingrpbgcolorlight,#ddd);
 --btngrpbgcolor:  var(--btngrpbgcolorlight,whitesmoke);
 --buttonbgcolor: var(--buttonbgcolorlight,#d9dcdf);
---buttontextcolor: var(--buttontextcolorlight, #000);
+--buttontextcolor: var(--buttontextcolorlight, #222);
 --lcdbgcolor: var(--lcdbgcolorlight,#859c99);
 --lcdtextcolor: var(--lcdtextcolorlight,#222); 
 --sensoroff: var(--sensorofflight,#ccc);
@@ -186,7 +186,7 @@ i.keypad-icon {
 
       button.keypad_button_small {
         font-weight: bold;
-        font-size: 0.8rem;
+        font-size: 1rem;
         min-height: 1.8rem;
         width: 2.2rem;
         line-height: 1;
@@ -215,7 +215,7 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--buttonbgcolor);
-        line-height: 0.4;
+        line-height: 1;
         width: 100%
         margin: auto;
       }
@@ -233,11 +233,12 @@ i.keypad-icon {
                 /*font-family: "Dot Matrix", sans-serif;*/
                 font-family: "Arial";
                 background-color: var(--lcdbgcolor);
-                font-size: 1.3rem;
+                font-size: 1.2rem;
                 border-radius: 8px;
                 text-align: center; 
                 color: var(--lcdtextcolor);
                 overflow: auto;
+                width: 100%;
                 margin: 5px 0px 5px 5px;
                 padding: 5px;
                 padding-top: 10px;

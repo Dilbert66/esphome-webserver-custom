@@ -11,9 +11,12 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
 import cssTab from "./css/tab";
+import * as yaml from 'js-yaml'
+
+
+
 import {encrypt,decrypt,isJson,initcrypt,cryptconf,login,logout} from "./esp-crypt";
 
-let basePath = getBasePath(); 
 window.source = new EventSource(getBasePath() + "/events");
 
 
@@ -77,7 +80,7 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: true, title: "", comment: "" ,cid: 9, token : ""};
+  config: Config = { ota: false, log: true, title: "", comment: "" ,cid: 0, token : ""};
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -90,6 +93,7 @@ export default class EspApp extends LitElement {
   }
 
  sendAck(cid) {
+     let basePath = getBasePath(); 
      let data=JSON.stringify({
          'cid': cid,
          'method': "POST",
@@ -146,7 +150,8 @@ export default class EspApp extends LitElement {
     l.href =
       'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
     //this.scheme = this.schemeDefault();
-     this.scheme=localStorage.getItem("scheme")===null?this.schemeDefault():localStorage.getItem("scheme");
+    this.scheme=localStorage.getItem("scheme")===null?this.schemeDefault():localStorage.getItem("scheme");
+
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
 //start
@@ -242,10 +247,9 @@ this.renderRoot.querySelector('#el1').click();
 //this.renderRoot.querySelector('#showlogin').innerText
   renderOta() {
     if (this.config.ota) {
-      let basePath = getBasePath();
      return html`<div class="tab-header">OTA Update</div>
 <div class="tab-container">
-        <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/>
+     <!--   <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> -->
         <button class="btn" id="el2" @click="${this.openselect}">choose file...</button>
         <span> Selected file:</span> <span id="el4"></span> <br/>
         <button class="btn" id="el5" @click="${this.upload}"  disabled>upload file</button>
@@ -281,6 +285,7 @@ upload(ev: any) {
 //end
 
   renderLog() {
+
     if (!this.config.cid) return nothing;
     return this.config.log
       ? html`<section
@@ -307,7 +312,7 @@ upload(ev: any) {
   render() {
     return html`
       <header>
-          ${this.renderCryptState()}<br/>
+          ${this.renderCryptState()} <br/>
         <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
           <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
@@ -332,10 +337,13 @@ upload(ev: any) {
         ${this.renderTitle()}
       </header>
 
-      ${this.renderLogin()}  
+      ${this.renderLogin()}
+  ${this.renderConfig()}
       <div class="keypad_row">
       ${this.renderKeypads()}
+
         </div>
+
       <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
         <section
           id="col_entities"
@@ -344,6 +352,7 @@ upload(ev: any) {
           <esp-entity-table .scheme="${this.scheme}"></esp-entity-table>
           ${this.renderOta()}
         </section>
+
         ${this.renderLog()}
       </main>
     `;
@@ -367,6 +376,8 @@ showLoginForm() {
         this.renderRoot.querySelector('#login').className="" 
       
 }
+
+
 toggleLoginForm() {
         if (this.renderRoot.querySelector('#login').classList=="hide")
             this.renderRoot.querySelector('#showlogin').innerText="Hide Login"; 
@@ -376,11 +387,30 @@ toggleLoginForm() {
         this.renderRoot.querySelector('#login').classList.toggle("hide");
       
 }
+
+toggleEditForm() {
+        if (this.renderRoot.querySelector('#editform').classList=="hide") {
+         this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+            this.renderRoot.querySelector('#showedit').className="hide";
+            this.renderRoot.querySelector('#editform').className="";
+        } else {
+            this.renderRoot.querySelector('#config_field').value="";
+            this.renderRoot.querySelector('#showedit').innerText="Edit Config"; 
+            this.renderRoot.querySelector('#showedit').className="";
+            this.renderRoot.querySelector('#editform').className="hide";
+
+        }
+     
+}
+
+
+
   renderLoginButton() {
-      if (this.config.crypt ) {
-          return html`<button id='logout' @click='${logout}'>Logout</button>`;  
-   }   else if (!this.config.cid) {
-        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
+      if ( this.config.cid ) {
+
+          return html`<button id='logout' @click='${this.logout}'>Logout</button>`;  
+   }  else {
+          return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
    }
       
   }
@@ -395,13 +425,70 @@ toggleLoginForm() {
         ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
   }  
 
+    resetConfig() {
+        localStorage.removeItem("keypad_config");
+        location.reload();
+    }
+
+    fetchConfig() {
+console.log("test test");
+     //   if (this.renderRoot.querySelector('#login').classList=="hide")
+         return yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+    //    else
+          //  return "";
+    }
+
+
+    renderConfig() {
+
+        
+        return html`
+       <div style1="float: right;">
+
+        <button class=""  @click='${this.toggleEditForm}' id="showedit">Edit Config</button>
+
+        <div class="hide" id="editform">
+<div>
+                <button  @click="${this.toggleEditForm}">Exit</button>
+                <button  @click="${this.saveConfig}">Save</button>
+                <button  @click="${this.resetConfig}">Reset</button>
+</div>
+            <textarea id="config_field" rows="20" cols="50" ></textarea>
+
+            <div>
+            <span id="yaml_error" style="color: red;"></span>
+            </div>
+        </div>
+
+       </div>
+
+        `;
+    }
+
+    saveConfig() {
+        const content = this.shadowRoot.getElementById("config_field").value;
+        const err = this.shadowRoot.getElementById("yaml_error");
+
+        try {
+            let c = JSON.stringify(yaml.load(content));
+            localStorage.setItem("keypad_config",c);
+            location.reload();
+        } catch (e) {
+            err.innerText=e;
+            console.log(e);
+        }
+
+    }
+
+
   renderCryptState() {
     let icon="🔓";
    if (this.config.crypt ) {
     icon="🔐";
    }
    return html`
-   <div id="cryptstate" >${icon}${this.renderLoginButton()}</div>
+   <div id="cryptstate" >${icon}${this.renderLoginButton()}  </div>
+
 `;
 
   }
@@ -425,15 +512,19 @@ toggleLoginForm() {
   static get styles() {
     return [cssReset, cssButton, cssApp, cssTab,   css`
        
-        .keypad_row {
+        .keypad_row{
           display: flex;
           flex-wrap:wrap;
           justify-content: center;
+        } 
 
-         } 
         .keypad {
-          padding: 5px; 
+          margin: 10px;
+          max-width:370px;
+          width: 100%;  
+
         }
+
         .login_row {
            display: flex;
           flex-wrap:wrap;

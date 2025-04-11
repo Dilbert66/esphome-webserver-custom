@@ -41,7 +41,7 @@ div.container[color-scheme="light"] {
 --activecolor: var(--activecolorlight,#999);
 --sensorlabelcolor: var(--sensorlabelcolorlight,#222);
 --buttonbgcolor: var(--buttonbgcolorlight,#f5f5f5);
---buttontextcolor: var(--buttontextcolorlight,#03a9f4);
+--buttontextcolor: var(--buttontextcolorlight,#222);
 --lcdbgcolor: var(--lcdbgcolorlight,#ccc);
 --lcdtextcolor: var(--lcdtextcolorlight,#222);
 --bordercolor: var(--bordercolorlight, #898e94);
@@ -63,13 +63,13 @@ div.container[color-scheme="light"] {
           background: var(--lcdbgcolor);
           border-radius: 10px;
           border: 1px solid var(--bordercolor);
-          width: 260px;
-          min-height: 54px;
+          min-height: 60px;
           margin: auto;
           padding-top: 8px;
           padding-bottom: 8px;
           margin-bottom: 8px;
           color: var(--lcdtextcolor);
+          max-width: 300px;
         }
 
          .keypad_title {
@@ -122,6 +122,7 @@ div.container[color-scheme="light"] {
            background-color:  var(--buttonbgcolor);
            color: var(--buttontextcolor);
            font-size: 0.8rem;
+           font-weight: bold;
         }
         
         .mdc-button--outlined:hover {
@@ -175,9 +176,10 @@ div.container[color-scheme="light"] {
 
         
        .keypad_cmd_text {
-        font-size: 0.4rem;
+        font-size: 0.5rem;
         font-style: italic; 
         padding-left: 0.2rem;
+        font-weight: bold;
        }        
 
 

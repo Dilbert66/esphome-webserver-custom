@@ -100,7 +100,6 @@ export function isJson(str) {
   }
   
  export function login() {
-       
        const username = this.shadowRoot.querySelector("#username").value;
        const password = this.shadowRoot.querySelector("#password").value;
 
