@@ -475,7 +475,7 @@ export class keyPad extends LitElement {
 
         window.source?.addEventListener("key_config", (e: Event) => {
 
-           let conf=localStorage.getItem("keypad_config");
+            let conf=localStorage.getItem("keypad_config");
             if (conf === null) {
                 const messageEvent = e as MessageEvent;
                 this._config = messageEvent.data;

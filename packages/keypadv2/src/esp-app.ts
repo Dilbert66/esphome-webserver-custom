@@ -11,7 +11,7 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
 import cssTab from "./css/tab";
-import * as yaml from 'js-yaml'
+import * as yaml from "js-yaml"
 
 
 
@@ -249,7 +249,7 @@ this.renderRoot.querySelector('#el1').click();
     if (this.config.ota) {
      return html`<div class="tab-header">OTA Update</div>
 <div class="tab-container">
-     <!--   <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> -->
+        <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> 
         <button class="btn" id="el2" @click="${this.openselect}">choose file...</button>
         <span> Selected file:</span> <span id="el4"></span> <br/>
         <button class="btn" id="el5" @click="${this.upload}"  disabled>upload file</button>
@@ -312,7 +312,7 @@ upload(ev: any) {
   render() {
     return html`
       <header>
-          ${this.renderCryptState()} <br/>
+        ${this.renderCryptState()}  </br> 
         <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
           <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
@@ -334,11 +334,13 @@ upload(ev: any) {
             class="top-icon"
           ></iconify-icon>
         </a>
+
         ${this.renderTitle()}
+${this.renderConfig()}
       </header>
 
       ${this.renderLogin()}
-  ${this.renderConfig()}
+
       <div class="keypad_row">
       ${this.renderKeypads()}
 
@@ -367,6 +369,30 @@ upload(ev: any) {
   }
 //start
 
+
+ sendConfig(config) {
+     let basePath = getBasePath(); 
+     let data=JSON.stringify({
+            'config': config,
+            'method': "POST",
+            'action': "set",
+            'oid': "alarm_panel",
+            'domain': "alarm_panel"
+     });
+    fetch(`${basePath}/api`, {
+      method: "POST",
+      body: encrypt(data)
+    }).then((r) => {
+       if (!r.ok) {
+            console.log(r);
+                //ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+            }  else {
+               // ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+            }
+    }).catch((error)=>console.log(error)); 
+
+}
+
 hideLoginForm() {
         this.renderRoot.querySelector('#login').className=""  
         this.renderRoot.querySelector('#login').classList.add("hide");
@@ -388,27 +414,11 @@ toggleLoginForm() {
       
 }
 
-toggleEditForm() {
-        if (this.renderRoot.querySelector('#editform').classList=="hide") {
-         this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
-            this.renderRoot.querySelector('#showedit').className="hide";
-            this.renderRoot.querySelector('#editform').className="";
-        } else {
-            this.renderRoot.querySelector('#config_field').value="";
-            this.renderRoot.querySelector('#showedit').innerText="Edit Config"; 
-            this.renderRoot.querySelector('#showedit').className="";
-            this.renderRoot.querySelector('#editform').className="hide";
-
-        }
-     
-}
-
-
 
   renderLoginButton() {
       if ( this.config.cid ) {
 
-          return html`<button id='logout' @click='${this.logout}'>Logout</button>`;  
+          return html`<button id='logout' @click='${logout}'>Logout</button>`;  
    }  else {
           return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
    }
@@ -425,38 +435,48 @@ toggleEditForm() {
         ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
   }  
 
-    resetConfig() {
-        localStorage.removeItem("keypad_config");
-        location.reload();
+
+    toggleEditForm() {
+            if (this.renderRoot.querySelector('#editform').classList=="hide") {
+             this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+                this.renderRoot.querySelector('#showedit').className="hide";
+                this.renderRoot.querySelector('#editform').className="";
+            } else {
+                this.renderRoot.querySelector('#config_field').value="";
+                this.shadowRoot.getElementById("yaml_error").innerText="";
+                this.renderRoot.querySelector('#showedit').innerText="Config"; 
+                this.renderRoot.querySelector('#showedit').className="";
+                this.renderRoot.querySelector('#editform').className="hide";
+
+            }
+         
     }
 
-    fetchConfig() {
-console.log("test test");
-     //   if (this.renderRoot.querySelector('#login').classList=="hide")
-         return yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
-    //    else
-          //  return "";
+
+    resetConfig() {
+     if (confirm("Are you sure you want reset the config to default?" ) == true) {
+         localStorage.removeItem("keypad_config");
+        location.reload();
+
+     }
+
     }
 
 
     renderConfig() {
-
-        
+         if (this.config.cid==0) return;
         return html`
-       <div style1="float: right;">
-
-        <button class=""  @click='${this.toggleEditForm}' id="showedit">Edit Config</button>
-
+       <div>
+        <button class=""  @click='${this.toggleEditForm}' id="showedit" style="font-size: 0.6rem;">Config</button>
         <div class="hide" id="editform">
-<div>
-                <button  @click="${this.toggleEditForm}">Exit</button>
-                <button  @click="${this.saveConfig}">Save</button>
-                <button  @click="${this.resetConfig}">Reset</button>
+<div >
+                <button style="font-size: 0.6rem;" @click="${this.toggleEditForm}">Exit</button>
+                <button style="font-size: 0.6rem;" @click="${this.saveConfig}">Save</button>
+                <button style="font-size: 0.6rem;" @click="${this.resetConfig}">Reset</button>
 </div>
             <textarea id="config_field" rows="20" cols="50" ></textarea>
-
             <div>
-            <span id="yaml_error" style="color: red;"></span>
+                <span id="yaml_error" style="color: red;"></span>
             </div>
         </div>
 
@@ -466,12 +486,16 @@ console.log("test test");
     }
 
     saveConfig() {
+
+       if (confirm("Save this configuration?" ) == false) 
+            return;
         const content = this.shadowRoot.getElementById("config_field").value;
         const err = this.shadowRoot.getElementById("yaml_error");
 
         try {
             let c = JSON.stringify(yaml.load(content));
             localStorage.setItem("keypad_config",c);
+           // this.sendConfig(c);
             location.reload();
         } catch (e) {
             err.innerText=e;
