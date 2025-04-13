@@ -225,12 +225,20 @@ export class keyPad extends LitElement  {
     super.connectedCallback();
     
     window.source?.addEventListener("key_config", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      let data=messageEvent.data;
-      if (isJson(data))
-        data = JSON.parse(data);
-      if ("iv" in data) data=decrypt(data);    
-      this.setConfig(data);
+
+        let conf=localStorage.getItem("keypad_config");
+        if (conf === null) {
+          const messageEvent = e as MessageEvent;
+          let data=messageEvent.data;
+          if (isJson(data))
+            data = JSON.parse(data);
+          if ("iv" in data) data=decrypt(data); 
+          this.setConfig(data);
+          localStorage.setItem("keypad_config",JSON.stringify(data));
+        } else {
+            let data=JSON.parse(conf);
+            this.setConfig(data);
+        }
     });
     
     window.source?.addEventListener("state", (e: Event) => {

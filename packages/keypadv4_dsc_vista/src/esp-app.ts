@@ -1,7 +1,6 @@
 import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
-
 import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
@@ -12,9 +11,12 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
 import cssTab from "./css/tab";
+import * as yaml from "js-yaml"
+
+
+
 import {encrypt,decrypt,isJson,initcrypt,cryptconf,login,logout} from "./esp-crypt";
 
-let basePath = getBasePath(); 
 window.source = new EventSource(getBasePath() + "/events");
 
 
@@ -30,7 +32,6 @@ interface Config {
   token: string;
 }
 
-//const salt:string="77992288";
 var partitions:Number=0;
 var numbers=[];
 
@@ -79,7 +80,7 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, log: true, title: "", comment: "" ,cid: 9, token : ""};
+  config: Config = { ota: false, log: true, title: "", comment: "" ,cid: 0, token : ""};
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -92,6 +93,7 @@ export default class EspApp extends LitElement {
   }
 
  sendAck(cid) {
+     let basePath = getBasePath(); 
      let data=JSON.stringify({
          'cid': cid,
          'method': "POST",
@@ -124,6 +126,7 @@ export default class EspApp extends LitElement {
 
     document.title = config.title;
     document.documentElement.lang = config.lang;
+// start
     var c:cryptconf={};
     c.cid=config.cid;
     c.token=config.token;
@@ -135,6 +138,7 @@ export default class EspApp extends LitElement {
     if (config.cid ) 
         this.hideLoginForm();
     this.requestUpdate(); 
+//end
 
   }
 
@@ -146,10 +150,11 @@ export default class EspApp extends LitElement {
     l.href =
       'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
     //this.scheme = this.schemeDefault();
-     this.scheme=localStorage.getItem("scheme")===null?this.schemeDefault():localStorage.getItem("scheme");
+    this.scheme=localStorage.getItem("scheme")===null?this.schemeDefault():localStorage.getItem("scheme");
 
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
+//start
       let data=e.data
       if (isJson(data)) 
         data = JSON.parse(data); 
@@ -158,10 +163,12 @@ export default class EspApp extends LitElement {
         this.setConfig(data);
         this.requestUpdate();
       }
+//end
       this._updateUptime(e);
       this.lastUpdate = Date.now();
+
     });
-    
+    //start
       window.source?.addEventListener("ota", (e: Event) => {
       var data = e.data
       if (isJson(data)) 
@@ -170,7 +177,7 @@ export default class EspApp extends LitElement {
        this.renderRoot.querySelector('#el3').innerText=data;
        this.requestUpdate();
     });  
- 
+ //end
     window.source.addEventListener("log", (e: MessageEvent) => {
       this._updateUptime(e);
       this.lastUpdate = Date.now();
@@ -195,13 +202,14 @@ export default class EspApp extends LitElement {
       const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
       mainElement?.classList.toggle('expanded_logs');
     });
+//start
     var c:cryptconf={};
     c.cid=this.config.cid;
     c.token=this.config.token;
     c.seq=1;
     c.crypt=this.config.crypt;
     initcrypt(c);
-  
+  //end
   }
 
   schemeDefault() {
@@ -223,7 +231,7 @@ export default class EspApp extends LitElement {
   uptime() {
     return `${getRelativeTime(-this.ping | 0)}`;
   }
-
+//start
 selectfile(ev: any) {
       f = ev.target.files[0];
       if (!f) return;
@@ -239,10 +247,9 @@ this.renderRoot.querySelector('#el1').click();
 //this.renderRoot.querySelector('#showlogin').innerText
   renderOta() {
     if (this.config.ota) {
-      let basePath = getBasePath();
      return html`<div class="tab-header">OTA Update</div>
 <div class="tab-container">
-        <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/>
+        <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> 
         <button class="btn" id="el2" @click="${this.openselect}">choose file...</button>
         <span> Selected file:</span> <span id="el4"></span> <br/>
         <button class="btn" id="el5" @click="${this.upload}"  disabled>upload file</button>
@@ -275,9 +282,10 @@ upload(ev: any) {
         }).catch((error)=>console.log(error));
       };
     };
-
+//end
 
   renderLog() {
+
     if (!this.config.cid) return nothing;
     return this.config.log
       ? html`<section
@@ -304,7 +312,7 @@ upload(ev: any) {
   render() {
     return html`
       <header>
-          ${this.renderCryptState()}<br/>
+        ${this.renderCryptState()}  </br> 
         <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
           <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
@@ -326,14 +334,19 @@ upload(ev: any) {
             class="top-icon"
           ></iconify-icon>
         </a>
-        ${this.renderTitle()}
-      </header>
-      ${this.renderLogin()}  
-      <div class="keypad_col">
-      ${this.renderKeypads()}
-</div>
-      <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
 
+        ${this.renderTitle()}
+${this.renderConfig()}
+      </header>
+
+      ${this.renderLogin()}
+
+      <div class="keypad_row">
+      ${this.renderKeypads()}
+
+        </div>
+
+      <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
         <section
           id="col_entities"
           class="col"          
@@ -341,6 +354,7 @@ upload(ev: any) {
           <esp-entity-table .scheme="${this.scheme}"></esp-entity-table>
           ${this.renderOta()}
         </section>
+
         ${this.renderLog()}
       </main>
     `;
@@ -353,7 +367,31 @@ upload(ev: any) {
       this.requestUpdate();
     }
   }
+//start
 
+
+ sendConfig(config) {
+     let basePath = getBasePath(); 
+     let data=JSON.stringify({
+            'config': config,
+            'method': "POST",
+            'action': "set",
+            'oid': "alarm_panel",
+            'domain': "alarm_panel"
+     });
+    fetch(`${basePath}/api`, {
+      method: "POST",
+      body: encrypt(data)
+    }).then((r) => {
+       if (!r.ok) {
+            console.log(r);
+                //ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+            }  else {
+               // ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+            }
+    }).catch((error)=>console.log(error)); 
+
+}
 
 hideLoginForm() {
         this.renderRoot.querySelector('#login').className=""  
@@ -364,6 +402,8 @@ showLoginForm() {
         this.renderRoot.querySelector('#login').className="" 
       
 }
+
+
 toggleLoginForm() {
         if (this.renderRoot.querySelector('#login').classList=="hide")
             this.renderRoot.querySelector('#showlogin').innerText="Hide Login"; 
@@ -373,11 +413,14 @@ toggleLoginForm() {
         this.renderRoot.querySelector('#login').classList.toggle("hide");
       
 }
+
+
   renderLoginButton() {
-      if (this.config.crypt ) {
+      if ( this.config.cid ) {
+
           return html`<button id='logout' @click='${logout}'>Logout</button>`;  
-   }   else if (!this.config.cid) {
-        return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
+   }  else {
+          return html`<button id="showlogin" @click="${this.toggleLoginForm}">Login</button>`;
    }
       
   }
@@ -392,13 +435,89 @@ toggleLoginForm() {
         ${numbers.map(num => html`<div class="keypad"><esp-keypad .current_partition=${num} .scheme="${this.scheme}"></esp-keypad></div>`)}`;
   }  
 
+
+    toggleEditForm() {
+            if (this.renderRoot.querySelector('#editform').classList=="hide") {
+        const err = this.shadowRoot.getElementById("yaml_error");
+    try {         this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+        } catch (e) {
+                        err.innerText=e;
+            console.log(e);
+}
+                this.renderRoot.querySelector('#showedit').className="hide";
+                this.renderRoot.querySelector('#editform').className="";
+            } else {
+                this.renderRoot.querySelector('#config_field').value="";
+                this.shadowRoot.getElementById("yaml_error").innerText="";
+                this.renderRoot.querySelector('#showedit').innerText="Config"; 
+                this.renderRoot.querySelector('#showedit').className="";
+                this.renderRoot.querySelector('#editform').className="hide";
+
+            }
+         
+    }
+
+
+    resetConfig() {
+     if (confirm("Are you sure you want reset the config to default?" ) == true) {
+         localStorage.removeItem("keypad_config");
+        location.reload();
+
+     }
+
+    }
+
+
+    renderConfig() {
+         if (this.config.cid==0) return;
+        return html`
+       <div>
+        <button class=""  @click='${this.toggleEditForm}' id="showedit" style="font-size: 0.6rem;">Config</button>
+        <div class="hide" id="editform">
+<div >
+                <button style="font-size: 0.6rem;" @click="${this.toggleEditForm}">Exit</button>
+                <button style="font-size: 0.6rem;" @click="${this.saveConfig}">Save</button>
+                <button style="font-size: 0.6rem;" @click="${this.resetConfig}">Reset</button>
+</div>
+            <textarea id="config_field" rows="20" cols="50" ></textarea>
+            <div>
+                <span id="yaml_error" style="color: red;"></span>
+            </div>
+        </div>
+
+       </div>
+
+        `;
+    }
+
+    saveConfig() {
+
+       if (confirm("Save this configuration?" ) == false) 
+            return;
+        const content = this.shadowRoot.getElementById("config_field").value;
+        const err = this.shadowRoot.getElementById("yaml_error");
+
+        try {
+            let c = JSON.stringify(yaml.load(content));
+            localStorage.setItem("keypad_config",c);
+           // this.sendConfig(c);
+            location.reload();
+        } catch (e) {
+            err.innerText=e;
+            console.log(e);
+        }
+
+    }
+
+
   renderCryptState() {
     let icon="🔓";
    if (this.config.crypt ) {
     icon="🔐";
    }
    return html`
-   <div id="cryptstate" >${icon}${this.renderLoginButton()}</div>
+   <div id="cryptstate" >${icon}${this.renderLoginButton()}  </div>
+
 `;
 
   }
@@ -417,21 +536,22 @@ toggleLoginForm() {
                </div>
 </div>`;
   }
-
+//end
 
   static get styles() {
     return [cssReset, cssButton, cssApp, cssTab,   css`
        
-        .keypad_col{
+        .keypad_row{
           display: flex;
           flex-wrap:wrap;
           justify-content: center;
         } 
 
         .keypad {
-          max-width: 450px;
-          width: 100%;   
-          margin: 5px; 
+          margin: 10px;
+          max-width:370px;
+          width: 100%;  
+
         }
 
         .login_row {
