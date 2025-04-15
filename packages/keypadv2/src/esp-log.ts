@@ -49,12 +49,15 @@ export class DebugLog extends LitElement {
         detail: detail,
         when: new Date().toTimeString().split(" ")[0],
       } as recordConfig;
-      this.logs.push(record);
-      this.logs = this.logs.slice(-this.rows);
+      if (!this.paused) {
+        this.logs.push(record);
+        this.logs = this.logs.slice(-this.rows);
+      }
     });
   }
 
   render() {
+
     return html`
       <div 
         class="tab-header"
@@ -70,7 +73,7 @@ export class DebugLog extends LitElement {
             <div>Tag</div>
             <div>Message</div>
           </div>
-          <div class="tbody">
+          <div class="tbody"         @click="${this._handleClick}">
             ${this.logs.map(
               (log: recordConfig) =>
                 html`
@@ -96,6 +99,18 @@ export class DebugLog extends LitElement {
     e.target?.dispatchEvent(doubleClickEvent);
   }
 
+  _handleClick(e: Event) {
+//    const doubleClickEvent = new CustomEvent('log-tab-header-double-clicked', {
+//      bubbles: true,
+//      composed: true,
+//    });
+//    e.target?.dispatchEvent(doubleClickEvent);
+      if (this.paused) 
+        this.paused=false;
+      else
+        this.paused=true;
+  }
+
   static get styles() {
     return [
       cssTab,
@@ -103,6 +118,9 @@ export class DebugLog extends LitElement {
         .thead,
         .tbody .trow:nth-child(2n) {
           background-color: rgba(127, 127, 127, 0.05);
+        }
+        .tbody {
+
         }
         .trow div {
           font-family: monospace;

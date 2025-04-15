@@ -441,7 +441,7 @@ toggleLoginForm() {
         const err = this.shadowRoot.getElementById("yaml_error");
     try {         this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
         } catch (e) {
-                        err.innerText=e;
+            err.innerText=e;
             console.log(e);
 }
                 this.renderRoot.querySelector('#showedit').className="hide";
