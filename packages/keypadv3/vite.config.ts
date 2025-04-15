@@ -9,7 +9,8 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = process.env.PROXY_TARGET || "http://dscalarmc3.local";
+const proxy_target = process.env.PROXY_TARGET || "http://vistaalarmtest1.local";
+//const proxy_target = process.env.PROXY_TARGET || "http://dscalarmc3.local";
 
 export default defineConfig({
   clearScreen: false,
@@ -67,7 +68,7 @@ export default defineConfig({
         }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
-        entryFileNames: "www_keypad.js",
+        entryFileNames: "www_keypadv3.js",
       },
     },
   },

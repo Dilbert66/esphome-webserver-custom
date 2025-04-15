@@ -1,14 +1,9 @@
 {
-  "name": "@esphome-webserver/v3",
+  "name": "keypadv3_dsc",
   "version": "3.0.0",
   "scripts": {
     "start": "npm run dev",
-    "start_dsc": "sed -i 's/vista-keypad/dsc-keypad/g' src/esp-app.ts && npm run start",
-    "start_vista": "sed -i 's/dsc-keypad/vista-keypad/g' src/esp-app.ts && npm run start",
     "dev": "vite",
-    "xbuild": "vite build --emptyOutDir",
-    "build_dsc": "sed -i 's/vista-keypad/dsc-keypad/g' src/esp-app.ts  && vite build --emptyOutDir && bash -c './copy_dsc.sh'",
-    "build_vista": "sed -i 's/dsc-keypad/vista-keypad/g' src/esp-app.ts && vite build --emptyOutDir && bash -c './copy_vista.sh'",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
     "deploy": "bash -c './copy.sh'"
@@ -20,6 +15,7 @@
     "fa-icons": "^0.2.0",
     "http-proxy-middleware": "^2.0.1",
     "iconify-icon": "^1.0.8",
+    "js-yaml": "^4.1.0",
     "lit": "^2.0.2",
     "lit-fontawesome": "^0.1.3"
   },
