@@ -207,7 +207,7 @@ i.keypad-icon {
 
 
        .keypad_cmd_text {
-        font-size: .4rem;
+        font-size: .45rem;
         font-style: italic; 
         margin-top: 2px;
        }
@@ -279,7 +279,6 @@ i.keypad-icon {
         border-radius: 20px;
         padding: 4px;
         background-color: var(--maingrpbgcolor);
-        max-width: 450px;
         margin: 5px;
 
       }

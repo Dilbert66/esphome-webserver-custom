@@ -549,7 +549,7 @@ toggleLoginForm() {
 
         .keypad {
           margin: 10px;
-          max-width:370px;
+          max-width:450px;
           width: 100%;  
 
         }

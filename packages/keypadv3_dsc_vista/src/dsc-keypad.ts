@@ -165,7 +165,15 @@ export class keyPad extends LitElement  {
      </div> <!-- buttons -->
     </div> <!-- container -->
 
-
+                <audio id="exitsound1" loop>
+                  <source src="/local/1_beep.mp3" type="audio/mpeg">
+                </audio>
+                <audio id="exitsound2" loop>
+                  <source src="/local/2_beeps.mp3" type="audio/mpeg">
+                </audio>
+                <audio id="chime">
+                  <source src="/local/3_beeps.mp3" type="audio/mpeg">
+                </audio>
     `;
   }
 
@@ -203,8 +211,8 @@ export class keyPad extends LitElement  {
       this._text_star=keypad_config["text_star"]!=null?keypad_config["text_star"]:"SELECT";
       this._text_pound=keypad_config["text_pound"]!=null?keypad_config["text_pound"]:"ENTER";
       this._vibration_duration=keypad_config["vibration_duration"]!=null?keypad_config["vibration_duration"]:5;
-
-       this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
+      this._beep = keypad_config["beep"] != null ? keypad_config["beep"] : "";
+      this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
 
        for (let i in this._style) {
         if (this._style[i] == null) continue;
@@ -259,6 +267,9 @@ export class keyPad extends LitElement  {
             id_code=parts[2];
 
         if (id_code != "") {
+          if (id_code == this._beep.replace("?", this.current_partition)) {
+              this.beepChanged(data.value);
+           } else
           if (id_code==this._line1id.replace("?",this.current_partition)) {
               this._line1=data.value;
 
@@ -402,7 +413,27 @@ setState(e) {
      this.sendKey(key);
   }
 
-  
+      beepChanged(beep) {
+        if ( beep== null || beep == "0") {
+            var promise = this.shadowRoot.getElementById("exitsound1").pause();
+            this.shadowRoot.getElementById("exitsound2").pause();
+            this.shadowRoot.getElementById("chime").pause();
+        } else if (beep == "1") {
+            var promise = this.shadowRoot.getElementById("exitsound1").play();
+        } else if (beep == "2") {
+            var promise = this.shadowRoot.getElementById("exitsound2").play();
+        } else if (beep > 2) {
+            var promise = this.shadowRoot.getElementById("chime").play();
+        }
+
+        if (promise !== undefined) {
+            promise.then(_ => {
+                // Autoplay started!
+            }).catch(error => {
+                console.warn('Sound auto play not enabled, check browser settings');
+            });
+        }
+    }
 
   
   static get styles() {
