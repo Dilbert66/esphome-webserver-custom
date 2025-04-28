@@ -282,15 +282,16 @@ i.keypad-icon {
       div.status_icons {
         text-align: center;
         padding: 2px;
-        margin: 0px 0px 0px 5px;
         flex: 0;
+        margin: 0px;
         color: grey;
 
       }
 
       div.status_icons i {
         display: block;
-        padding: 2px ;
+        padding: 1px;
+        padding-left: 2px;
 
       }
 
