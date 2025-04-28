@@ -179,11 +179,14 @@ i.keypad-icon {
         font-size: 0.8rem;
         line-height: 0.8;
         margin: 0px;
-        background-color: var(--buttonbgcolor);
+            background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
         margin-top: 0.1rem;
         margin-bottom: 0.6rem; 
-        padding: 8px;  
+        padding: 6px;
+        padding-right: 10px;
+        padding-left: 10px;
+    
          
       }
 
@@ -214,8 +217,8 @@ i.keypad-icon {
 
          .keypad_title {
           margin: auto;
-          padding-bottom: 5px;
           display: flex;
+          padding: 4px;
           justify-content: center          
          }    
 
@@ -225,7 +228,7 @@ i.keypad-icon {
                 /*font-family: "Dot Matrix", sans-serif;*/
                 font-family: "Arial";
                 background-color: var(--lcdbgcolor);
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 border-radius: 8px;
                 text-align: center; 
                 color: var(--lcdtextcolor);
@@ -254,7 +257,7 @@ i.keypad-icon {
         border: 1px solid var(--bordercolor);
         padding: 4px;
         background-color: var(--btngrpbgcolor);
-        border-radius: 10px;
+        border-radius: 8px;
         white-space: nowrap;
         display: flex;
       }
@@ -268,7 +271,7 @@ i.keypad-icon {
 
 
       div.container {
-        border-radius: 20px;
+        border-radius: 15px;
         padding: 2px;
         background-color: var(--maingrpbgcolor);
         margin: 5px;
@@ -287,7 +290,7 @@ i.keypad-icon {
 
       div.status_icons i {
         display: block;
-        padding: 3px ;
+        padding: 2px ;
 
       }
 
