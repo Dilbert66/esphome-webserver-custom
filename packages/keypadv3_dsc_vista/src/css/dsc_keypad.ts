@@ -162,7 +162,7 @@ i.keypad-icon {
       }
 
       button.keypad_button_pad {
-        width: 28%;
+        width: 30%;
         font-weight: bold;
         font-size: 0.8rem;
         background-color: var(--buttonbgcolor);
@@ -182,7 +182,7 @@ i.keypad-icon {
             background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
         margin-top: 0.1rem;
-        margin-bottom: 0.6rem; 
+        margin-bottom: 1rem; 
         padding: 6px;
         padding-right: 10px;
         padding-left: 10px;
@@ -210,7 +210,7 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--buttonbgcolor);
-        line-height: 1;
+        line-height: 1.1;
         width: 100%
         margin: auto;
       }
@@ -263,7 +263,8 @@ i.keypad-icon {
       }
 
       div.keypad_button_row {
-        margin:4px;
+        margin:2px;
+        margin-top: 4px;
         text-align: center;
         white-space: nowrap;
       }
