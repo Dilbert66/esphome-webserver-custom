@@ -7,7 +7,8 @@
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c './copy.sh'"
+    "deploy": "bash -c './copy.sh'",
+    "files": [ "./src/*.mp3"]
   },
   "dependencies": {
     "chart.js": "^4.4.1",

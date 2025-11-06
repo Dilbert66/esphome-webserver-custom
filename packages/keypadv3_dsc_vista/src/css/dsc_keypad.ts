@@ -170,7 +170,9 @@ i.keypad-icon {
         min-height: 2.3rem;
         color: var(--buttontextcolor);
         line-height: 0.8;
-        margin-bottom: 8px;
+        margin: auto;
+        margin-top: 2px;
+
       }
 
 
@@ -179,10 +181,11 @@ i.keypad-icon {
         font-size: 0.8rem;
         line-height: 0.8;
         margin: 0px;
-            background-color: var(--buttonbgcolor);
+        margin-top: 2px;
+        background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor); 
         margin-top: 0.1rem;
-        margin-bottom: 1rem; 
+        margin-bottom: 10px; 
         padding: 6px;
         padding-right: 10px;
         padding-left: 10px;
@@ -195,7 +198,7 @@ i.keypad-icon {
         line-height: 0.8;
         background-color: var(--buttonbgcolor);
         border: 2px solid var(--bordercolor);  
-        margin-top: 12px;
+        margin-top: 8px;
         width: 100%;      
       }
 
@@ -210,9 +213,9 @@ i.keypad-icon {
 
       button.keypad_button_control {
         background-color: var(--buttonbgcolor);
-        line-height: 1.1;
-        width: 100%
+        line-height: 0.8;
         margin: auto;
+
       }
 
          .keypad_title {
@@ -253,7 +256,7 @@ i.keypad-icon {
 
       
       div#lcd_container {
-        margin: 2px 4px 2px 4px;
+        margin: 2px 2px 4px 2px;
         border: 1px solid var(--bordercolor);
         padding: 4px;
         background-color: var(--btngrpbgcolor);
@@ -302,6 +305,8 @@ i.keypad-icon {
         border: 1px solid var(--bordercolor);
         border-radius: 8px;
         background-color: var(--btngrpbgcolor);
+        padding: 2px;
+
        }
 
       div#left_buttons {
@@ -309,6 +314,7 @@ i.keypad-icon {
         border: 1px solid var(--bordercolor);
         border-radius: 8px;
         background-color: var(--btngrpbgcolor);
+        padding: 2px;
       }
 
 
@@ -320,8 +326,6 @@ i.keypad-icon {
 
       div#buttons_area {
         display: flex;
-    
-
       }
 
       div#regular_icons {

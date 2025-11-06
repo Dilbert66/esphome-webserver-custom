@@ -5,7 +5,6 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
-import "./esp-logo";
 import "./esp-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
@@ -313,8 +312,6 @@ upload(ev: any) {
     return html`
       <header>
         ${this.renderCryptState()}  </br> 
-        <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
-          <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
         <iconify-icon
           .icon="${!!this.connected ? "mdi:circle" : "mdi:circle-off-outline"}"

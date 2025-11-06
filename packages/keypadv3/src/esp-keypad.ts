@@ -4,6 +4,85 @@ import { getBasePath } from "./esp-entity-table";
 import cssKeypad from "./css/esp_keypad";
 import { isJson, encrypt, decrypt } from "./esp-crypt";
 
+/*!
+ * long-press.js
+ * Pure JavaScript long-press event
+ * https://github.com/john-doherty/long-press
+ * @author John Doherty <www.johndoherty.info>
+ * @license MIT
+ */
+//(function (window, document) {
+//
+//    'use strict';
+//
+//    var timer = null;
+//
+//    // check if we're using a touch screen
+//    var isTouch = (('ontouchstart' in window) || (navigator.MaxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0));
+//
+//    // switch to touch events if using a touch screen
+//    var mouseDown = isTouch ? 'touchstart' : 'mousedown';
+//    var mouseOut = isTouch ? 'touchcancel' : 'mouseout';
+//    var mouseUp = isTouch ? 'touchend' : 'mouseup';
+//    var mouseMove = isTouch ? 'touchmove' : 'mousemove';
+//
+//    // patch CustomEvent to allow constructor creation (IE/Chrome) - resolved once initCustomEvent no longer exists
+//    if ('initCustomEvent' in document.createEvent('CustomEvent')) {
+//
+//        window.CustomEvent = function(event, params) {
+//
+//            params = params || { bubbles: false, cancelable: false, detail: undefined };
+//
+//            var evt = document.createEvent('CustomEvent');
+//            evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+//            return evt;
+//        };
+//
+//        window.CustomEvent.prototype = window.Event.prototype;
+//    }
+//
+//    // listen to mousedown event on any child element of the body
+//    document.addEventListener(mouseDown, function(e) {
+//
+//        var el = e.target;
+//
+//        // get delay from html attribute if it exists, otherwise default to 1500
+//        var longPressDelayInMs = parseInt(el.getAttribute('data-long-press-delay') || '1500', 10);
+//
+//        // start the timer
+//        timer = setTimeout(fireLongPressEvent.bind(el), longPressDelayInMs);
+//    });
+//
+//    // clear the timeout if the user releases the mouse/touch
+//    document.addEventListener(mouseUp, function(e) {
+//        clearTimeout(timer);
+//    });
+//
+//    // clear the timeout if the user leaves the element
+//    document.addEventListener(mouseOut, function(e) {
+//        clearTimeout(timer);
+//    });
+//
+//    // clear if the mouse moves
+//    document.addEventListener(mouseMove, function(e) {
+//        clearTimeout(timer);
+//    });
+//
+//    /**
+//     * Fires the 'long-press' event on element
+//     * @returns {void}
+//     */
+//    function fireLongPressEvent() {
+//
+//        // fire the long-press event
+//        this.dispatchEvent(new CustomEvent('long-press', { bubbles: true, cancelable: true }));
+//
+//        clearTimeout(timer);
+//
+//        if (console && console.log) console.log('long-press fired on ' + this.outerHTML);
+//    }
+//
+//}(this, document));
 
 let basePath = getBasePath();
 @customElement("esp-keypad")
@@ -328,19 +407,19 @@ export class keyPad extends LitElement {
     
               
           </div>
-                <audio id="exitsound1" loop>
-                  <source src="/local/1_beep.mp3" type="audio/mpeg">
-                </audio>
-                <audio id="exitsound2" loop>
-                  <source src="/local/2_beeps.mp3" type="audio/mpeg">
-                </audio>
-                <audio id="chime">
-                  <source src="/local/3_beeps.mp3" type="audio/mpeg">
-                </audio>
+
 
     `;
     }
-
+//                <audio id="exitsound1" loop>
+//                  <source src="/local/1_beep.mp3" type="audio/mpeg">
+//                </audio>
+//                <audio id="exitsound2" loop>
+//                  <source src="/local/2_beeps.mp3" type="audio/mpeg">
+//                </audio>
+//                <audio id="chime">
+//                  <source src="/local/3_beeps.mp3" type="audio/mpeg">
+//                </audio>
 
     setConfig(keypad_config) {
         //console.log("data="+keypad_config);
@@ -462,7 +541,7 @@ export class keyPad extends LitElement {
        this._status_G_state = 'var(--sensoroff)';
        this._iconH = this._sensor_H!=""? this._status_H_off_icon:"";
        this._status_H_state = 'var(--sensoroff)';
-       this._beep = keypad_config["beep"] != null ? keypad_config["beep"] : "";
+//       this._beep = keypad_config["beep"] != null ? keypad_config["beep"] : "";
 
        this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
 
@@ -519,9 +598,9 @@ export class keyPad extends LitElement {
                     id_code = parts[2];
 
                 if (id_code != "") {
-                     if (id_code == this._beep.replace("?", this.current_partition)) {
-                          this.beepChanged(data.value);
-                    } else
+//                     if (id_code == this._beep.replace("?", this.current_partition)) {
+//                          this.beepChanged(data.value);
+//                    } else
                     if (id_code == this._line1id.replace("?", this.current_partition)) {
                         this._line1 = data.value;
                     } else
@@ -668,27 +747,27 @@ export class keyPad extends LitElement {
 
     }
 
-    beepChanged(beep) {
-        if ( beep== null || beep == "0") {
-            var promise = this.shadowRoot.getElementById("exitsound1").pause();
-            this.shadowRoot.getElementById("exitsound2").pause();
-            this.shadowRoot.getElementById("chime").pause();
-        } else if (beep == "1") {
-            var promise = this.shadowRoot.getElementById("exitsound1").play();
-        } else if (beep == "2") {
-            var promise = this.shadowRoot.getElementById("exitsound2").play();
-        } else if (beep > 2) {
-            var promise = this.shadowRoot.getElementById("chime").play();
-        }
-
-        if (promise !== undefined) {
-            promise.then(_ => {
-                // Autoplay started!
-            }).catch(error => {
-                console.warn('Sound auto play not enabled, check browser settings');
-            });
-        }
-    }
+//    beepChanged(beep) {
+//        if ( beep== null || beep == "0") {
+//            var promise = this.shadowRoot.getElementById("exitsound1").pause();
+//            this.shadowRoot.getElementById("exitsound2").pause();
+//            this.shadowRoot.getElementById("chime").pause();
+//        } else if (beep == "1") {
+//            var promise = this.shadowRoot.getElementById("exitsound1").play();
+//        } else if (beep == "2") {
+//            var promise = this.shadowRoot.getElementById("exitsound2").play();
+//        } else if (beep > 2) {
+//            var promise = this.shadowRoot.getElementById("chime").play();
+//        }
+//
+//        if (promise !== undefined) {
+//            promise.then(_ => {
+//                // Autoplay started!
+//            }).catch(error => {
+//                console.warn('Sound auto play not enabled, check browser settings');
+//            });
+//        }
+//    }
 
 
     static get styles() {
