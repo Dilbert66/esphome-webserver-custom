@@ -63,7 +63,7 @@ div.container[color-scheme="light"] {
           background: var(--lcdbgcolor);
           border-radius: 10px;
           border: 1px solid var(--bordercolor);
-          min-height: 60px;
+          min-height: 65px;
           margin: auto;
           padding-top: 8px;
           padding-bottom: 8px;
@@ -82,6 +82,14 @@ div.container[color-scheme="light"] {
           margin: auto;
           padding: 15px;
         } 
+        .beep_line {
+          font-size: .9rem;
+          line-height: 1.2;
+          font-family: monospace;
+          display: flex;
+          justify-content: center;
+ 
+        }
     
         .display_line {
           font-size: .9rem;

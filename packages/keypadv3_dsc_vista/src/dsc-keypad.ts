@@ -15,6 +15,7 @@ export class keyPad extends LitElement  {
 
   @state({ type: String })  _line1="";
   @state({ type: String })  _line2="";
+  @state({ type: String })  _beeps="";
   @state({ type: String })  _readyStyle="color: var(--sensoroff);";
   @state({ type: String })  _armedStyle="color: var(--sensoroff);";
   @state({ type: String }) _chimeStyle="color: var(--sensoroff);";
@@ -70,6 +71,7 @@ export class keyPad extends LitElement  {
         <div class="virtual_lcd">
           <div id="first_line">${this._line1}</div>
           <div id="second_line">${this._line2}</div>
+          <div id="beep_line">${this._beeps}</div>
         </div>
         <div class="status_icons">
           <i class="keypad-icon icon-check" id="ready_icon" title="Ready" style="${this._readyStyle}"></i>
@@ -165,19 +167,19 @@ export class keyPad extends LitElement  {
      </div> <!-- buttons -->
     </div> <!-- container -->
 
-                <audio id="exitsound1" loop>
-                  <source src="/local/1_beep.mp3" type="audio/mpeg">
-                </audio>
-                <audio id="exitsound2" loop>
-                  <source src="/local/2_beeps.mp3" type="audio/mpeg">
-                </audio>
-                <audio id="chime">
-                  <source src="/local/3_beeps.mp3" type="audio/mpeg">
-                </audio>
+
     `;
   }
 
-  
+//                  <audio id="exitsound1" loop>
+//                  <source src="/local/1_beep.mp3" type="audio/mpeg">
+//                </audio>
+//                <audio id="exitsound2" loop>
+//                  <source src="/local/2_beeps.mp3" type="audio/mpeg">
+//                </audio>
+//                <audio id="chime">
+//                  <source src="/local/3_beeps.mp3" type="audio/mpeg">
+//                </audio>
 
  setConfig(keypad_config) {
       this._line1id=keypad_config["line_1"]!=null?keypad_config["line_1"]:"ln1_?";
@@ -413,26 +415,31 @@ setState(e) {
      this.sendKey(key);
   }
 
-      beepChanged(beep) {
-        if ( beep== null || beep == "0") {
-            var promise = this.shadowRoot.getElementById("exitsound1").pause();
-            this.shadowRoot.getElementById("exitsound2").pause();
-            this.shadowRoot.getElementById("chime").pause();
-        } else if (beep == "1") {
-            var promise = this.shadowRoot.getElementById("exitsound1").play();
-        } else if (beep == "2") {
-            var promise = this.shadowRoot.getElementById("exitsound2").play();
-        } else if (beep > 2) {
-            var promise = this.shadowRoot.getElementById("chime").play();
-        }
-
-        if (promise !== undefined) {
-            promise.then(_ => {
-                // Autoplay started!
-            }).catch(error => {
-                console.warn('Sound auto play not enabled, check browser settings');
-            });
-        }
+  beepChanged(beep) {
+    if (beep == null || beep =="0") {
+        this._beeps="";
+    } else {
+        this._beeps="***" + beep + " beep(s) ***";
+    }
+//        if ( beep== null || beep == "0") {
+//            var promise = this.shadowRoot.getElementById("exitsound1").pause();
+//            this.shadowRoot.getElementById("exitsound2").pause();
+//            this.shadowRoot.getElementById("chime").pause();
+//        } else if (beep == "1") {
+//            var promise = this.shadowRoot.getElementById("exitsound1").play();
+//        } else if (beep == "2") {
+//            var promise = this.shadowRoot.getElementById("exitsound2").play();
+//        } else if (beep > 2) {
+//            var promise = this.shadowRoot.getElementById("chime").play();
+//        }
+//
+//        if (promise !== undefined) {
+//            promise.then(_ => {
+//                // Autoplay started!
+//            }).catch(error => {
+//                console.warn('Sound auto play not enabled, check browser settings');
+//            });
+//        }
     }
 
   

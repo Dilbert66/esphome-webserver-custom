@@ -6,8 +6,8 @@ import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
 import "./esp-logo";
-//import "./dsc-keypad"
-import "./vista-keypad"
+import "./dsc-keypad"
+//import "./vista-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
@@ -35,6 +35,7 @@ interface Config {
 
 var partitions:Number=0;
 var numbers=[];
+var f;
 
 function getRelativeTime(diff: number) {
   const mark = Math.sign(diff);
@@ -177,6 +178,8 @@ export default class EspApp extends LitElement {
       if (data['iv'] != null) data=decrypt(data);
        this.renderRoot.querySelector('#el3').innerText=data;
        this.requestUpdate();
+       if (data=="OTA completed") 
+            setTimeout(function(){location.reload();},5000);
     });  
  //end
     window.source.addEventListener("log", (e: MessageEvent) => {
@@ -314,8 +317,6 @@ upload(ev: any) {
     return html`
       <header>
         ${this.renderCryptState()}  </br> 
-        <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
-          <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
         <iconify-icon
           .icon="${!!this.connected ? "mdi:circle" : "mdi:circle-off-outline"}"

@@ -94,6 +94,7 @@ export class keyPad extends LitElement {
     @state({type: Object }) _config;
     @state({ type: String }) _line1;
     @state({ type: String }) _line2;
+    @state({ type: String }) _beeps;
     @state({ type: String }) _iconA;
     @state({ type: String }) _status_A_state;
     @state({ type: String }) _iconB;
@@ -124,6 +125,7 @@ export class keyPad extends LitElement {
                   <div class="display">
                     <div class="display_line" id="display_line1">${this._line1}</div>
                     <div class="display_line" id="display_line2">${this._line2}</div>
+                    <div class="beep_line" id="display_beep">${this._beeps}</div>
                 </div>`: ''}
 
                 ${this._view_status ? html`
@@ -541,7 +543,7 @@ export class keyPad extends LitElement {
        this._status_G_state = 'var(--sensoroff)';
        this._iconH = this._sensor_H!=""? this._status_H_off_icon:"";
        this._status_H_state = 'var(--sensoroff)';
-//       this._beep = keypad_config["beep"] != null ? keypad_config["beep"] : "";
+       this._beep = keypad_config["beep"] != null ? keypad_config["beep"] : "";
 
        this._style = keypad_config["style"] != null ? keypad_config["style"]:"";
 
@@ -598,9 +600,9 @@ export class keyPad extends LitElement {
                     id_code = parts[2];
 
                 if (id_code != "") {
-//                     if (id_code == this._beep.replace("?", this.current_partition)) {
-//                          this.beepChanged(data.value);
-//                    } else
+                     if (id_code == this._beep.replace("?", this.current_partition)) {
+                          this.beepChanged(data.value);
+                    } else
                     if (id_code == this._line1id.replace("?", this.current_partition)) {
                         this._line1 = data.value;
                     } else
@@ -746,6 +748,16 @@ export class keyPad extends LitElement {
 
 
     }
+
+beepChanged(beep) {
+    if (beep == null || beep =="0") {
+        this._beeps="";
+    } else {
+        this._beeps="***" + beep + " beep(s) ***";
+    }
+
+
+}
 
 //    beepChanged(beep) {
 //        if ( beep== null || beep == "0") {

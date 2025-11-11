@@ -33,6 +33,7 @@ interface Config {
 
 var partitions:Number=0;
 var numbers=[];
+var file;
 
 function getRelativeTime(diff: number) {
   const mark = Math.sign(diff);
@@ -175,6 +176,8 @@ export default class EspApp extends LitElement {
       if (data['iv'] != null) data=decrypt(data);
        this.renderRoot.querySelector('#el3').innerText=data;
        this.requestUpdate();
+       if (data=="OTA completed") 
+            setTimeout(function(){location.reload();},5000);
     });  
  //end
     window.source.addEventListener("log", (e: MessageEvent) => {
@@ -232,9 +235,9 @@ export default class EspApp extends LitElement {
   }
 //start
 selectfile(ev: any) {
-      f = ev.target.files[0];
-      if (!f) return;
-      this.renderRoot.querySelector('#el4').innerText = f.name;
+      file = ev.target.files[0];
+      if (!file) return;
+      this.renderRoot.querySelector('#el4').innerText = file.name;
       this.renderRoot.querySelector('#el5').removeAttribute('disabled');
       this.renderRoot.querySelector('#el3').innerText = ' ';
     };
@@ -249,7 +252,7 @@ this.renderRoot.querySelector('#el1').click();
      return html`<div class="tab-header">OTA Update</div>
 <div class="tab-container">
         <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> 
-        <button class="btn" id="el2" @click="${this.openselect}">choose file...</button>
+        <button class="btn" id="el2" @click="${this.openselect}">choose file... </button>
         <span> Selected file:</span> <span id="el4"></span> <br/>
         <button class="btn" id="el5" @click="${this.upload}"  disabled>upload file</button>
         <div id="el3" style="margin-top: 1em;"></div>
@@ -263,19 +266,19 @@ this.renderRoot.querySelector('#el1').click();
 
 upload(ev: any) {
       var r = new FileReader();
-      r.readAsArrayBuffer(f);
+      r.readAsArrayBuffer(file);
       r.onload = function() {
         ev.target.value = '';
         ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
-        fetch('/update/' + encodeURIComponent(f.name), {
+        fetch('/update/' + encodeURIComponent(file.name), {
           method: 'POST',
             body: r.result,
         }).then(function(res) {
             if (!res.ok) {
             console.log(res);
-                ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+               // ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
             }  else {
-                ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+               // ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
             }
              ev.target.renderRoot.querySelector('#el5').setAttribute('disabled','');
         }).catch((error)=>console.log(error));
