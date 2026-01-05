@@ -125,7 +125,7 @@ export class keyPad extends LitElement {
                   <div class="display">
                     <div class="display_line" id="display_line1">${this._line1}</div>
                     <div class="display_line" id="display_line2">${this._line2}</div>
-                    <div class="beep_line" id="display_beep">${this._beeps}</div>
+                    <div class="display_line" id="beep_line">${this._beeps}</div>
                 </div>`: ''}
 
                 ${this._view_status ? html`
@@ -753,7 +753,7 @@ beepChanged(beep) {
     if (beep == null || beep =="0") {
         this._beeps="";
     } else {
-        this._beeps="***" + beep + " beep(s) ***";
+        this._beeps="*** " + beep + " beep(s) ***";
     }
 
 

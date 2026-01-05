@@ -9,7 +9,7 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = process.env.PROXY_TARGET || "http://dscalarmc3.local";
+const proxy_target = process.env.PROXY_TARGET || "http://dscalarm8266.local";
 
 export default defineConfig({
   clearScreen: false,
@@ -92,6 +92,7 @@ export default defineConfig({
       "/time": proxy_target,
       "/alarm_panel": proxy_target,
       "/update" : proxy_target,
+      "/chunk" : proxy_target,
     },
   },
 });

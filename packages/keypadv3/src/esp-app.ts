@@ -5,7 +5,9 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
+import "./esp-logo";
 import "./esp-keypad"
+//import "./vista-keypad"
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
@@ -33,7 +35,7 @@ interface Config {
 
 var partitions:Number=0;
 var numbers=[];
-var file;
+var f;
 
 function getRelativeTime(diff: number) {
   const mark = Math.sign(diff);
@@ -235,9 +237,9 @@ export default class EspApp extends LitElement {
   }
 //start
 selectfile(ev: any) {
-      file = ev.target.files[0];
-      if (!file) return;
-      this.renderRoot.querySelector('#el4').innerText = file.name;
+      f = ev.target.files[0];
+      if (!f) return;
+      this.renderRoot.querySelector('#el4').innerText = f.name;
       this.renderRoot.querySelector('#el5').removeAttribute('disabled');
       this.renderRoot.querySelector('#el3').innerText = ' ';
     };
@@ -252,7 +254,7 @@ this.renderRoot.querySelector('#el1').click();
      return html`<div class="tab-header">OTA Update</div>
 <div class="tab-container">
         <input type="file" @change="${this.selectfile}" id="el1" style="display: none"/> 
-        <button class="btn" id="el2" @click="${this.openselect}">choose file... </button>
+        <button class="btn" id="el2" @click="${this.openselect}">choose file...</button>
         <span> Selected file:</span> <span id="el4"></span> <br/>
         <button class="btn" id="el5" @click="${this.upload}"  disabled>upload file</button>
         <div id="el3" style="margin-top: 1em;"></div>
@@ -262,23 +264,73 @@ this.renderRoot.querySelector('#el1').click();
     }
   }
 
+//uploadChunk(chunk: any, ev: any,start: any) {
+//  const formData = new FormData();
+//  formData.append('file', chunk);
+//   var uri='/update';
+//    if (start > 0)
+//        uri='/chunk';
+//  // Make a request to the server
+//  fetch(uri, {
+//    method: 'POST',
+//    body: formData,
+//            headers: {
+//                'x-filename':f.name,
+//                'x-filesize':f.size,
+//               
+//            },
+//  }).then(function(res) {
+//            if (!res.ok) {
+//            console.log(res);
+//                ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+//                 throw 'OTA upload error: ' +res.statusText;
+//                //controller.abort();
+//            }  else {
+//                ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+//            }
+//             ev.target.renderRoot.querySelector('#el5').setAttribute('disabled','');
+//        }).catch((error)=>console.log(error));
+//}
+//
+//  upload(ev: any) {
+//
+//  const chunkSize = 1024; // size of each chunk (1MB)
+//  let start = 0;
+//  //ev.target.value = '';
+//  //ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
+//  while (start < f.size) {
+//    this.uploadChunk(f.slice(start, start + chunkSize),ev,start);
+//    start += chunkSize;
+//  }
+//}
+//
 
 
 upload(ev: any) {
+const controller = new AbortController();
+const signal = controller.signal;
+
       var r = new FileReader();
-      r.readAsArrayBuffer(file);
+      r.readAsArrayBuffer(f);
       r.onload = function() {
         ev.target.value = '';
         ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
-        fetch('/update/' + encodeURIComponent(file.name), {
+        fetch('/update', {
           method: 'POST',
+          //signal: signal,
             body: r.result,
+            headers: {
+                'x-filename':f.name,
+                'x-filesize':f.size,
+            },
         }).then(function(res) {
             if (!res.ok) {
             console.log(res);
-               // ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+                ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+                 throw 'OTA upload error: ' +res.statusText;
+                controller.abort();
             }  else {
-               // ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+                ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
             }
              ev.target.renderRoot.querySelector('#el5').setAttribute('disabled','');
         }).catch((error)=>console.log(error));
@@ -311,7 +363,7 @@ upload(ev: any) {
     `;
   }
 
-  render() {
+  renderPage() {
     return html`
       <header>
         ${this.renderCryptState()}  </br> 
@@ -359,6 +411,11 @@ ${this.renderConfig()}
       </main>
     `;
   }
+
+  render() {
+  return this.renderPage();
+}
+
 
   private _updateUptime(e: MessageEvent) {
     if (e.lastEventId) {
@@ -438,7 +495,12 @@ toggleLoginForm() {
 
     toggleEditForm() {
             if (this.renderRoot.querySelector('#editform').classList=="hide") {
-             this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+        const err = this.shadowRoot.getElementById("yaml_error");
+    try {         this.renderRoot.querySelector('#config_field').value=yaml.dump(JSON.parse(localStorage.getItem("keypad_config")));
+        } catch (e) {
+            err.innerText=e;
+            console.log(e);
+}
                 this.renderRoot.querySelector('#showedit').className="hide";
                 this.renderRoot.querySelector('#editform').className="";
             } else {
@@ -544,7 +606,7 @@ toggleLoginForm() {
 
         .keypad {
           margin: 10px;
-          max-width:370px;
+          max-width:450px;
           width: 100%;  
 
         }

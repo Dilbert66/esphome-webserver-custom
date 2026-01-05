@@ -419,7 +419,7 @@ setState(e) {
     if (beep == null || beep =="0") {
         this._beeps="";
     } else {
-        this._beeps="***" + beep + " beep(s) ***";
+        this._beeps="*** " + beep + " beep(s) ***";
     }
 //        if ( beep== null || beep == "0") {
 //            var promise = this.shadowRoot.getElementById("exitsound1").pause();

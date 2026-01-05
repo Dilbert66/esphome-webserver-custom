@@ -264,21 +264,71 @@ this.renderRoot.querySelector('#el1').click();
     }
   }
 
+//uploadChunk(chunk: any, ev: any,start: any) {
+//  const formData = new FormData();
+//  formData.append('file', chunk);
+//   var uri='/update';
+//    if (start > 0)
+//        uri='/chunk';
+//  // Make a request to the server
+//  fetch(uri, {
+//    method: 'POST',
+//    body: formData,
+//            headers: {
+//                'x-filename':f.name,
+//                'x-filesize':f.size,
+//               
+//            },
+//  }).then(function(res) {
+//            if (!res.ok) {
+//            console.log(res);
+//                ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+//                 throw 'OTA upload error: ' +res.statusText;
+//                //controller.abort();
+//            }  else {
+//                ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+//            }
+//             ev.target.renderRoot.querySelector('#el5').setAttribute('disabled','');
+//        }).catch((error)=>console.log(error));
+//}
+//
+//  upload(ev: any) {
+//
+//  const chunkSize = 1024; // size of each chunk (1MB)
+//  let start = 0;
+//  //ev.target.value = '';
+//  //ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
+//  while (start < f.size) {
+//    this.uploadChunk(f.slice(start, start + chunkSize),ev,start);
+//    start += chunkSize;
+//  }
+//}
+//
 
 
 upload(ev: any) {
+const controller = new AbortController();
+const signal = controller.signal;
+
       var r = new FileReader();
       r.readAsArrayBuffer(f);
       r.onload = function() {
         ev.target.value = '';
         ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
-        fetch('/update/' + encodeURIComponent(f.name), {
+        fetch('/update', {
           method: 'POST',
+          //signal: signal,
             body: r.result,
+            headers: {
+                'x-filename':f.name,
+                'x-filesize':f.size,
+            },
         }).then(function(res) {
             if (!res.ok) {
             console.log(res);
                 ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+                 throw 'OTA upload error: ' +res.statusText;
+                controller.abort();
             }  else {
                 ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
             }
@@ -313,7 +363,7 @@ upload(ev: any) {
     `;
   }
 
-  render() {
+  renderPage() {
     return html`
       <header>
         ${this.renderCryptState()}  </br> 
@@ -361,6 +411,11 @@ ${this.renderConfig()}
       </main>
     `;
   }
+
+  render() {
+  return this.renderPage();
+}
+
 
   private _updateUptime(e: MessageEvent) {
     if (e.lastEventId) {

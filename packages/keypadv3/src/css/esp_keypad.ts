@@ -107,6 +107,10 @@ div.container[color-scheme="light"] {
         #display_line2 {
           white-space: pre-wrap;
         } 
+        #beep_line {
+            height: 1em;
+        }
+
 
         .pad {
           display: flex;

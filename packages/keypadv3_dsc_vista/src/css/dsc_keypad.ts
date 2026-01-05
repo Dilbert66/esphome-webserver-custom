@@ -254,6 +254,10 @@ i.keypad-icon {
         height: 1.5em;
       }
 
+       div#beep_line {
+        height: 1em;
+      }
+
       
       div#lcd_container {
         margin: 2px 2px 4px 2px;
