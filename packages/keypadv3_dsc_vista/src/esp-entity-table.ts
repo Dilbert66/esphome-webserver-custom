@@ -63,7 +63,7 @@ export const stateOff = "OFF";
 export function getBasePath() {
   let str = window.location.pathname;
    //return "http://dscalarm2040.local";
-  return "http://dscalarm8266.local";
+  //return "http://dscalarm8266.local";
   //return "http://vistaalarmesp32idf.local";
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
