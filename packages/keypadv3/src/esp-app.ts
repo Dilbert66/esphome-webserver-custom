@@ -248,6 +248,19 @@ openselect(ev: any){
 this.renderRoot.querySelector('#el1').click();
 }
 
+
+renderWifi() {
+     return html`<div class="tab-header">Wifi Update</div>
+<div class="tab-container">
+      <form method="GET" action="/wifisave">
+        <input id="ssid" name="ssid" length="32" placeholder="SSID" /><br/>
+        <input id="psk" name="psk" length="64" type="password" placeholder="Password" /><br/>
+        <br/>
+        <button type="submit">Save</button>
+      </form>
+    </div>`;
+
+}
 //this.renderRoot.querySelector('#showlogin').innerText
   renderOta() {
     if (this.config.ota) {
@@ -405,6 +418,7 @@ ${this.renderConfig()}
         >
           <esp-entity-table .scheme="${this.scheme}"></esp-entity-table>
           ${this.renderOta()}
+          ${this.renderWifi()};
         </section>
 
         ${this.renderLog()}
@@ -600,7 +614,7 @@ toggleLoginForm() {
        
         .keypad_row{
           display: flex;
-          flex-wrap:wrap;
+          flex-wrap:wrap;re
           justify-content: center;
         } 
 

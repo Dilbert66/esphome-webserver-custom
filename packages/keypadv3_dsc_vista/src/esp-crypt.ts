@@ -87,7 +87,7 @@ export function isJson(str) {
         if (str=="") return false;
         JSON.parse(str);
     } catch (e) {
-        //console.log("error parsing [" + str + "]," +e);
+       // console.log("error parsing [" + str + "]," +e);
         return false;
     }
     return true;

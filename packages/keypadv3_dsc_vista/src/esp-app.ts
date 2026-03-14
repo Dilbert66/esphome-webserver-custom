@@ -136,7 +136,9 @@ export default class EspApp extends LitElement {
     c.crypt=config.crypt;
     initcrypt(c);
 
-    if (config.cid) this.sendAck(config.cid);
+    if (config.cid) {
+ this.sendAck(config.cid);
+}
     if (config.cid ) 
         this.hideLoginForm();
     this.requestUpdate(); 
@@ -191,7 +193,7 @@ export default class EspApp extends LitElement {
     });
     window.source.addEventListener("error", (e: Event) => {
       console.dir(e);
-      //console.log("Lost event stream!")
+      console.log("Lost event stream!")
       this.connected = false;
       this.requestUpdate();
     });
@@ -248,6 +250,19 @@ openselect(ev: any){
 this.renderRoot.querySelector('#el1').click();
 }
 
+
+//renderWifi() {
+//    if (!this.config.cid) return nothing;
+//     return html`<div class="tab-header">Wifi Update</div>
+//<div class="tab-container">
+//        <span><input id="ssid" name="ssid" length="32" placeholder="SSID" /></span> <br/>
+//        <span><input id="psk" name="psk" length="64" type="password" placeholder="Password" /></span> <br/>
+//        <br/>
+//        <button class="btn" @click="${this.wifisave}">Save</button>
+//    </div>`;
+//
+//}
+
 //this.renderRoot.querySelector('#showlogin').innerText
   renderOta() {
     if (this.config.ota) {
@@ -264,47 +279,34 @@ this.renderRoot.querySelector('#el1').click();
     }
   }
 
-//uploadChunk(chunk: any, ev: any,start: any) {
-//  const formData = new FormData();
-//  formData.append('file', chunk);
-//   var uri='/update';
-//    if (start > 0)
-//        uri='/chunk';
-//  // Make a request to the server
-//  fetch(uri, {
-//    method: 'POST',
-//    body: formData,
-//            headers: {
-//                'x-filename':f.name,
-//                'x-filesize':f.size,
-//               
-//            },
-//  }).then(function(res) {
-//            if (!res.ok) {
-//            console.log(res);
-//                ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
-//                 throw 'OTA upload error: ' +res.statusText;
-//                //controller.abort();
-//            }  else {
-//                ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
-//            }
-//             ev.target.renderRoot.querySelector('#el5').setAttribute('disabled','');
-//        }).catch((error)=>console.log(error));
-//}
-//
-//  upload(ev: any) {
-//
-//  const chunkSize = 1024; // size of each chunk (1MB)
-//  let start = 0;
-//  //ev.target.value = '';
-//  //ev.target.renderRoot.querySelector('#el3').innerText = 'Uploading...';
-//  while (start < f.size) {
-//    this.uploadChunk(f.slice(start, start + chunkSize),ev,start);
-//    start += chunkSize;
-//  }
-//}
-//
 
+
+
+//wifisave(key) {
+//        let basePath = getBasePath(); 
+//       const ssid = this.shadowRoot.querySelector("#ssid").value;
+//       const psk = this.shadowRoot.querySelector("#psk").value;
+//     let data=JSON.stringify({
+//         'domain': 'wifisave',
+//         'ssid': ssid,
+//         'psk':psk,
+//      });
+//console.log(data);
+//    fetch(`${basePath}/api`, {
+//      method: "POST",
+//      body: encrypt(data)
+//    }).then((r) => {
+//       if (!r.ok) {
+//            console.log(r);
+//                //ev.target.renderRoot.querySelector('#el3').innerText = 'OTA upload error: '+res.statusText;
+//            }  else {
+//               // ev.target.renderRoot.querySelector('#el3').innerText = 'Uploaded ' + r.result.byteLength + ' bytes';
+//            }
+//    }).catch((error)=> {
+//            console.log(error);
+//     }   
+//    
+//)}
 
 upload(ev: any) {
 const controller = new AbortController();
@@ -363,7 +365,7 @@ const signal = controller.signal;
     `;
   }
 
-  renderPage() {
+  render() {
     return html`
       <header>
         ${this.renderCryptState()}  </br> 
@@ -412,10 +414,10 @@ ${this.renderConfig()}
     `;
   }
 
-  render() {
-  return this.renderPage();
-}
-
+//  render() {
+//  return this.renderPage();
+//}
+//
 
   private _updateUptime(e: MessageEvent) {
     if (e.lastEventId) {

@@ -62,8 +62,9 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   let str = window.location.pathname;
+   //return "http://dscalarm8266.local"
    //return "http://dscalarm2040.local";
-  //return "http://dscalarm8266.local";
+  //return "http://dscalarmc3idf.local";
   //return "http://vistaalarmesp32idf.local";
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
@@ -100,7 +101,7 @@ export class EntityTable extends LitElement implements RestAction {
       if (isJson(data))
         data = JSON.parse(data); 
       if (data['iv'] != null) data=decrypt(data);
-     // const data = JSON.parse(messageEvent.data);
+
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx != -1 && data.id) {
         if (typeof data.value === 'number') {
@@ -108,15 +109,15 @@ export class EntityTable extends LitElement implements RestAction {
           history.push(data.value);
           this.entities[idx].value_numeric_history = history.splice(-50);
         }
-
         delete data.id;
         delete data.domain;
         delete data.unique_id;
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
+
       } else {
         // is it a `detail_all` event already?
-        if (data?.name) {
+        if (data?.name ) {
           this.addEntity(data);
         } else {
           if (this._unknown_state_events[data.id]) {
@@ -126,10 +127,9 @@ export class EntityTable extends LitElement implements RestAction {
           }
           // ignore the first few events, maybe the esp will send a detail_all
           // event soon
-          if (this._unknown_state_events[data.id] < 1) {
+          if (this._unknown_state_events[data.id] < 1 || data.id == undefined) {
             return;
           }
-
           let parts = data.id.split('-');
           let domain = parts[0];
           let id = parts.slice(1).join('-');

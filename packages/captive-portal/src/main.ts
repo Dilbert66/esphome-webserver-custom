@@ -17,7 +17,9 @@ function lock(show: boolean) {
 }
 function html(h: String[]) {
   return h.join("");
+
 }
+
 fetch("/config.json").then(function (response) {
   response.json().then(function (config) {
     document.title = config.name;
@@ -35,5 +37,7 @@ fetch("/config.json").then(function (response) {
     })
     document.querySelector("#net").innerHTML = html(result)
     document.querySelector("link[rel~='icon']").href = `data:image/svg+xml,${wifi(-65)}`;
+    
   })
 })
+

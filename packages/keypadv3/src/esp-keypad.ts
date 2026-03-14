@@ -458,6 +458,15 @@ export class keyPad extends LitElement {
         this._sensor_G = keypad_config["sensor_G"] != null ? keypad_config["sensor_G"] : "";
         this._sensor_H = keypad_config["sensor_H"] != null ? keypad_config["sensor_H"] : "";
 
+        this._confirm_A = (keypad_config["confirm_A"]  != null) ? keypad_config["confirm_A"] : false;
+        this._confirm_B = (keypad_config["confirm_B"]  != null) ? keypad_config["confirm_B"] : false;
+        this._confirm_C = (keypad_config["confirm_C"]  != null) ? keypad_config["confirm_C"]  : false;
+        this._confirm_D = (keypad_config["confirm_D"]  != null) ? keypad_config["confirm_D"] : false;
+        this._confirm_E = (keypad_config["confirm_E"]  != null) ? keypad_config["confirm_E"]  : false;
+        this._confirm_F = (keypad_config["confirm_F"]  != null) ? keypad_config["confirm_F"]  : false;
+        this._confirm_G = (keypad_config["confirm_G"]  != null) ? keypad_config["confirm_G"]  : false;
+        this._confirm_H = (keypad_config["confirm_H"]  != null) ? keypad_config["confirm_H"]  : false;
+
         this._status_A_on_icon = (keypad_config["status_A_on_icon"] != null ) ? keypad_config["status_A_on_icon"] : "mdi:check-circle-outline"
         this._status_A_off_icon = (keypad_config["status_A_off_icon"] != null) ? keypad_config["status_A_off_icon"] : "mdi:circle-outline"
         this._status_B_on_icon = (keypad_config["status_B_on_icon"] != null) ? keypad_config["status_B_on_icon"] : "mdi:check-circle-outline"
@@ -713,19 +722,25 @@ export class keyPad extends LitElement {
 //    }
 
 
+confirmState(name)   {
+
+return confirm("Are you sure you want to trigger the "+ name + " command" );
+}
+
+
     setState(e) {
 
         var key = e.currentTarget.getAttribute('state');
 
         switch (key) {
-            case 'A': key = this._cmd_A; break;
-            case 'B': key = this._cmd_B; break;
-            case 'C': key = this._cmd_C; break;
-            case 'D': key = this._cmd_D; break;
-            case 'E': key = this._cmd_E; break;
-            case 'F': key = this._cmd_F; break;
-            case 'G': key = this._cmd_G; break;
-            case 'H': key = this._cmd_H; break;
+            case 'A': key = this._cmd_A; if (this._confirm_A && !this.confirmState(this._button_A)) return;break;
+            case 'B': key = this._cmd_B; if (this._confirm_B && !this.confirmState(this._button_B)) return;break;
+            case 'C': key = this._cmd_C; if (this._confirm_C && !this.confirmState(this._button_C)) return;break;
+            case 'D': key = this._cmd_D; if (this._confirm_D && !this.confirmState(this._button_D)) return;break;
+            case 'E': key = this._cmd_E; if (this._confirm_E && !this.confirmState(this._button_E)) return;break;
+            case 'F': key = this._cmd_F; if (this._confirm_F && !this.confirmState(this._button_F)) return;break;
+            case 'G': key = this._cmd_G; if (this._confirm_G && !this.confirmState(this._button_G)) return;break;
+            case 'H': key = this._cmd_H; if (this._confirm_H && !this.confirmState(this._button_H)) return;break;
             case '0': key = '0'; break;
             case '1': key = '1'; break;
             case '2': key = '2'; break;
